@@ -2,11 +2,9 @@
 
 
 [![Build Status](https://travis-ci.org/Yelp/venv-update.svg)](https://travis-ci.org/Yelp/venv-update)
--- FIXME: start CI
 
 [![Coverage
 Status](https://img.shields.io/coveralls/Yelp/<package>.svg?branch=master)](https://coveralls.io/r/Yelp/<package>)
--- FIXME: hook up coveralls
 
 
 ## Installation

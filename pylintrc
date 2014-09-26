@@ -22,7 +22,7 @@ variable-rgx=[a-z_][a-z0-9_]{0,30}$
 max-line-length=131
 
 [TYPECHECK]
-ignored-classes=pytest,RFC3986
+ignored-classes=pytest
 
 [DESIGN]
 min-public-methods=0
