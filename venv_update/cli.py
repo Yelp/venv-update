@@ -13,7 +13,7 @@ from os import environ
 from os.path import exists, isdir
 from plumbum import local
 
-from ._compat import exec_file
+from venv_update._compat import exec_file
 
 # The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
 PIP = 'pip>=1.5.5,<1.6'
