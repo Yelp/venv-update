@@ -5,6 +5,8 @@
     When this script completes, the virtualenv should have the same packages as if it were
     removed, then rebuilt.
 '''
+from __future__ import print_function
+
 import argparse
 from contextlib import contextmanager
 from os import environ
@@ -119,10 +121,10 @@ def do_install(reqs):
 
 def mark_venv_invalid(venv_path, reqs):
     if isdir(venv_path):
-        print
-        print "Something went wrong! Sending %r back in time, so make knows it's invalid." % venv_path
+        print()
+        print("Something went wrong! Sending %r back in time, so make knows it's invalid." % venv_path)
         colorize(local['touch'], venv_path, '--reference', reqs[0], '--date', '1 day ago')
-        print
+        print()
 
 
 def main():
