@@ -1,5 +1,5 @@
 # venv-update
-[![Build Status](https://travis-ci.org/Yelp/venv-update.svg)](https://travis-ci.org/Yelp/venv-update) 
+[![Build Status](https://travis-ci.org/Yelp/venv-update.svg)](https://travis-ci.org/Yelp/venv-update)
 [![Coverage Status](https://img.shields.io/coveralls/Yelp/venv-update.svg?branch=master)](https://coveralls.io/r/Yelp/venv-update)
 
 
