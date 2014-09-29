@@ -1,4 +1,4 @@
 [flake8]
 max-line-length=131
-exclude=./.tox/,./venv-*/
+exclude=./.tox/
 max-complexity=10

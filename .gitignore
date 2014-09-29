@@ -7,7 +7,6 @@
 .project
 .pydevproject
 .tox
-/venv-*/
 coverage-html
 dist
 *.tmp
