@@ -1,0 +1,3 @@
+-r prod.txt
+flake8
+pylint

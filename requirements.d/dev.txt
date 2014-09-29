@@ -1,5 +1,2 @@
--r prod.txt
-pytest
-coverage
-flake8
-pylint
+-r test.txt
+tox

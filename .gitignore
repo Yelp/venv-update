@@ -10,3 +10,5 @@
 /venv*
 coverage-html
 dist
+*.tmp
+tmp/

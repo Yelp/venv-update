@@ -1,9 +1,14 @@
 language: python
 env: # These should match the tox env list
-    - TOXENV=py26 PATH=/opt/python/2.6.9/bin:$PATH
-    - TOXENV=py27
-    - TOXENV=py34
-install: pip install coveralls tox
+    - TOXENV=py26-test
+    - TOXENV=py27-test
+    - TOXENV=py34-test
+    # only need one of each lint, imo
+    - TOXENV=py27-lint
+    - TOXENV=py34-lint
+matrix:
+    fast_finish: true
+install: pip install -r requirements.d/travis.txt
 script: tox
 cache:
     directories:

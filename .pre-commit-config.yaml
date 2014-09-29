@@ -1,12 +1,10 @@
 -   repo: git@github.com:pre-commit/pre-commit-hooks
-    sha: 59f23b7c556ce1cf66eb6dc574e10d2b4274be4b
+    sha: v0.3.0
     hooks:
     -   id: trailing-whitespace
         files: \.(md|py|txt|yaml|yml)$
     -   id: end-of-file-fixer
         files: \.(md|py|txt|yaml|yml)$
-    -   id: check-yaml
-        files: \.(yaml|yml)$
     -   id: debug-statements
         files: \.py$
     -   id: name-tests-test

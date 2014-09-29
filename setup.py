@@ -20,7 +20,7 @@ def main():
         ],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[],
-    )
+    )  # pragma: no cover: covered by tox
 
 if __name__ == '__main__':
     exit(main())

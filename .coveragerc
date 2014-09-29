@@ -1,12 +1,6 @@
 [run]
 branch = True
-source =
-    .
-omit =
-    .tox/*
-    /usr/*
-    */tmp*
-    setup.py
+source = venv_update
 
 [report]
 exclude_lines =

@@ -1,13 +1,13 @@
 #!/bin/bash
 set -ex
-shopt -s globstar
+TOP=${TOP:-.}
+SITEPACKAGES=${SITEPACKAGES:-.}
+PROJECT=venv_update
 
 python --version
 coverage --version
+py.test --version
 coverage erase
-coverage run -m pytest "$@" tests
+coverage run --rcfile=$TOP/.coveragerc --source $PROJECT,$TOP/tests \
+    -m pytest "$@" $TOP/tests $SITEPACKAGES/$PROJECT
 coverage report --show-missing --fail-under 100
-flake8 --version
-flake8 $(git ls-files '*.py')
-pylint --version
-pylint $(git ls-files '*.py')
