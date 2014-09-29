@@ -19,7 +19,9 @@ def main():
             'Programming Language :: Python :: 2.7',
         ],
         packages=find_packages('.', exclude=('tests*',)),
-        install_requires=[],
+        install_requires=[
+            'plumbum',
+        ],
         entry_points={
             'console_scripts': [
                 'venv-update = venv_update.cli:main',
