@@ -13,6 +13,7 @@ from os import environ
 from os.path import exists, isdir
 from plumbum import local
 
+from ._compat import exec_file
 
 # The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
 PIP = 'pip>=1.5.5,<1.6'
@@ -54,7 +55,7 @@ def clean_venv(venv_path):
 
     # This is the documented way to activate the venv in a python process.
     activate_this_file = venv_path + "/bin/activate_this.py"
-    execfile(activate_this_file, dict(__file__=activate_this_file))
+    exec_file(activate_this_file, dict(__file__=activate_this_file))
     local.env.update(environ)
 
     yield
