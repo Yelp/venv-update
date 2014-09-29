@@ -20,6 +20,11 @@ def main():
         ],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[],
+        entry_points={
+            'console_scripts': [
+                'venv-update = venv_update.cli:main',
+            ],
+        },
     )  # pragma: no cover: covered by tox
 
 if __name__ == '__main__':
