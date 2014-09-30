@@ -23,9 +23,7 @@ SETUPTOOLS = 'setuptools>=3.6,<4.0'
 
 def parseargs(args):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        'virtualenv_dir', help='Destination virtualenv directory',
-    )
+    parser.add_argument('virtualenv_dir', help='Destination virtualenv directory')
     parser.add_argument('requirements', nargs='+', help='Requirements files.')
     parsed_args = parser.parse_args(args)
 
