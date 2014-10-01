@@ -11,3 +11,12 @@
         files: tests/.+\.py$
     -   id: flake8
         files: \.py$
+
+-   repo: git://github.com/bukzor/pre-commit-system-hook.git
+    sha: v0.0
+    hooks:
+    -   id: system
+        name: PyLint
+        entry: python -m pylint
+        language: system
+        files: \.py$

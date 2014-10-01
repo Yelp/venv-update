@@ -13,5 +13,6 @@ script: tox
 cache:
     directories:
         - $HOME/.pip
+        - $HOME/.pre-commit
 after_success:
     - coveralls
