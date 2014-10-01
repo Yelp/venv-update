@@ -17,4 +17,4 @@ pylint --rcfile=$TOP/pylintrc $(
 ## blocked on pylint bug: https://bitbucket.org/logilab/pylint/issue/352
 # pylint .
 
-pre-commit run --all-files
+(cd $TOP && pre-commit run --all-files)

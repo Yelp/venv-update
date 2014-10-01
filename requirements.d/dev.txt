@@ -1,2 +1,5 @@
+# minimal set of packages for committers
 -r test.txt
+-r lint.txt
+-r bootstrap.txt
 tox

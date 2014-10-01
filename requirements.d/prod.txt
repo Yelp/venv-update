@@ -1,1 +1,2 @@
+# minimal set of packasges for end-users
 plumbum

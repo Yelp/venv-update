@@ -1,4 +1,4 @@
--r lint.txt
-pre-commit
+# minimal set of packages to run tests, under tox, for example
+-r prod.txt
 pytest
 coverage

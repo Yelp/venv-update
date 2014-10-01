@@ -1,3 +1,6 @@
+# packages necessary to `make lint`
 -r prod.txt
+-r bootstrap.txt
 flake8
 pylint
+pre-commit
