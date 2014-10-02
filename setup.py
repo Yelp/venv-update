@@ -1,4 +1,4 @@
-"""Quickly and exactly synchronize a virtualenv with a requirements.txt"""
+#!/usr/bin/env python
 
 from setuptools import find_packages
 from setuptools import setup
@@ -7,8 +7,8 @@ from setuptools import setup
 def main():
     setup(
         name='venv-update',
-        version='0.0a1',
-        description=__doc__,
+        version='0.0',
+        description="Quickly and exactly synchronize a virtualenv with a requirements.txt",
         url='https://github.com/Yelp/venv-update',
         author='Buck Golemon',
         author_email='buck@yelp.com',
@@ -21,6 +21,7 @@ def main():
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
             'plumbum',
+            'virtualenv',
         ],
         entry_points={
             'console_scripts': [

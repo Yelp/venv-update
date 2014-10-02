@@ -1854,14 +1854,23 @@ def extend_parser(dummy_parser):
     sys.argv[1:] = [os.path.join(os.environ['HOME'], '.venv-update')]
 
 
+def activate(venv):
+    activate_this = os.path.join(venv, 'bin', 'activate_this.py')
+    code = open(activate_this).read()
+    code = compile(code, activate_this, 'exec')
+    exec(code, {'__file__': activate_this})  # pylint:disable=exec-used
+
+
 def after_install(dummy_options, home_dir):
     subprocess.check_call([
         os.path.join(home_dir, 'bin', 'pip'),
         'install', 'venv-update',
     ])
 
+    activate(home_dir)
+
     script_src = os.path.join(home_dir, 'bin', 'venv-update')
-    subprocess.check_call([script_src] + orig_args)
+    os.execv(script_src, [script_src] + orig_args)
 
 
 def convert(s):

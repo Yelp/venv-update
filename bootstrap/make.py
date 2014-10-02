@@ -26,7 +26,7 @@ def main():
         install_file.write('# pylint:' + 'skip-file\n')
 
     import os
-    os.chmod(filename, 0755)
+    os.chmod(filename, 0o755)
 
 
 acceptance_tests = dict(

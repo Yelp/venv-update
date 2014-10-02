@@ -1,2 +1,0 @@
-# packages necessary for ./bootstrap/make.py
-virtualenv
