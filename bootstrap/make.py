@@ -18,11 +18,16 @@ def main():
         open(path('content.py')).read()
     )
 
-    with io.open(join(dirname(__file__), 'result.py'), 'w', encoding='UTF-8') as install_file:
+    filename = join(dirname(__file__), 'result.py')
+    with io.open(filename, 'w', encoding='UTF-8') as install_file:
         install_file.write(contents)
         # mangle the noqa pragmas slightly to preserve linting for this file
         install_file.write('# flake8:' + 'noqa\n')
         install_file.write('# pylint:' + 'skip-file\n')
+
+    import os
+    os.chmod(filename, 0755)
+
 
 acceptance_tests = dict(
     already_built='''

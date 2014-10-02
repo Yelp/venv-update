@@ -1,11 +1,13 @@
 .PHONY: all
 all: lint test
 
-.PHONY: lint test
-lint : ./.travis/lint.sh
-test : ./.travis/test.sh
-lint test:
-	$<
+.PHONY: lint
+lint:
+	pre-commit run --all
+
+.PHONY: test
+test:
+	./.travis/test.sh
 
 .PHONY: tox
 tox:

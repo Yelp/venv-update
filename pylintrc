@@ -23,7 +23,6 @@ max-line-length=131
 
 [TYPECHECK]
 ignored-classes=pytest
-ignored-modules=distutils
 
 [DESIGN]
 min-public-methods=0
