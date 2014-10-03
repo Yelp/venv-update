@@ -1865,7 +1865,6 @@ def extend_parser(dummy_parser):
         os.execv(VENV_UPDATE, [VENV_UPDATE] + orig_args)
 
     if hasattr(sys, 'real_prefix'):
-        # TODO: check if the activated virtualenv is in VENV_HOME
         exit('You seem to be running from inside a virtualenv. Please deactivate and try again.')
 
     sys.argv[1:] = [VENV_HOME]

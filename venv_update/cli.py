@@ -20,9 +20,9 @@ def parseargs(args):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('virtualenv_dir', help='Destination virtualenv directory')
     parser.add_argument('requirements', nargs='+', help='Requirements files.')
-    parsed_args = parser.parse_args(args)
+    parsed_args, remaining = parser.parse_known_args(args)
 
-    return parsed_args.virtualenv_dir, parsed_args.requirements
+    return parsed_args.virtualenv_dir, parsed_args.requirements, remaining
 
 
 def colorize(pbcmd, *args):
@@ -34,7 +34,7 @@ def colorize(pbcmd, *args):
 
 
 @contextmanager
-def clean_venv(venv_path):
+def clean_venv(venv_path, venv_args):
     """Make a clean virtualenv, and activate it."""
     if exists(venv_path):
         # virtualenv --clear has two problems:
@@ -43,7 +43,7 @@ def clean_venv(venv_path):
         colorize(local['rm'], '-rf', venv_path)
 
     virtualenv = local['virtualenv'][venv_path]
-    colorize(virtualenv, '--system-site-packages')
+    colorize(virtualenv, venv_args)
 
     # This is the documented way to activate the venv in a python process.
     activate_this_file = venv_path + "/bin/activate_this.py"
@@ -117,10 +117,10 @@ def mark_venv_invalid(venv_path, reqs):
 def main():
     import sys
     from plumbum import ProcessExecutionError
-    venv_path, reqs = parseargs(sys.argv[1:])
+    venv_path, reqs, venv_args = parseargs(sys.argv[1:])
 
     try:
-        with clean_venv(venv_path):
+        with clean_venv(venv_path, venv_args):
             exit_code = do_install(reqs)
     except SystemExit as error:
         exit_code = error.code
@@ -200,6 +200,10 @@ nor the venv-update spec
     freshen_venv='''
 already in the venv created by venv-update
 run venv-update bootstrapper to freshen it
+    ''',
+    install_with_different_python='''
+bin/venv-update virtualenv_run requirements.txt -p python2.7
+./virtualenv_run/bin/python --version # should be 2.7
     ''',
 )
 
