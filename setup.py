@@ -7,7 +7,7 @@ from setuptools import setup
 def main():
     setup(
         name='venv-update',
-        version='0.0',
+        version='0.0a1',
         description="Quickly and exactly synchronize a virtualenv with a requirements.txt",
         url='https://github.com/Yelp/venv-update',
         author='Buck Golemon',
