@@ -201,6 +201,10 @@ make virtualenv_run  # Should try again and fail again
 git checkout -- requirements-dev.txt
 make virtualenv_run  # Should succeed
     ''',
+    install_with_different_python='''
+        bin/venv-update virtualenv_run requirements.txt -p python2.7
+        ./virtualenv_run/bin/python --version # should be 2.7
+    ''',
 )
 
 
