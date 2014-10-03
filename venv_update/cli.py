@@ -15,11 +15,6 @@ from plumbum import local
 
 from venv_update._compat import exec_file
 
-# The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
-PIP = 'pip>=1.5.5,<1.6'
-WHEEL = 'wheel>=0.22.0,<1.0'
-SETUPTOOLS = 'setuptools>=3.6,<4.0'
-
 
 def parseargs(args):
     parser = argparse.ArgumentParser(description=__doc__)
@@ -35,7 +30,7 @@ def colorize(pbcmd, *args):
     local['echo']['\033[01;36m>\033[m \033[01;33m{0}\033[m'.format(
         ' '.join(pbcmd.formulate(level=1))
     )].run(stdin=None, stdout=None, stderr=None)
-    pbcmd.run(stdin=None, stdout=None, stderr=None)
+    local['time'][pbcmd].run(stdin=None, stdout=None, stderr=None)
 
 
 @contextmanager
@@ -47,9 +42,8 @@ def clean_venv(venv_path):
         #   it writes over (rather than replaces) the python binary, so there's an error if it's in use.
         colorize(local['rm'], '-rf', venv_path)
 
-    # --no-setuptools -- don't install a pip we're about to uninstall
     virtualenv = local['virtualenv'][venv_path]
-    colorize(virtualenv, '--no-setuptools', '--system-site-packages')
+    colorize(virtualenv, '--system-site-packages')
 
     # This is the documented way to activate the venv in a python process.
     activate_this_file = venv_path + "/bin/activate_this.py"
@@ -89,25 +83,19 @@ def do_install(reqs):
         '--index-url=' + pip_index_url,
     )
 
-    install = pip['install', '--ignore-installed'][cache_opts]
+    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
+    install = pip['install', '--ignore-installed', '--use-wheel'][cache_opts]
     wheel = pip['wheel'][cache_opts]
 
-    # Bootstrap the install system.
-    # Bootstrap 1: Install a pip that knows how to use wheels. This package will install more slowly than the others.
-    colorize(install, PIP)
-    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install = install['--use-wheel']  # yay!
-
-    # Bootstrap 2: Get pip the tools it needs.
-    # This looks the same as above, but will be faster, since it can use wheels to do the work.
-    colorize(install, WHEEL, SETUPTOOLS, '--verbose')
+    # Bootstrap the install system; setuptools and pip are alreayd installed, just need wheel
+    colorize(install, 'wheel')
 
     # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     colorize(
         wheel,
         '--wheel-dir=' + pip_download_cache,
         requirements_as_options,
-        PIP, WHEEL, SETUPTOOLS,
+        'wheel',
     )
 
     # Install: Use our well-populated cache (only) to do the installations.
@@ -200,6 +188,18 @@ make virtualenv_run  # Should fail
 make virtualenv_run  # Should try again and fail again
 git checkout -- requirements-dev.txt
 make virtualenv_run  # Should succeed
+    ''',
+    freshen_venv_update='''
+bootstrap re-installs venv-update when there's been a change to bootstrap script,
+or to the venv-update spec
+    ''',
+    no_freshen_venv_update='''
+bootstrap doesn't re-install venv-update when there's been no change to bootstrap script
+nor the venv-update spec
+    ''',
+    freshen_venv='''
+already in the venv created by venv-update
+run venv-update bootstrapper to freshen it
     ''',
 )
 

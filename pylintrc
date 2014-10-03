@@ -1,5 +1,5 @@
 [MESSAGES CONTROL]
-disable=locally-disabled,missing-docstring
+disable=locally-disabled,missing-docstring,fixme
 
 [REPORTS]
 output-format=colorized
