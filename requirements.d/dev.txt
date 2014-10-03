@@ -1,4 +1,4 @@
 # minimal set of packages for committers
 -r test.txt
--r lint.txt
+-r _lint.txt
 tox

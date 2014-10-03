@@ -1,5 +1,4 @@
 # packages necessary to `make lint`
--r prod.txt
-flake8
-pylint
-pre-commit
+-r testing.txt
+# mixin pattern, only to avoid the diamond-include issue
+-r _lint.txt

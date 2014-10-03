@@ -1,0 +1,4 @@
+# packages needed for linting, but not for prod
+flake8
+pylint
+pre-commit

@@ -1,0 +1,4 @@
+# packages imported by tests
+-r prod.txt
+git+git://github.com/bukzor/python-clom@0.8.0a1-buck1
+pytest
