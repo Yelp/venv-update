@@ -22,6 +22,7 @@ def main():
         install_requires=[
             'plumbum',
             'virtualenv',
+            'argparse',
         ],
         entry_points={
             'console_scripts': [
