@@ -5,6 +5,7 @@
     When this script completes, the virtualenv should have the same packages as if it were
     removed, then rebuilt.
 '''
+from __future__ import print_function
 import argparse
 from contextlib import contextmanager
 from os import environ
@@ -37,6 +38,13 @@ def colorize(pbcmd, *args):
     pbcmd.run(stdin=None, stdout=None, stderr=None)
 
 
+def exec_file(fname, lnames=None, gnames=None):
+    """a python3 replacement for execfile"""
+    with open(fname) as f:
+        code = compile(f.read(), fname, 'exec')
+        exec(code, lnames, gnames)  # pylint:disable=exec-used
+
+
 @contextmanager
 def clean_venv(venv_path):
     """Make a clean virtualenv, and activate it."""
@@ -52,7 +60,7 @@ def clean_venv(venv_path):
 
     # This is the documented way to activate the venv in a python process.
     activate_this_file = venv_path + "/bin/activate_this.py"
-    execfile(activate_this_file, dict(__file__=activate_this_file))
+    exec_file(activate_this_file, dict(__file__=activate_this_file))
     local.env.update(environ)
 
     yield
@@ -119,10 +127,10 @@ def do_install(reqs):
 
 def mark_venv_invalid(venv_path, reqs):
     if isdir(venv_path):
-        print
-        print "Something went wrong! Sending %r back in time, so make knows it's invalid." % venv_path
+        print()
+        print("Something went wrong! Sending %r back in time, so make knows it's invalid." % venv_path)
         colorize(local['touch'], venv_path, '--reference', reqs[0], '--date', '1 day ago')
-        print
+        print()
 
 
 def main():
