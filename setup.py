@@ -18,6 +18,7 @@ def main():
             'Programming Language :: Python :: 2.6',
             'Programming Language :: Python :: 2.7',
         ],
+        py_modules=['venv_update'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
             'plumbum',
@@ -26,7 +27,7 @@ def main():
         ],
         entry_points={
             'console_scripts': [
-                'venv-update = venv_update.cli:main',
+                'venv-update = venv_update:main',
             ],
         },
     )  # pragma: no cover: covered by tox
