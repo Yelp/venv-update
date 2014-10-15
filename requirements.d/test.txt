@@ -1,3 +1,4 @@
 # minimal set of packages to run tests, under tox, for example
 -r testing.txt
-coverage
+#coverage  ## pending pull request: https://bitbucket.org/ned/coveragepy/pull-request/42
+hg+https://bitbucket.org/bukzor/coverage.py@__main__-support

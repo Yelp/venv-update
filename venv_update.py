@@ -22,9 +22,13 @@ SETUPTOOLS = 'setuptools>=3.6,<4.0'
 def parseargs(args):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        'virtualenv_dir', help='Destination virtualenv directory',
+        'virtualenv_dir', nargs='?', default='virtualenv_run',
+        help='Destination virtualenv directory (default: virtualenv_run)',
     )
-    parser.add_argument('requirements', nargs='+', help='Requirements files.')
+    parser.add_argument(
+        'requirements', nargs='*', default=['requirements.txt'],
+        help='Requirements files. (default: requirements.txt)',
+    )
     parsed_args = parser.parse_args(args)
 
     return parsed_args.virtualenv_dir, parsed_args.requirements
@@ -169,9 +173,9 @@ def main():
 manual_tests = dict(
     smoketest='''
 rm -rf virtualenv_run ~/.pip
-time make virtualenv_run    # should run in ~100s
-touch requirements.txt
-time make virtualenv_run    # should be speedy: ~12.5s
+time make virtualenv_run
+venv-update tmp-venv requirements.txt # should run in ~100s
+venv-update tmp-venv requirements.txt # should be speedy: ~12.5s
     ''',
     text_file_busy=''',
 time make virtualenv_run
