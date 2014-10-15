@@ -34,7 +34,7 @@ def test_trivial(tmpdir):
         '--parallel-mode',
         '--rcfile', str(TOP/'.coveragerc'),
         '-m', 'venv_update',
-        COVERAGE_FILE=str(TOP/'.coverage'),
+        COVERAGE_FILE=str(pwd/'.coverage'),
     )
 
     pwd.chdir()

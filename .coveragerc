@@ -18,6 +18,7 @@ exclude_lines =
 
     # Don't complain if non-runnable code isn't run:
     ^if __name__ == ['"]__main__['"]:$
+show_missing = True
 
 [html]
 directory = coverage-html
