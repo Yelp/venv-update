@@ -4,8 +4,12 @@
     Update a (possibly non-existant) virtualenv directory using a requirements.txt listing
     When this script completes, the virtualenv should have the same packages as if it were
     removed, then rebuilt.
+
+    To set the index server, export a PIP_INDEX_SERVER variable.
+        See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
 '''
 from __future__ import print_function
+from __future__ import unicode_literals
 import argparse
 from contextlib import contextmanager
 from os import environ
@@ -22,9 +26,13 @@ SETUPTOOLS = 'setuptools>=3.6,<4.0'
 def parseargs(args):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        'virtualenv_dir', help='Destination virtualenv directory',
+        'virtualenv_dir', nargs='?', default='virtualenv_run',
+        help='Destination virtualenv directory (default: virtualenv_run)',
     )
-    parser.add_argument('requirements', nargs='+', help='Requirements files.')
+    parser.add_argument(
+        'requirements', nargs='*', default=['requirements.txt'],
+        help='Requirements files. (default: requirements.txt)',
+    )
     parsed_args = parser.parse_args(args)
 
     return parsed_args.virtualenv_dir, parsed_args.requirements
@@ -74,16 +82,12 @@ def do_install(reqs):
         '--requirement={0}'.format(requirement) for requirement in reqs
     ]
 
-    # See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
-    pip_index_url = 'https://pypi.yelpcorp.com/simple/'
-
     # We put the cache in the directory that pip already uses.
     # This has better security characteristics than a machine-wide cache, and is a
     #   pattern people can use for open-source projects
     pip_download_cache = environ['HOME'] + '/.pip/cache'
 
     local.env.update(
-        PIP_INDEX_URL=pip_index_url,
         PIP_DOWNLOAD_CACHE=pip_download_cache,
     )
 
@@ -93,7 +97,6 @@ def do_install(reqs):
     cache_opts = (
         '--download-cache=' + pip_download_cache,
         '--find-links=file://' + pip_download_cache,
-        '--index-url=' + pip_index_url,
     )
 
     install = pip['install', '--ignore-installed'][cache_opts]
@@ -167,12 +170,6 @@ def main():
 #       * delete
 
 manual_tests = dict(
-    smoketest='''
-rm -rf virtualenv_run ~/.pip
-time make virtualenv_run    # should run in ~100s
-touch requirements.txt
-time make virtualenv_run    # should be speedy: ~12.5s
-    ''',
     text_file_busy=''',
 time make virtualenv_run
 source virtualenv_run/bin/activate

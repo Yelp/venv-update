@@ -1,11 +1,14 @@
 language: python
 env: # These should match the tox env list
-    - TOXENV=py26-test
-    - TOXENV=py27-test
-    - TOXENV=py34-test
     # only need one of each lint, imo
     - TOXENV=py27-lint
     - TOXENV=py34-lint
+    # test after lint
+    - TOXENV=py26-test
+    - TOXENV=py27-test
+    - TOXENV=py34-test
+    - TOXENV=pypy-test
+    - TOXENV=pypy3-test
 matrix:
     fast_finish: true
 install: pip install -r requirements.d/travis.txt
@@ -15,4 +18,5 @@ cache:
         - $HOME/.pip
         - $HOME/.pre-commit
 after_success:
+    - find -name '.coverage' | xargs mv -t .
     - coveralls
