@@ -58,9 +58,9 @@ def test_second_install_faster(tmpdir):
     # Trailing slash is essential to rsync
     run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
     with open('requirements.txt', 'w') as requirements:
-        # Something with significant C parts: lxml
+        # An arbitrary package that takes a bit of time to install: twisted
         # Should I make my own fake c-extention just to remove this dependency?
-        requirements.write('lxml')
+        requirements.write('twisted')
 
     from time import time
     start = time()
