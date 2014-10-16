@@ -169,12 +169,6 @@ def main():
 #       * delete
 
 manual_tests = dict(
-    smoketest='''
-rm -rf virtualenv_run ~/.pip
-time make virtualenv_run
-venv-update tmp-venv requirements.txt # should run in ~100s
-venv-update tmp-venv requirements.txt # should be speedy: ~12.5s
-    ''',
     text_file_busy=''',
 time make virtualenv_run
 source virtualenv_run/bin/activate
