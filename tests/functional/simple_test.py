@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import unicode_literals
 from py._path.local import LocalPath as Path
 import pytest
 
@@ -73,5 +75,5 @@ def test_second_install_faster(tmpdir):
 
     # second install should be at least twice as fast
     ratio = time1 / time2
-    print '%.1fx speedup' % ratio
+    print('%.1fx speedup' % ratio)
     assert ratio / 2

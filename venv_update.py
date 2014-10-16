@@ -9,6 +9,7 @@
         See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
 '''
 from __future__ import print_function
+from __future__ import unicode_literals
 import argparse
 from contextlib import contextmanager
 from os import environ
