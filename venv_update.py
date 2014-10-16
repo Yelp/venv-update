@@ -33,9 +33,9 @@ def parseargs(args):
         'requirements', nargs='*', default=['requirements.txt'],
         help='Requirements files. (default: requirements.txt)',
     )
-    parsed_args = parser.parse_args(args)
+    parsed_args, remaining = parser.parse_known_args(args)
 
-    return parsed_args.virtualenv_dir, parsed_args.requirements
+    return parsed_args.virtualenv_dir, parsed_args.requirements, remaining
 
 
 def colorize(pbcmd, *args):
@@ -54,7 +54,7 @@ def exec_file(fname, lnames=None, gnames=None):
 
 
 @contextmanager
-def clean_venv(venv_path):
+def clean_venv(venv_path, venv_args):
     """Make a clean virtualenv, and activate it."""
     if exists(venv_path):
         # virtualenv --clear has two problems:
@@ -62,9 +62,8 @@ def clean_venv(venv_path):
         #   it writes over (rather than replaces) the python binary, so there's an error if it's in use.
         colorize(local['rm'], '-rf', venv_path)
 
-    # --no-setuptools -- don't install a pip we're about to uninstall
     virtualenv = local['virtualenv'][venv_path]
-    colorize(virtualenv, '--no-setuptools', '--system-site-packages')
+    colorize(virtualenv, venv_args)
 
     # This is the documented way to activate the venv in a python process.
     activate_this_file = venv_path + "/bin/activate_this.py"
@@ -139,10 +138,10 @@ def mark_venv_invalid(venv_path, reqs):
 def main():
     import sys
     from plumbum import ProcessExecutionError
-    venv_path, reqs = parseargs(sys.argv[1:])
+    venv_path, reqs, venv_args = parseargs(sys.argv[1:])
 
     try:
-        with clean_venv(venv_path):
+        with clean_venv(venv_path, venv_args):
             exit_code = do_install(reqs)
     except SystemExit as error:
         exit_code = error.code
@@ -204,6 +203,11 @@ make virtualenv_run  # Should fail
 make virtualenv_run  # Should try again and fail again
 git checkout -- requirements-dev.txt
 make virtualenv_run  # Should succeed
+    ''',
+    install_with_different_python='''
+bin/venv-update --version  # should show virtualenv version, then crash
+python venv_update.py --no-setuptools --system-site-packages
+## see also: http://stackoverflow.com/a/8895500/146821
     ''',
 )
 
