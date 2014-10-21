@@ -20,7 +20,7 @@ def main():
             'Programming Language :: Python :: 2.7',
         ],
         py_modules=['venv_update'],
-        packages=find_packages('.', exclude=('tests*',)),
+        packages=find_packages('.', exclude=('test*',)),
         install_requires=[
             'plumbum',
             'virtualenv',

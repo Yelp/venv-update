@@ -8,7 +8,7 @@
     -   id: debug-statements
         files: \.py$
     -   id: name-tests-test
-        files: tests/.+\.py$
+        files: test/.+\.py$
     -   id: flake8
         files: \.py$
 

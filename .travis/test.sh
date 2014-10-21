@@ -11,7 +11,7 @@ coverage --version
 py.test --version
 coverage erase
 coverage run --parallel-mode --rcfile=$TOP/.coveragerc \
-    -m pytest "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
+    -m pytest "$@" $TOP/test $SITEPACKAGES/${PROJECT}.py
 coverage combine
 coverage report --fail-under 81  # FIXME: should be 100
 mv .coverage $TOP
