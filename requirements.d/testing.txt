@@ -2,3 +2,4 @@
 -r prod.txt
 clom>=0.8.0a1
 pytest
+pytest-timeout

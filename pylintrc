@@ -6,6 +6,9 @@ output-format=colorized
 reports=no
 
 [BASIC]
+#good-names=i,j,k,ex,Run,_
+good-names=fd
+
 #const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
 const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
 

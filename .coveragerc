@@ -2,8 +2,8 @@
 branch = True
 source =
     venv_update
-    tests
-    ../../../tests
+    test
+    ../../../test
 
 [report]
 exclude_lines =
