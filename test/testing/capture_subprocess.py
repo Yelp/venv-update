@@ -4,6 +4,8 @@ without deadlocking or temporary files.
 
 This should maybe be a package in its own right, someday.
 """
+from __future__ import print_function
+
 import os
 from subprocess import Popen
 
@@ -154,17 +156,17 @@ def demo():
     even under worst-case conditions.
     """
     cmd = ('python', 'outputter.py')
-    print 'CMD:', cmd
+    print('CMD:', cmd)
     stdout, stderr, combined = capture_subprocess(cmd)
 
-    print 'STDOUT:'
-    print stdout.count('\n')
+    print('STDOUT:')
+    print(stdout.count('\n'))
 
-    print 'STDERR:'
-    print stderr.count('\n')
+    print('STDERR:')
+    print(stderr.count('\n'))
 
-    print 'COMBINED:'
-    print combined.count('\n')
+    print('COMBINED:')
+    print(combined.count('\n'))
 
 
 def make_outputter():
