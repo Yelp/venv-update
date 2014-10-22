@@ -39,10 +39,6 @@ class Pipe(object):
         """close the write end of the pipe. idempotent."""
         fdclosed(self.write)
 
-    def writeonly(self):
-        """close the read end of the pipe. idempotent."""
-        fdclosed(self.read)
-
 
 class Pty(Pipe):
     """Represent a pty as a pipe"""
@@ -149,63 +145,3 @@ def capture_subprocess(cmd):
     combined.closed()
 
     return result
-
-
-def demo():
-    """Demonstrate that run() doesn't deadlock,
-    even under worst-case conditions.
-    """
-    cmd = ('python', 'outputter.py')
-    print('CMD:', cmd)
-    stdout, stderr, combined = capture_subprocess(cmd)
-
-    print('STDOUT:')
-    print(stdout.count('\n'))
-
-    print('STDERR:')
-    print(stderr.count('\n'))
-
-    print('COMBINED:')
-    print(combined.count('\n'))
-
-
-def make_outputter():
-    """Create the the outputter.py script, for the demonstration."""
-    with open('outputter.py', 'w') as outputter:
-        outputter.write('''\
-from __future__ import print_function
-from __future__ import division
-from sys import stdout, stderr
-from time import sleep
-from random import random, seed
-seed(0)  # unpredictable, but repeatable
-
-# system should not deadlock for any given value of these parameters.
-LINES = 4000
-TIME = 0
-WIDTH = 79
-ERROR_RATIO = .20
-
-for i in range(LINES):
-    if random() > ERROR_RATIO:
-        char = '.'
-        file = stdout
-    else:
-        char = '%'
-        file = stderr
-
-    for j in range(WIDTH):
-        print(char, file=file, end='')
-        sleep(TIME / LINES / WIDTH)
-    print(file=file)
-''')
-
-
-def main():
-    """The entry point"""
-    make_outputter()
-    demo()
-
-
-if __name__ == '__main__':
-    exit(main())
