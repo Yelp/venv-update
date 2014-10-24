@@ -1,5 +1,4 @@
-# packages imported by tests
+# minimal set of requirements to import (but not run) test code
+# this is used by the lint environment.
 -r prod.txt
-clom>=0.8.0a1
 pytest
-pytest-timeout

@@ -15,9 +15,9 @@ from random import random, seed
 seed(0)  # unpredictable, but repeatable
 
 # system should not deadlock for any given value of these parameters.
-LINES = 10
+LINES = 4000
 TIME = 0
-WIDTH = 79
+WIDTH = 179
 ERROR_RATIO = .20
 
 for i in range(LINES):
@@ -35,8 +35,16 @@ for i in range(LINES):
 ''')
 
 
+# coverage.py adds some helpful warnings to stderr, with no way to quiet them.
+from re import compile as Regex, MULTILINE
+coverage_warnings_regex = Regex(
+    r'^Coverage.py warning: (Module .* was never imported\.|No data was collected\.)\n',
+    flags=MULTILINE,
+)
+
+
 # buglet: floating-point, zero, negative values interpreted as infinite =/
-@pytest.mark.timeout(1)  # should take <.5s
+@pytest.mark.timeout(30)  # should take <2s
 def test_capture_subprocess(tmpdir):
     tmpdir.chdir()
     make_outputter()
@@ -44,14 +52,17 @@ def test_capture_subprocess(tmpdir):
     cmd = ('python', 'outputter.py')
     stdout, stderr, combined = capture_subprocess(cmd)
 
-    #assert stdout.count('\n') == 10
-    #assert stderr.count('\n') == 0
-    #assert combined.count('\n') == 14
+    stderr = coverage_warnings_regex.sub('', stderr)
+    combined = coverage_warnings_regex.sub('', combined)
 
-    #assert stdout.strip('.\r\n') == ''
-    #assert stderr.strip('%\r\n') == ''
+    assert stdout.count('\n') == 3207
+    assert stderr.count('\n') == 793
+    assert combined.count('\n') == 4000
 
-    # I'd like to assert that the two streams are interleaved strictly by line,
+    assert stdout.strip('.\r\n') == ''
+    assert stderr.strip('%\r\n') == ''
+
+    # I'd like to also assert that the two streams are interleaved strictly by line,
     # but I haven't been able to produce such output reliably =/
 
-    assert len(stdout) + len(stderr) == len(combined)
+    assert sorted(stdout + stderr) == sorted(combined)

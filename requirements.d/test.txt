@@ -1,4 +1,18 @@
-# minimal set of packages to run tests, under tox, for example
+# minimal set of packages to run tests (under tox, for example)
 -r testing.txt
+
+pytest-xdist
+pytest-timeout
+
+# NOTE: versions must be specified in dependency DFS post-order or else we get the wrong versions.
+
 #coverage  ## pending pull request: https://bitbucket.org/ned/coveragepy/pull-request/42
 hg+https://bitbucket.org/bukzor/coverage.py@__main__-support
+
+# cov-core ## pending pull requests:
+#       * https://github.com/schlamar/cov-core/pull/6
+#       * https://github.com/schlamar/cov-core/pull/7
+git+git://github.com/bukzor/cov-core.git@master
+
+# pytest-cov ## pending pull request: https://github.com/schlamar/pytest-cov/pull/21
+git+git://github.com/bukzor/pytest-cov.git@enable-coveragerc
