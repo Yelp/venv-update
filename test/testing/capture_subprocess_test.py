@@ -1,4 +1,3 @@
-import pytest
 
 from .capture_subprocess import capture_subprocess
 
@@ -44,7 +43,8 @@ coverage_warnings_regex = Regex(
 
 
 # buglet: floating-point, zero, negative values interpreted as infinite =/
-@pytest.mark.timeout(30)  # should take <2s
+# import pytest
+# @pytest.mark.timeout(30)  # should take <2s
 def test_capture_subprocess(tmpdir):
     tmpdir.chdir()
     make_outputter()
