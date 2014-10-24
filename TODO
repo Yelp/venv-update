@@ -1,0 +1,9 @@
+# Things that I want to do, but would put me past my deadline:
+
+* I could remove the --cov-config with a small patch to pytest-cov
+    use os.path.abspath(options.cov_config) in postprocess(options)
+
+* coverage.py adds some helpful warnings to stderr, with no way to quiet them.
+    there's already an issue (#2 i think?), just needs a patch
+
+* pytest-timeout won't actually time-out with floating-point, zero, or negative input

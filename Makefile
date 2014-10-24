@@ -5,8 +5,8 @@ all: lint test
 lint:
 	pre-commit run --all
 
-.PHONY: test
-test:
+.PHONY: test tests
+test tests:
 	./.travis/test.sh $(ARGS)
 
 .PHONY: tox

@@ -18,5 +18,6 @@ cache:
         - $HOME/.pip
         - $HOME/.pre-commit
 after_success:
-    - find -name '.coverage' | xargs mv -t .
+    - find -name '.coverage*' | xargs mv -t .
+    - coverage combine
     - coveralls
