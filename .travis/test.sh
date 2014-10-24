@@ -13,6 +13,6 @@ py.test --version
 coverage erase
 py.test "$@" -n $NCPU \
     --cov-enable --cov-config=$TOP/.coveragerc --cov-report='' \
-    $TOP/test $SITEPACKAGES/${PROJECT}.py
+    $TOP/tests $SITEPACKAGES/${PROJECT}.py
 coverage combine
 coverage report --fail-under 81  # FIXME: should be 100

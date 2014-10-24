@@ -8,8 +8,8 @@
     -   id: debug-statements
         files: \.py$
     -   id: name-tests-test
-        files: test/.+\.py$
-        exclude: test/testing
+        files: tests/.+\.py$
+        exclude: tests/testing
     -   id: flake8
         files: \.py$
 

@@ -12,7 +12,6 @@ from subprocess import Popen
 
 # posix standard file descriptors
 STDIN, STDOUT, STDERR = range(3)
-PY3 = (str is not bytes)
 
 if hasattr(os, 'set_inheritable'):
     # os.set_inheritable only exists in py3  pylint:disable=no-member

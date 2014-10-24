@@ -4,7 +4,7 @@ from py._path.local import LocalPath as Path
 import pytest
 
 TOP = Path(__file__) / '../../..'
-SCENARIOS = TOP/'test/scenarios'
+SCENARIOS = TOP/'tests/scenarios'
 
 
 def run(cmd, *args, **env):
