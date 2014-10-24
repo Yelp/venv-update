@@ -3,6 +3,7 @@
 
 pytest-xdist
 pytest-timeout
+pytest-rerunfailures
 
 # NOTE: versions must be specified in dependency DFS post-order or else we get the wrong versions.
 

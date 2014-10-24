@@ -1,3 +1,4 @@
+import pytest
 
 from .capture_subprocess import capture_subprocess
 
@@ -29,22 +30,24 @@ for i in range(LINES):
 
     for j in range(WIDTH):
         print(char, file=file, end='')
+        file.flush()
         sleep(TIME / LINES / WIDTH)
     print(file=file)
+    file.flush()
 ''')
 
 
 # coverage.py adds some helpful warnings to stderr, with no way to quiet them.
 from re import compile as Regex, MULTILINE
 coverage_warnings_regex = Regex(
-    r'^Coverage.py warning: (Module .* was never imported\.|No data was collected\.)\n',
+    br'^Coverage.py warning: (Module .* was never imported\.|No data was collected\.)\n',
     flags=MULTILINE,
 )
 
 
 # buglet: floating-point, zero, negative values interpreted as infinite =/
-# import pytest
-# @pytest.mark.timeout(30)  # should take <2s
+@pytest.mark.flaky(reruns=10)
+@pytest.mark.timeout(8)  # ~50% at 6 seconds
 def test_capture_subprocess(tmpdir):
     tmpdir.chdir()
     make_outputter()
@@ -52,15 +55,15 @@ def test_capture_subprocess(tmpdir):
     cmd = ('python', 'outputter.py')
     stdout, stderr, combined = capture_subprocess(cmd)
 
-    stderr = coverage_warnings_regex.sub('', stderr)
-    combined = coverage_warnings_regex.sub('', combined)
+    stderr = coverage_warnings_regex.sub(b'', stderr)
+    combined = coverage_warnings_regex.sub(b'', combined)
 
-    assert stdout.count('\n') == 3207
-    assert stderr.count('\n') == 793
-    assert combined.count('\n') == 4000
+    assert stdout.count(b'\n') == 3207
+    assert stderr.count(b'\n') == 793
+    assert combined.count(b'\n') == 4000
 
-    assert stdout.strip('.\r\n') == ''
-    assert stderr.strip('%\r\n') == ''
+    assert stdout.strip(b'.\r\n') == b''
+    assert stderr.strip(b'%\r\n') == b''
 
     # I'd like to also assert that the two streams are interleaved strictly by line,
     # but I haven't been able to produce such output reliably =/

@@ -12,6 +12,13 @@ from subprocess import Popen
 
 # posix standard file descriptors
 STDIN, STDOUT, STDERR = range(3)
+PY3 = (str is not bytes)
+
+if hasattr(os, 'set_inheritable'):
+    # os.set_inheritable only exists in py3  pylint:disable=no-member
+    set_inheritable = os.set_inheritable
+else:
+    set_inheritable = lambda *args: None
 
 
 def fdclosed(fd):
@@ -29,6 +36,9 @@ class Pipe(object):
     """a convenience object, wrapping os.pipe()"""
     def __init__(self):
         self.read, self.write = os.pipe()
+        # emulate old, inheritable os.pipe in py34
+        set_inheritable(self.read, True)
+        set_inheritable(self.write, True)
 
     def closed(self):
         """close both ends of the pipe. idempotent."""
@@ -90,13 +100,13 @@ def _communicate_with_select(read_set):
 
         for fd in readable:
             data = os.read(fd, 1024)
-            if data == "":
+            if data == b'':
                 os.close(fd)
                 read_set.remove(fd)
             result[fd].append(data)
 
     return tuple(
-        ''.join(result[fd])
+        b''.join(result[fd])
         for fd in orig_read_set
     )
 
