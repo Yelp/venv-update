@@ -16,8 +16,3 @@ py.test "$@" -n $NCPU \
     $TOP/test $SITEPACKAGES/${PROJECT}.py
 coverage combine
 coverage report --fail-under 81  # FIXME: should be 100
-
-
-if [[ $CI ]]; then
-    mv .coverage $TOP
-fi
