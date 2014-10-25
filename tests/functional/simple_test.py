@@ -4,7 +4,7 @@ from py._path.local import LocalPath as Path
 import pytest
 
 TOP = Path(__file__) / '../../..'
-SCENARIOS = TOP/'testing/data/scenarios'
+SCENARIOS = TOP/'tests/scenarios'
 
 
 def run(*cmd, **env):
@@ -25,34 +25,27 @@ def run(*cmd, **env):
     check_call(cmd, env=env)
 
 
-def do_install(pwd, tmpdir):
+def do_install(tmpdir, *args):
+    # we get coverage for free via the (patched) pytest-cov plugin
     run(
-        'coverage',
-        'run',
-        '--parallel-mode',
-        '--rcfile', str(TOP/'.coveragerc'),
-        '-m', 'venv_update',
-        COVERAGE_FILE=str(pwd/'.coverage'),
-        HOME=str(tmpdir),
+        'venv-update',
+        *args,
+        HOME=str(tmpdir)
     )
 
 
 def test_trivial(tmpdir):
-    pwd = Path('.').realpath()
     tmpdir.chdir()
 
     # Trailing slash is essential to rsync
     run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
-    do_install(pwd, tmpdir)
-
-    pwd.chdir()
+    do_install(tmpdir)
 
 
 # Not yet installed: https://github.com/klrmn/pytest-rerunfailures
 @pytest.mark.flaky(reruns=10)
 def test_second_install_faster(tmpdir):
     """install twice, and the second one should be faster, due to whl caching"""
-    pwd = Path('.').realpath()
     tmpdir.chdir()
 
     # Trailing slash is essential to rsync
@@ -64,14 +57,12 @@ def test_second_install_faster(tmpdir):
 
     from time import time
     start = time()
-    do_install(pwd, tmpdir)
+    do_install(tmpdir)
     time1 = time() - start
 
     start = time()
-    do_install(pwd, tmpdir)
+    do_install(tmpdir)
     time2 = time() - start
-
-    pwd.chdir()
 
     # second install should be at least twice as fast
     ratio = time1 / time2
