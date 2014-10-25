@@ -7,11 +7,10 @@ TOP = Path(__file__) / '../../..'
 SCENARIOS = TOP/'tests/scenarios'
 
 
-def run(cmd, *args, **env):
+def run(*cmd, **env):
     from pipes import quote
     from subprocess import check_call
 
-    cmd += args
     if env:
         from os import environ
         tmp = env
@@ -29,8 +28,9 @@ def run(cmd, *args, **env):
 def do_install(tmpdir, *args):
     # we get coverage for free via the (patched) pytest-cov plugin
     run(
-        ('venv-update',) + args,
-        HOME=str(tmpdir),
+        'venv-update',
+        *args,
+        HOME=str(tmpdir)
     )
 
 
@@ -38,7 +38,7 @@ def test_trivial(tmpdir):
     tmpdir.chdir()
 
     # Trailing slash is essential to rsync
-    run(('rsync', '-a', str(SCENARIOS) + '/trivial/', '.'))
+    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
     do_install(tmpdir)
 
 
@@ -49,7 +49,7 @@ def test_second_install_faster(tmpdir):
     tmpdir.chdir()
 
     # Trailing slash is essential to rsync
-    run(('rsync', '-a', str(SCENARIOS) + '/trivial/', '.'))
+    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
     with open('requirements.txt', 'w') as requirements:
         # An arbitrary package that takes a bit of time to install: twisted
         # Should I make my own fake c-extention just to remove this dependency?
@@ -68,7 +68,3 @@ def test_second_install_faster(tmpdir):
     ratio = time1 / time2
     print('%.1fx speedup' % ratio)
     assert ratio / 2
-
-
-def test_arguments():
-    pass  # TODO: anything
