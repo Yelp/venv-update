@@ -166,3 +166,41 @@ def test_scripts_left_behind(tmpdir):
 
     venv_update()
     assert not script_path.exists()
+
+
+def assert_timestamps(*reqs):
+    # Trailing slash is essential to rsync
+    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    venv_update('virtualenv_run', *reqs)
+
+    assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
+
+    with open(reqs[-1], 'w') as requirements:
+        # garbage, to cause a failure
+        requirements.write('-w wat')
+
+    from subprocess import CalledProcessError
+    with pytest.raises(CalledProcessError) as excinfo:
+        venv_update('virtualenv_run', *reqs)
+
+    assert excinfo.value.returncode == 2
+    assert Path(reqs[0]).mtime() > Path('virtualenv_run').mtime()
+
+    with open(reqs[-1], 'w') as requirements:
+        # blank requirements should succeed
+        requirements.write('')
+
+    venv_update('virtualenv_run', *reqs)
+    assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
+
+
+def test_timestamps_single(tmpdir):
+    tmpdir.chdir()
+    assert_timestamps('requirements.txt')
+
+
+def test_timestamps_multiple(tmpdir):
+    tmpdir.chdir()
+    with open('requirements2.txt', 'w') as requirements:
+        requirements.write('')
+    assert_timestamps('requirements.txt', 'requirements2.txt')
