@@ -62,7 +62,13 @@ def test_second_install_faster(tmpdir):
     with open('requirements.txt', 'w') as requirements:
         # An arbitrary package that takes a bit of time to install: twisted
         # Should I make my own fake c-extention just to remove this dependency?
-        requirements.write('twisted')
+        requirements.write('''\
+simplejson
+pyyaml
+coverage
+pylint
+pytest
+''')
 
     from time import time
     start = time()
@@ -76,7 +82,7 @@ def test_second_install_faster(tmpdir):
     # second install should be at least twice as fast
     ratio = time1 / time2
     print('%.1fx speedup' % ratio)
-    assert ratio / 2
+    assert ratio > 2
 
 
 def test_arguments_version(tmpdir, capfd):
@@ -113,6 +119,7 @@ import sys
 for p in sys.path:
     if p.startswith(sys.real_prefix) and p.endswith("-packages"):
         print(p)
+        break
 ''')
     out, err = capfd.readouterr()
     assert strip_coverage_warnings(err) == ''

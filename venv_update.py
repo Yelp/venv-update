@@ -115,7 +115,7 @@ def do_install(reqs):
 
     # Bootstrap 2: Get pip the tools it needs.
     # This looks the same as above, but will be faster, since it can use wheels to do the work.
-    colorize(install, WHEEL, SETUPTOOLS, '--verbose')
+    colorize(install, WHEEL, SETUPTOOLS)
 
     # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     colorize(
