@@ -35,12 +35,12 @@ def strip_coverage_warnings(stderr):
     return coverage_warnings_regex.sub('', stderr)
 
 
-def do_install(tmpdir, *args):
+def venv_update(*args):
     # we get coverage for free via the (patched) pytest-cov plugin
     run(
         'venv-update',
         *args,
-        HOME=str(tmpdir)
+        HOME='.'
     )
 
 
@@ -49,7 +49,7 @@ def test_trivial(tmpdir):
 
     # Trailing slash is essential to rsync
     run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
-    do_install(tmpdir)
+    venv_update()
 
 
 @pytest.mark.flaky(reruns=10)
@@ -66,11 +66,11 @@ def test_second_install_faster(tmpdir):
 
     from time import time
     start = time()
-    do_install(tmpdir)
+    venv_update()
     time1 = time() - start
 
     start = time()
-    do_install(tmpdir)
+    venv_update()
     time2 = time() - start
 
     # second install should be at least twice as fast
@@ -79,13 +79,13 @@ def test_second_install_faster(tmpdir):
     assert ratio / 2
 
 
-def test_arguments_version(tmpdir, capfd):
+def test_arguments_version(capfd):
     """Show that we can pass arguments through to virtualenv"""
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
         # should show virtualenv version, then crash
-        do_install(tmpdir, '--version')
+        venv_update('--version')
 
     assert excinfo.value.returncode == 1
     out, err = capfd.readouterr()
@@ -105,7 +105,7 @@ def test_arguments_system_packages(tmpdir, capfd):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
     run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
-    do_install(tmpdir, '--system-site-packages')
+    venv_update('--system-site-packages')
     out, err = capfd.readouterr()  # flush buffers
 
     run('virtualenv_run/bin/python', '-c', '''\
@@ -120,17 +120,49 @@ for p in sys.path:
     assert out and Path(out).isdir()
 
 
+def pip(*args):
+    # because the scripts are made relative, it won't use the venv python without being explicit.
+    run('virtualenv_run/bin/python', 'virtualenv_run/bin/pip', *args)
+
+
+def pip_freeze(capfd):
+    out, err = capfd.readouterr()  # flush any previous output
+
+    pip('freeze')
+    out, err = capfd.readouterr()
+
+    assert strip_coverage_warnings(err) == ''
+    return out
+
+
 def test_update_while_active(tmpdir, capfd):
     tmpdir.chdir()
     run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
 
-    do_install(tmpdir)
-    run('virtualenv_run/bin/pip', 'freeze')
-    out, err = capfd.readouterr()
-
-    assert strip_coverage_warnings(err) == ''
-    assert 'mccabe' not in out
+    venv_update()
+    assert 'mccabe' not in pip_freeze(capfd)
 
     with open('requirements.txt', 'w') as requirements:
         # An arbitrary small package: mccabe
         requirements.write('mccabe')
+
+    run('sh', '-c', '. virtualenv_run/bin/activate && venv-update')
+    assert 'mccabe' in pip_freeze(capfd)
+
+
+def test_scripts_left_behind(tmpdir):
+    tmpdir.chdir()
+
+    # Trailing slash is essential to rsync
+    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    venv_update()
+
+    # an arbitrary small package with a script: pep8
+    script_path = Path('virtualenv_run/bin/pep8')
+    assert not script_path.exists()
+
+    pip('install', 'pep8')
+    assert script_path.exists()
+
+    venv_update()
+    assert not script_path.exists()

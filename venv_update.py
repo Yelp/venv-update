@@ -175,24 +175,9 @@ def main():
 #       * delete
 
 manual_tests = dict(
-    text_file_busy=''',
-time make virtualenv_run
-source virtualenv_run/bin/activate
-touch requirements.txt
-time make virtualenv_run  # should succeed
-    ''',
     output_interleaving='''
 touch requirements.txt
 time make virtualenv_run | tee virtrualenv_run.log  # should show the commands in proper position
-    ''',
-    scripts_left_behind=''',
-time make virtualenv_run
-source virtualenv_run/bin/activate
-pip install --upgrade virtualenv
-touch requirements.txt
-time make virtualenv_run
-which virtualenv  # should show /usr/bin/virtualenv
-virtualenv --version  # should succeed
     ''',
     failure_rerun='''
 make virtualenv_run
