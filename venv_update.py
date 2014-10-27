@@ -39,8 +39,14 @@ def parseargs(args):
 
 
 def colorize(pbcmd, *args):
+    from os import isatty
+
     pbcmd = pbcmd[args]
-    local['echo']['\033[01;36m>\033[m \033[01;33m{0}\033[m'.format(
+    if isatty(1):
+        template = '\033[01;36m>\033[m \033[01;33m{0}\033[m'
+    else:
+        template = '> {0}'
+    local['echo'][template.format(
         ' '.join(pbcmd.formulate(level=1))
     )].run(stdin=None, stdout=None, stderr=None)
     pbcmd.run(stdin=None, stdout=None, stderr=None)
@@ -204,11 +210,7 @@ make virtualenv_run  # Should try again and fail again
 git checkout -- requirements-dev.txt
 make virtualenv_run  # Should succeed
     ''',
-    install_with_different_python='''
-bin/venv-update --version  # should show virtualenv version, then crash
-python venv_update.py --no-setuptools --system-site-packages
-## see also: http://stackoverflow.com/a/8895500/146821
-    ''',
+    colored_for_tty_only='',
 )
 
 

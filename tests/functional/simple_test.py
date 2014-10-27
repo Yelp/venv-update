@@ -8,7 +8,6 @@ SCENARIOS = TOP/'tests/scenarios'
 
 
 def run(*cmd, **env):
-    from pipes import quote
     from subprocess import check_call
 
     if env:
@@ -19,9 +18,6 @@ def run(*cmd, **env):
     else:
         env = None
 
-    check_call(('echo', '\033[01;36m>\033[m \033[01;33m{0}\033[m'.format(
-        ' '.join(quote(arg) for arg in cmd)
-    )))
     check_call(cmd, env=env)
 
 
@@ -42,7 +38,6 @@ def test_trivial(tmpdir):
     do_install(tmpdir)
 
 
-# Not yet installed: https://github.com/klrmn/pytest-rerunfailures
 @pytest.mark.flaky(reruns=10)
 def test_second_install_faster(tmpdir):
     """install twice, and the second one should be faster, due to whl caching"""
@@ -68,3 +63,40 @@ def test_second_install_faster(tmpdir):
     ratio = time1 / time2
     print('%.1fx speedup' % ratio)
     assert ratio / 2
+
+
+def test_arguments_version(tmpdir, capfd):
+    """Show that we can pass arguments through to virtualenv"""
+
+    from subprocess import CalledProcessError
+    with pytest.raises(CalledProcessError) as excinfo:
+        # should show virtualenv version, then crash
+        do_install(tmpdir, '--version')
+
+    assert excinfo.value.returncode == 1
+    out, err = capfd.readouterr()
+    lasterr = err.rsplit('\n', 2)[-2]
+    assert lasterr.startswith('IOError: [Errno 2] No such file or directory:')
+    assert lasterr.endswith("/activate_this.py'")
+
+    out = out.split('\n')
+    assert out[-3].endswith('/virtualenv virtualenv_run --version')
+
+
+def test_arguments_system_packages(tmpdir, capfd):
+    """Show that we can pass arguments through to virtualenv"""
+    tmpdir.chdir()
+    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    do_install(tmpdir, '--system-site-packages')
+    out, err = capfd.readouterr()  # flush buffers
+
+    run(str(tmpdir.join('virtualenv_run', 'bin', 'python')), '-c', '''\
+import sys
+for p in sys.path:
+    if p.startswith(sys.real_prefix) and p.endswith("site-packages"):
+        print p
+''')
+    out, err = capfd.readouterr()
+    assert err == ''
+    out = out.rstrip('\n')
+    assert out and Path(out).isdir()
