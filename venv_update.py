@@ -136,7 +136,7 @@ def do_install(reqs):
 def mark_venv_invalid(venv_path, reqs):
     if isdir(venv_path):
         print()
-        print("Something went wrong! Sending %r back in time, so make knows it's invalid." % venv_path)
+        print("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
         colorize(local['touch'], venv_path, '--reference', reqs[0], '--date', '1 day ago')
         print()
 
@@ -175,41 +175,6 @@ def main():
 #       * delete
 
 manual_tests = dict(
-    text_file_busy=''',
-time make virtualenv_run
-source virtualenv_run/bin/activate
-touch requirements.txt
-time make virtualenv_run  # should succeed
-    ''',
-    output_interleaving='''
-touch requirements.txt
-time make virtualenv_run | tee virtrualenv_run.log  # should show the commands in proper position
-    ''',
-    scripts_left_behind=''',
-time make virtualenv_run
-source virtualenv_run/bin/activate
-pip install --upgrade virtualenv
-touch requirements.txt
-time make virtualenv_run
-which virtualenv  # should show /usr/bin/virtualenv
-virtualenv --version  # should succeed
-    ''',
-    failure_rerun='''
-make virtualenv_run
-echo 'foo' >> requirements.txt
-make virtualenv_run  # Should fail
-make virtualenv_run  # Should try again and fail again
-git checkout -- requirements.txt
-make virtualenv_run  # Should succeed
-    ''',
-    failure_with_requirements_dev='''
-make virtualenv_run
-echo 'foo' >> requirements-dev.txt
-make virtualenv_run  # Should fail
-make virtualenv_run  # Should try again and fail again
-git checkout -- requirements-dev.txt
-make virtualenv_run  # Should succeed
-    ''',
     colored_for_tty_only='',
 )
 
