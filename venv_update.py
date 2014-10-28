@@ -18,9 +18,7 @@ from plumbum import local
 
 
 # The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
-PIP = 'pip>=1.5.5,<1.6'
 WHEEL = 'wheel>=0.22.0,<1.0'
-SETUPTOOLS = 'setuptools>=3.6,<4.0'
 
 
 def parseargs(args):
@@ -105,24 +103,19 @@ def do_install(reqs):
     )
 
     install = pip['install', '--ignore-installed'][cache_opts]
+    # --use-wheel is somewhat redundant here, but it means we get an error if we have a too-old version of pip/setuptools.
+    install = install['--use-wheel']  # yay!
     wheel = pip['wheel'][cache_opts]
 
-    # Bootstrap the install system.
-    # Bootstrap 1: Install a pip that knows how to use wheels. This package will install more slowly than the others.
-    colorize(install, PIP)
-    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install = install['--use-wheel']  # yay!
-
-    # Bootstrap 2: Get pip the tools it needs.
-    # This looks the same as above, but will be faster, since it can use wheels to do the work.
-    colorize(install, WHEEL, SETUPTOOLS)
+    # Bootstrap: Get pip the tools it needs.
+    colorize(install, WHEEL)
 
     # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     colorize(
         wheel,
         '--wheel-dir=' + pip_download_cache,
         requirements_as_options,
-        PIP, WHEEL, SETUPTOOLS,
+        WHEEL,
     )
 
     # Install: Use our well-populated cache (only) to do the installations.

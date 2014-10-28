@@ -40,7 +40,7 @@ def venv_update(*args):
     run(
         'venv-update',
         *args,
-        HOME='.'
+        HOME=str(Path('.').realpath())
     )
 
 
@@ -81,7 +81,7 @@ pytest
 
     # second install should be at least twice as fast
     ratio = time1 / time2
-    print('%.1fx speedup' % ratio)
+    print('%.2fx speedup' % ratio)
     assert ratio > 2
 
 

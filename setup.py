@@ -22,9 +22,9 @@ def main():
         py_modules=['venv_update'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
-            'plumbum',
-            'virtualenv',
-            'argparse',
+            'virtualenv>=1.11.5',
+            'plumbum',  # TODO: remove dep
+            'argparse',  # TODO: remove dep
         ],
         entry_points={
             'console_scripts': [
