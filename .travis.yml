@@ -1,19 +1,20 @@
 language: python
 env: # These should match the tox env list
-    # only need one of each lint, imo
-    - TOXENV=py27-lint
+    # ordered by "most likely to fail in a unique way" first
     - TOXENV=py34-lint
-    # test after lint
-    - TOXENV=py26-test
-    - TOXENV=py27-test
+    - TOXENV=pypy3-test
     - TOXENV=py34-test
     - TOXENV=pypy-test
-    - TOXENV=pypy3-test
+    - TOXENV=py26-test
+    - TOXENV=py27-test
+    - TOXENV=py27-lint
 matrix:
+    # notify a failed build as soon as anything fails
     fast_finish: true
 install: pip install -r requirements.d/travis.txt
 script: tox
 cache:
+    # This doesn't seem to do anything :(
     directories:
         - $HOME/.pip
         - $HOME/.pre-commit
