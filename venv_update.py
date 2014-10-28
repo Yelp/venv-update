@@ -158,19 +158,5 @@ def main():
     return exit_code
 
 
-# Test scenarios: (not implemented yet :( )
-#   * entirely clean -- <venv_path> does not exist
-#   * noop -- Requirements haven't changed since last run
-#   * each of these should behave similarly whether caused by the user or the requirements file:
-#       * upgrade
-#       * downgrade
-#       * add
-#       * delete
-
-manual_tests = dict(
-    colored_for_tty_only='',
-)
-
-
 if __name__ == '__main__':
     exit(main())

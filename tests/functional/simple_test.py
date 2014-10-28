@@ -216,3 +216,75 @@ def test_timestamps_multiple(tmpdir):
     with open('requirements2.txt', 'w') as requirements:
         requirements.write('')
     assert_timestamps('requirements.txt', 'requirements2.txt')
+
+
+def read_loop(fd):
+    # this is the only method that works under pypy
+    # see also: https://bitbucket.org/pypy/pypy/issue/1910
+    from os import read
+    result = []
+    lastread = None
+    while lastread != '':
+        try:
+            lastread = read(fd, 1024 * 1024)
+        except OSError as err:
+            if err.errno == 5:
+                lastread = ''  # slave closed
+            else:
+                raise
+        result.append(lastread)
+
+    return ''.join(result)
+
+
+def pipe_output(read, write):
+    from os import environ
+    environ = environ.copy()
+    environ['HOME'] = str(Path('.').realpath())
+
+    from subprocess import Popen
+    vupdate = Popen(
+        ('venv-update', '--version'),
+        env=environ,
+        stdout=write,
+        close_fds=True,
+    )
+
+    from os import close
+    close(write)
+    result = read_loop(read)
+    close(read)
+    vupdate.wait()
+    return result
+
+
+def unprintable(mystring):
+    """return only the unprintable characters of a string"""
+    from string import printable
+    return ''.join(
+        character
+        for character in mystring
+        if character not in printable
+    )
+
+
+def test_colored_tty(tmpdir):
+    tmpdir.chdir()
+
+    from os import openpty
+    read, write = openpty()
+
+    out = pipe_output(read, write)
+
+    assert unprintable(out)
+
+
+def test_uncolored_pipe(tmpdir):
+    tmpdir.chdir()
+
+    from os import pipe
+    read, write = pipe()
+
+    out = pipe_output(read, write)
+
+    assert not unprintable(out)

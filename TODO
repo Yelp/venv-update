@@ -7,3 +7,13 @@
     there's already an issue (#2 i think?), just needs a patch
 
 * pytest-timeout won't actually time-out with floating-point, zero, or negative input
+
+
+* Make doubly sure these test scenarios are covered:
+   * entirely clean -- <venv_path> does not exist
+   * noop -- Requirements haven't changed since last run
+   * each of these should behave similarly whether caused by the user or the requirements file:
+       * upgrade
+       * downgrade
+       * add
+       * delete
