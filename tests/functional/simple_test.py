@@ -6,8 +6,9 @@ import pytest
 TOP = Path(__file__) / '../../..'
 SCENARIOS = TOP/'tests/scenarios'
 
-from sys import version_info
+from sys import version_info, builtin_module_names
 PY33 = (version_info >= (3, 3))
+PYPY = ('__pypy__' in builtin_module_names)
 
 
 def run(*cmd, **env):
@@ -82,7 +83,11 @@ pytest
     # second install should be at least twice as fast
     ratio = time1 / time2
     print('%.2fx speedup' % ratio)
-    assert ratio > 2
+    if PYPY:
+        # pypy is too fast :(
+        assert ratio > 1.5
+    else:
+        assert ratio > 2
 
 
 def test_arguments_version(capfd):
