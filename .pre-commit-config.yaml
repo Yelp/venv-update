@@ -9,6 +9,7 @@
         files: \.py$
     -   id: name-tests-test
         files: tests/.+\.py$
+        exclude: tests/testing.*\.py$
     -   id: flake8
         files: \.py$
 

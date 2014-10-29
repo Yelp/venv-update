@@ -20,8 +20,29 @@ from plumbum import local
 # The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
 WHEEL = 'wheel>=0.22.0,<1.0'
 
+HELP_OUTPUT = '''\
+usage: venv-update [-h] [virtualenv_dir] [requirements [requirements ...]]
+
+Update a (possibly non-existant) virtualenv directory using a requirements.txt
+listing When this script completes, the virtualenv should have the same
+packages as if it were removed, then rebuilt. To set the index server, export
+a PIP_INDEX_SERVER variable. See also:
+http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
+
+positional arguments:
+  virtualenv_dir  Destination virtualenv directory (default: virtualenv_run)
+  requirements    Requirements files. (default: requirements.txt)
+
+optional arguments:
+  -h, --help      show this help message and exit
+'''
+
 
 def parseargs(args):
+    if set(args) & set(['-h', '--help']):
+        print(HELP_OUTPUT, end='')
+        exit(0)
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         'virtualenv_dir', nargs='?', default='virtualenv_run',
