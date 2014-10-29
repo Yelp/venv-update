@@ -224,17 +224,17 @@ def read_loop(fd):
     from os import read
     result = []
     lastread = None
-    while lastread != '':
+    while lastread != b'':
         try:
             lastread = read(fd, 1024 * 1024)
         except OSError as err:
             if err.errno == 5:
-                lastread = ''  # slave closed
+                lastread = b''  # slave closed
             else:
                 raise
         result.append(lastread)
 
-    return ''.join(result)
+    return b''.join(result).decode('US-ASCII')
 
 
 def pipe_output(read, write):
