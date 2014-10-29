@@ -15,4 +15,4 @@ py.test "$@" -n $NCPU \
     --cov-enable --cov-config=$TOP/.coveragerc --cov-report='' \
     $TOP/tests $SITEPACKAGES/${PROJECT}.py
 coverage combine
-coverage report --fail-under 84  # FIXME: should be 100
+coverage report --fail-under 95  # FIXME: should be 100
