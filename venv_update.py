@@ -13,7 +13,6 @@ from __future__ import unicode_literals
 from contextlib import contextmanager
 from os import environ
 from os.path import exists, isdir
-from plumbum import local
 
 
 # The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
@@ -59,21 +58,24 @@ def parseargs(args):
     if not requirements:
         requirements = ['requirements.txt']
 
-    return virtualenv_dir, requirements, remaining
+    return virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
-def colorize(pbcmd, *args):
+def colorize(cmd, *args):
     from os import isatty
 
-    pbcmd = pbcmd[args]
+    cmd = cmd + args
     if isatty(1):
         template = '\033[01;36m>\033[m \033[01;33m{0}\033[m'
     else:
         template = '> {0}'
-    local['echo'][template.format(
-        ' '.join(pbcmd.formulate(level=1))
-    )].run(stdin=None, stdout=None, stderr=None)
-    pbcmd.run(stdin=None, stdout=None, stderr=None)
+
+    from subprocess import check_call
+    from pipes import quote
+    check_call(('echo', template.format(
+        ' '.join(quote(arg) for arg in cmd)
+    )))
+    check_call(cmd)
 
 
 def exec_file(fname, lnames=None, gnames=None):
@@ -90,15 +92,14 @@ def clean_venv(venv_path, venv_args):
         # virtualenv --clear has two problems:
         #   it doesn't properly clear out the venv/bin, causing wacky errors
         #   it writes over (rather than replaces) the python binary, so there's an error if it's in use.
-        colorize(local['rm'], '-rf', venv_path)
+        colorize(('rm', '-rf', venv_path))
 
-    virtualenv = local['virtualenv'][venv_path]
-    colorize(virtualenv, venv_args)
+    virtualenv = ('virtualenv', venv_path)
+    colorize(virtualenv + venv_args)
 
     # This is the documented way to activate the venv in a python process.
     activate_this_file = venv_path + "/bin/activate_this.py"
     exec_file(activate_this_file, dict(__file__=activate_this_file))
-    local.env.update(environ)
 
     yield
 
@@ -107,31 +108,31 @@ def clean_venv(venv_path, venv_args):
 
 
 def do_install(reqs):
-    requirements_as_options = [
+    requirements_as_options = tuple(
         '--requirement={0}'.format(requirement) for requirement in reqs
-    ]
+    )
 
     # We put the cache in the directory that pip already uses.
     # This has better security characteristics than a machine-wide cache, and is a
     #   pattern people can use for open-source projects
     pip_download_cache = environ['HOME'] + '/.pip/cache'
 
-    local.env.update(
+    environ.update(
         PIP_DOWNLOAD_CACHE=pip_download_cache,
     )
 
     # We need python -m here so that the system-level pip1.4 knows we're talking about the venv.
-    pip = local['python']['-m', 'pip.runner']
+    pip = ('python', '-m', 'pip.runner')
 
     cache_opts = (
         '--download-cache=' + pip_download_cache,
         '--find-links=file://' + pip_download_cache,
     )
 
-    install = pip['install', '--ignore-installed'][cache_opts]
-    # --use-wheel is somewhat redundant here, but it means we get an error if we have a too-old version of pip/setuptools.
-    install = install['--use-wheel']  # yay!
-    wheel = pip['wheel'][cache_opts]
+    install = pip + ('install', '--ignore-installed') + cache_opts
+    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
+    install = install + ('--use-wheel',)  # yay!
+    wheel = pip + ('wheel',) + cache_opts
 
     # Bootstrap: Get pip the tools it needs.
     colorize(install, WHEEL)
@@ -140,14 +141,14 @@ def do_install(reqs):
     colorize(
         wheel,
         '--wheel-dir=' + pip_download_cache,
-        requirements_as_options,
         WHEEL,
+        *requirements_as_options
     )
 
     # Install: Use our well-populated cache (only) to do the installations.
     # The --ignore-installed gives more-repeatable behavior in the face of --system-site-packages,
     #   and brings us closer to a --no-site-packages future
-    colorize(install, '--no-index', requirements_as_options)
+    colorize(install, '--no-index', *requirements_as_options)
 
     return 0
 
@@ -156,22 +157,22 @@ def mark_venv_invalid(venv_path, reqs):
     if isdir(venv_path):
         print()
         print("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
-        colorize(local['touch'], venv_path, '--reference', reqs[0], '--date', '1 day ago')
+        colorize(('touch', venv_path, '--reference', reqs[0], '--date', '1 day ago'))
         print()
 
 
 def main():
     import sys
-    from plumbum import ProcessExecutionError
     venv_path, reqs, venv_args = parseargs(sys.argv[1:])
 
+    from subprocess import CalledProcessError
     try:
         with clean_venv(venv_path, venv_args):
             exit_code = do_install(reqs)
     except SystemExit as error:
         exit_code = error.code
-    except ProcessExecutionError as error:
-        exit_code = error.retcode
+    except CalledProcessError as error:
+        exit_code = error.returncode
     except KeyboardInterrupt:
         exit_code = 1
     except Exception:

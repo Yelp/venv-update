@@ -77,7 +77,7 @@ def test_arguments_version(capfd):
     assert lasterr.endswith("/activate_this.py'")
 
     out = out.split('\n')
-    assert out[-3].endswith('/virtualenv virtualenv_run --version')
+    assert out[-3] == ('> virtualenv virtualenv_run --version')
 
 
 def test_arguments_system_packages(tmpdir, capfd):

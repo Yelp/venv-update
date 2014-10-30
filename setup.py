@@ -23,7 +23,6 @@ def main():
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
             'virtualenv>=1.11.5',
-            'plumbum',  # TODO: remove dep
         ],
         entry_points={
             'console_scripts': [
