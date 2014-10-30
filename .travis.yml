@@ -2,9 +2,9 @@ language: python
 env: # These should match the tox env list
     # ordered by "most likely to fail in a unique way" first
     - TOXENV=py34-lint
-    - TOXENV=pypy3-test
+#   - TOXENV=pypy3-test
     - TOXENV=py34-test
-    - TOXENV=pypy-test
+#   - TOXENV=pypy-test
     - TOXENV=py26-test
     - TOXENV=py27-test
     - TOXENV=py27-lint

@@ -186,25 +186,6 @@ def test_timestamps_multiple(tmpdir):
     assert_timestamps('requirements.txt', 'requirements2.txt')
 
 
-def read_loop(fd):
-    # this is the only method that works under pypy
-    # see also: https://bitbucket.org/pypy/pypy/issue/1910
-    from os import read
-    result = []
-    lastread = None
-    while lastread != b'':
-        try:
-            lastread = read(fd, 1024 * 1024)
-        except OSError as err:
-            if err.errno == 5:
-                lastread = b''  # slave closed
-            else:
-                raise
-        result.append(lastread)
-
-    return b''.join(result).decode('US-ASCII')
-
-
 def pipe_output(read, write):
     from os import environ
     environ = environ.copy()
@@ -218,10 +199,11 @@ def pipe_output(read, write):
         close_fds=True,
     )
 
-    from os import close
-    close(write)
-    result = read_loop(read)
-    close(read)
+    from os import fdopen
+    fdopen(write, 'w').close()
+    read = fdopen(read)
+    result = read.read()
+    read.close()
     vupdate.wait()
     return result
 
@@ -244,7 +226,7 @@ def test_colored_tty(tmpdir):
 
     out = pipe_output(read, write)
 
-    assert unprintable(out)
+    assert unprintable(out), out
 
 
 def test_uncolored_pipe(tmpdir):
@@ -255,4 +237,4 @@ def test_uncolored_pipe(tmpdir):
 
     out = pipe_output(read, write)
 
-    assert not unprintable(out)
+    assert not unprintable(out), out
