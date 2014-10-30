@@ -10,7 +10,6 @@
 '''
 from __future__ import print_function
 from __future__ import unicode_literals
-import argparse
 from contextlib import contextmanager
 from os import environ
 from os.path import exists, isdir
@@ -43,18 +42,24 @@ def parseargs(args):
         print(HELP_OUTPUT, end='')
         exit(0)
 
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        'virtualenv_dir', nargs='?', default='virtualenv_run',
-        help='Destination virtualenv directory (default: virtualenv_run)',
-    )
-    parser.add_argument(
-        'requirements', nargs='*', default=['requirements.txt'],
-        help='Requirements files. (default: requirements.txt)',
-    )
-    parsed_args, remaining = parser.parse_known_args(args)
+    virtualenv_dir = None
+    requirements = []
+    remaining = []
 
-    return parsed_args.virtualenv_dir, parsed_args.requirements, remaining
+    for arg in args:
+        if arg.startswith('-'):
+            remaining.append(arg)
+        elif virtualenv_dir is None:
+            virtualenv_dir = arg
+        else:
+            requirements.append(arg)
+
+    if not virtualenv_dir:
+        virtualenv_dir = 'virtualenv_run'
+    if not requirements:
+        requirements = ['requirements.txt']
+
+    return virtualenv_dir, requirements, remaining
 
 
 def colorize(pbcmd, *args):

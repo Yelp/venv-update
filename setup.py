@@ -24,7 +24,6 @@ def main():
         install_requires=[
             'virtualenv>=1.11.5',
             'plumbum',  # TODO: remove dep
-            'argparse',  # TODO: remove dep
         ],
         entry_points={
             'console_scripts': [
