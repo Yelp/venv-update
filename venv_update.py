@@ -111,10 +111,8 @@ def active_virtualenv(venv_path):
         sys.real_prefix = orig_real_prefix
     sys.prefix = orig_prefix
     sys.path[:] = orig_pythonpath
+    environ.clear()
     environ.update(orig_environ)
-    for var in environ:
-        if var not in orig_environ:
-            del environ[var]
 
 
 @contextmanager

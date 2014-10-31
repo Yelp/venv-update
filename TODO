@@ -21,3 +21,5 @@
 * pypy support. Some icky subprocess bugs makes it impossible to make not-flakey:
     * https://bitbucket.org/pypy/pypy/issue/1910/fdopen-of-pty-doesnt-match-cpython
     * https://bitbucket.org/pypy/pypy/issue/1912/subprocess-deadlock-in-pypy3
+
+* fixture to delete all PIP* environment vars before starting tests
