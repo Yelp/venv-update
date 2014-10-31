@@ -1,24 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
-    Update a (possibly non-existant) virtualenv directory using a requirements.txt listing
-    When this script completes, the virtualenv should have the same packages as if it were
-    removed, then rebuilt.
-
-    To set the index server, export a PIP_INDEX_SERVER variable.
-        See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
-'''
-from __future__ import print_function
-from __future__ import unicode_literals
-from contextlib import contextmanager
-from os import environ
-from os.path import exists, isdir
-
-
-# The versions of these bootstrap packages are semi-pinned, to give us bugfixes but mitigate incompatiblity.
-WHEEL = 'wheel>=0.22.0,<1.0'
-
-HELP_OUTPUT = '''\
+'''\
 usage: venv-update [-h] [virtualenv_dir] [requirements [requirements ...]]
 
 Update a (possibly non-existant) virtualenv directory using a requirements.txt
@@ -34,11 +16,19 @@ positional arguments:
 optional arguments:
   -h, --help      show this help message and exit
 '''
+from __future__ import print_function
+from __future__ import unicode_literals
+
+# This script must not rely on anything other than
+#   stdlib>=2.6 and virtualenv>1.11
+from contextlib import contextmanager
+from os import environ
 
 
 def parseargs(args):
-    if set(args) & set(['-h', '--help']):
-        print(HELP_OUTPUT, end='')
+    # TODO: unit test
+    if set(args) & set(('-h', '--help')):
+        print(__doc__, end='')
         exit(0)
 
     virtualenv_dir = None
@@ -61,33 +51,76 @@ def parseargs(args):
     return virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
+def shellescape(args):
+    # TODO: unit test
+    from pipes import quote
+    return ' '.join(quote(arg) for arg in args)
+
+
 def colorize(cmd, *args):
     from os import isatty
 
-    cmd = cmd + args
+    cmd += args
     if isatty(1):
         template = '\033[01;36m>\033[m \033[01;33m{0}\033[m'
     else:
         template = '> {0}'
 
     from subprocess import check_call
-    from pipes import quote
     check_call(('echo', template.format(
-        ' '.join(quote(arg) for arg in cmd)
+        shellescape(cmd)
     )))
     check_call(cmd)
 
 
 def exec_file(fname, lnames=None, gnames=None):
-    """a python3 replacement for execfile"""
+    """a python3 shim for execfile"""
     with open(fname) as f:
         code = compile(f.read(), fname, 'exec')
         exec(code, lnames, gnames)  # pylint:disable=exec-used
 
 
+def activate(venv):
+    """Activate the virtualenv, in the current python process."""
+    # This is the documented way to activate the venv in a python process.
+    from os.path import join
+    activate_this = join(venv, 'bin', 'activate_this.py')
+    exec_file(activate_this, dict(__file__=activate_this))
+
+
+@contextmanager
+def active_virtualenv(venv_path):
+    """Within this context, the given virtualenv is active.
+    All state is restored upon exiting this context
+    The given virtualenv should already exist.
+    """
+    # TODO: unit test
+    import sys
+    orig_environ = environ.copy()
+    orig_pythonpath = list(sys.path)
+    orig_prefix = sys.prefix
+    orig_real_prefix = getattr(sys, 'real_prefix', None)
+
+    activate(venv_path)
+    yield
+
+    # restore the original environment
+    if orig_real_prefix is None:
+        del sys.real_prefix  # pylint:disable=no-member
+    else:
+        sys.real_prefix = orig_real_prefix
+    sys.prefix = orig_prefix
+    sys.path[:] = orig_pythonpath
+    environ.update(orig_environ)
+    for var in environ:
+        if var not in orig_environ:
+            del environ[var]
+
+
 @contextmanager
 def clean_venv(venv_path, venv_args):
     """Make a clean virtualenv, and activate it."""
+    from os.path import exists
     if exists(venv_path):
         # virtualenv --clear has two problems:
         #   it doesn't properly clear out the venv/bin, causing wacky errors
@@ -97,11 +130,8 @@ def clean_venv(venv_path, venv_args):
     virtualenv = ('virtualenv', venv_path)
     colorize(virtualenv + venv_args)
 
-    # This is the documented way to activate the venv in a python process.
-    activate_this_file = venv_path + "/bin/activate_this.py"
-    exec_file(activate_this_file, dict(__file__=activate_this_file))
-
-    yield
+    with active_virtualenv(venv_path):
+        yield
 
     # Postprocess: Make our venv relocatable, since we do plan to relocate it, sometimes.
     colorize(virtualenv, '--relocatable')
@@ -129,19 +159,18 @@ def do_install(reqs):
         '--find-links=file://' + pip_download_cache,
     )
 
-    install = pip + ('install', '--ignore-installed') + cache_opts
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install = install + ('--use-wheel',)  # yay!
+    install = pip + ('install', '--ignore-installed', '--use-wheel') + cache_opts
     wheel = pip + ('wheel',) + cache_opts
 
-    # Bootstrap: Get pip the tools it needs.
-    colorize(install, WHEEL)
+    # Bootstrap the install system; setuptools and pip are alreayd installed, just need wheel
+    colorize(install, 'wheel')
 
     # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     colorize(
         wheel,
         '--wheel-dir=' + pip_download_cache,
-        WHEEL,
+        'wheel',
         *requirements_as_options
     )
 
@@ -154,6 +183,7 @@ def do_install(reqs):
 
 
 def mark_venv_invalid(venv_path, reqs):
+    from os.path import isdir
     if isdir(venv_path):
         print()
         print("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
