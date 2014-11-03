@@ -3,11 +3,14 @@
 '''\
 usage: venv-update [-h] [virtualenv_dir] [requirements [requirements ...]]
 
-Update a (possibly non-existant) virtualenv directory using a requirements.txt
-listing When this script completes, the virtualenv should have the same
-packages as if it were removed, then rebuilt. To set the index server, export
-a PIP_INDEX_SERVER variable. See also:
-http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
+Update a (possibly non-existant) virtualenv directory using a requirements.txt listing
+When this script completes, the virtualenv should have the same packages as if it were
+removed, then rebuilt.
+
+To set the index server, export a PIP_INDEX_SERVER variable.
+    See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
+
+Version control at: https://github.com/yelp/venv-update
 
 positional arguments:
   virtualenv_dir  Destination virtualenv directory (default: virtualenv_run)
@@ -180,11 +183,27 @@ def do_install(reqs):
     return 0
 
 
+def wait_for_all_subprocesses():
+    # TODO: unit-test
+    from os import wait
+    try:
+        while True:
+            wait()
+    except OSError as error:
+        if error.errno == 10:  # no child processes
+            return
+        else:
+            raise
+
+
 def mark_venv_invalid(venv_path, reqs):
     from os.path import isdir
     if isdir(venv_path):
         print()
         print("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
+        print("Waiting for all subprocesses to finish...", end=' ')
+        wait_for_all_subprocesses()
+        print("DONE")
         colorize(('touch', venv_path, '--reference', reqs[0], '--date', '1 day ago'))
         print()
 
