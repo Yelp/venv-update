@@ -195,9 +195,8 @@ def pipe_output(read, write):
 
     from os import fdopen
     fdopen(write, 'w').close()
-    read = fdopen(read)
-    result = read.read()
-    read.close()
+    with fdopen(read) as output:
+        result = output.read()
     vupdate.wait()
     return result
 
@@ -212,9 +211,7 @@ def unprintable(mystring):
     )
 
 
-def test_colored_tty(tmpdir):
-    tmpdir.chdir()
-
+def test_colored_tty():
     from os import openpty
     read, write = openpty()
 
@@ -223,9 +220,7 @@ def test_colored_tty(tmpdir):
     assert unprintable(out), out
 
 
-def test_uncolored_pipe(tmpdir):
-    tmpdir.chdir()
-
+def test_uncolored_pipe():
     from os import pipe
     read, write = pipe()
 
