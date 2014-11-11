@@ -2,6 +2,8 @@ Should probably do before it hits users
 
 * currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
 
+* coverage: 37-38, 47-50, 86-99, 116-151, 156-162, 170-176, 192-198, 209, 211, 213, 218-221
+
 
 Things that I want to do, but would put me past my deadline:
 
