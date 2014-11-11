@@ -24,8 +24,6 @@ from __future__ import unicode_literals
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
-from contextlib import contextmanager
-from os import environ
 
 
 def parseargs(args):
@@ -33,6 +31,11 @@ def parseargs(args):
     if set(args) & set(('-h', '--help')):
         print(__doc__, end='')
         exit(0)
+
+    stage = 1
+    while '--stage2' in args:
+        stage = 2
+        args.remove('--stage2')
 
     virtualenv_dir = None
     requirements = []
@@ -51,7 +54,7 @@ def parseargs(args):
     if not requirements:
         requirements = ['requirements.txt']
 
-    return virtualenv_dir, tuple(requirements), tuple(remaining)
+    return stage, virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
 def shellescape(args):
@@ -60,85 +63,58 @@ def shellescape(args):
     return ' '.join(quote(arg) for arg in args)
 
 
-def colorize(cmd, *args):
+def colorize(cmd):
     from os import isatty
 
-    cmd += args
     if isatty(1):
         template = '\033[01;36m>\033[m \033[01;33m{0}\033[m'
     else:
         template = '> {0}'
 
+    return template.format(shellescape(cmd))
+
+
+def run(cmd):
     from subprocess import check_call
-    check_call(('echo', template.format(
-        shellescape(cmd)
-    )))
+    check_call(('echo', colorize(cmd)))
     check_call(cmd)
 
 
-def exec_file(fname, lnames=None, gnames=None):
-    """a python3 shim for execfile"""
-    with open(fname) as f:
-        code = compile(f.read(), fname, 'exec')
-        exec(code, lnames, gnames)  # pylint:disable=exec-used
-
-
-def activate(venv):
-    """Activate the virtualenv, in the current python process."""
-    # This is the documented way to activate the venv in a python process.
-    from os.path import join
-    activate_this = join(venv, 'bin', 'activate_this.py')
-    exec_file(activate_this, dict(__file__=activate_this))
-
-
-@contextmanager
-def active_virtualenv(venv_path):
-    """Within this context, the given virtualenv is active.
-    All state is restored upon exiting this context
-    The given virtualenv should already exist.
-    """
-    # TODO: unit test
+def pip(args):
+    """Run pip, in-process."""
+    # NOTE: pip *must* be imported here, so that we get the venv's pip
+    import pip as pipmodule
     import sys
-    orig_environ = environ.copy()
-    orig_pythonpath = list(sys.path)
-    orig_prefix = sys.prefix
-    orig_real_prefix = getattr(sys, 'real_prefix', None)
 
-    activate(venv_path)
-    yield
+    # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
+    pipmodule.logger.consumers = []
 
-    # restore the original environment
-    if orig_real_prefix is None:
-        del sys.real_prefix  # pylint:disable=no-member
-    else:
-        sys.real_prefix = orig_real_prefix
-    sys.prefix = orig_prefix
-    sys.path[:] = orig_pythonpath
-    environ.clear()
-    environ.update(orig_environ)
+    sys.stdout.write(colorize(('pip',) + args))
+    sys.stdout.write('\n')
+    sys.stdout.flush()
+
+    result = pipmodule.main(list(args))
+    if result != 0:
+        # pip exited with failure, then we should too
+        exit(result)
 
 
-@contextmanager
 def clean_venv(venv_path, venv_args):
-    """Make a clean virtualenv, and activate it."""
+    """Make a clean virtualenv."""
     from os.path import exists
     if exists(venv_path):
         # virtualenv --clear has two problems:
         #   it doesn't properly clear out the venv/bin, causing wacky errors
         #   it writes over (rather than replaces) the python binary, so there's an error if it's in use.
-        colorize(('rm', '-rf', venv_path))
+        run(('rm', '-rf', venv_path))
 
     virtualenv = ('virtualenv', venv_path)
-    colorize(virtualenv + venv_args)
-
-    with active_virtualenv(venv_path):
-        yield
-
-    # Postprocess: Make our venv relocatable, since we do plan to relocate it, sometimes.
-    colorize(virtualenv, '--relocatable')
+    run(virtualenv + venv_args)
 
 
 def do_install(reqs):
+    from os import environ
+
     requirements_as_options = tuple(
         '--requirement={0}'.format(requirement) for requirement in reqs
     )
@@ -152,35 +128,27 @@ def do_install(reqs):
         PIP_DOWNLOAD_CACHE=pip_download_cache,
     )
 
-    # We need python -m here so that the system-level pip1.4 knows we're talking about the venv.
-    pip = ('python', '-m', 'pip.runner')
-
     cache_opts = (
         '--download-cache=' + pip_download_cache,
         '--find-links=file://' + pip_download_cache,
     )
 
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install = pip + ('install', '--ignore-installed', '--use-wheel') + cache_opts
-    wheel = pip + ('wheel',) + cache_opts
+    install = ('install', '--ignore-installed', '--use-wheel') + cache_opts
+    wheel = ('wheel',) + cache_opts
 
     # Bootstrap the install system; setuptools and pip are alreayd installed, just need wheel
-    colorize(install, 'wheel')
+    pip(install + ('wheel',))
 
     # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
-    colorize(
-        wheel,
-        '--wheel-dir=' + pip_download_cache,
-        'wheel',
-        *requirements_as_options
-    )
+    pip(wheel + ('--wheel-dir=' + pip_download_cache, 'wheel') + requirements_as_options)
 
     # Install: Use our well-populated cache (only) to do the installations.
     # The --ignore-installed gives more-repeatable behavior in the face of --system-site-packages,
     #   and brings us closer to a --no-site-packages future
-    colorize(install, '--no-index', *requirements_as_options)
+    pip(install + ('--no-index',) + requirements_as_options)
 
-    return 0
+    return 0  # posix:success!
 
 
 def wait_for_all_subprocesses():
@@ -204,18 +172,39 @@ def mark_venv_invalid(venv_path, reqs):
         print("Waiting for all subprocesses to finish...", end=' ')
         wait_for_all_subprocesses()
         print("DONE")
-        colorize(('touch', venv_path, '--reference', reqs[0], '--date', '1 day ago'))
+        run(('touch', venv_path, '--reference', reqs[0], '--date', '1 day ago'))
         print()
 
 
+def venv_update(stage, venv_path, reqs, venv_args):
+    from os.path import join, abspath
+    venv_python = abspath(join(venv_path, 'bin', 'python'))
+    if stage == 1:
+        # we have a random python interpreter active, (possibly) outside the virtualenv we want
+        # make a fresh venv at the right spot, and use it to perform stage 2
+        clean_venv(venv_path, venv_args)
+
+        from os import execv
+        execv(
+            venv_python,
+            (venv_python, __file__, '--stage2', venv_path) + reqs + venv_args
+        )  # never returns
+    elif stage == 2:
+        import sys
+        assert sys.executable == venv_python, (sys.executable, venv_python)
+        # we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
+        return do_install(reqs)
+    else:
+        raise ValueError('unexpected stage value: %r' % stage)
+
+
 def main():
-    import sys
-    venv_path, reqs, venv_args = parseargs(sys.argv[1:])
+    from sys import argv
+    stage, venv_path, reqs, venv_args = parseargs(argv[1:])
 
     from subprocess import CalledProcessError
     try:
-        with clean_venv(venv_path, venv_args):
-            exit_code = do_install(reqs)
+        return venv_update(stage, venv_path, reqs, venv_args)
     except SystemExit as error:
         exit_code = error.code
     except CalledProcessError as error:

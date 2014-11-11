@@ -8,8 +8,7 @@ from testing import run, strip_coverage_warnings, venv_update
 TOP = Path(__file__) / '../../..'
 SCENARIOS = TOP/'tests/scenarios'
 
-from sys import version_info, builtin_module_names
-PY33 = (version_info >= (3, 3))
+from sys import builtin_module_names
 PYPY = ('__pypy__' in builtin_module_names)
 
 
@@ -69,15 +68,10 @@ def test_arguments_version(capfd):
     assert excinfo.value.returncode == 1
     out, err = capfd.readouterr()
     lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
-    if PY33:
-        errname = 'FileNotFoundError'
-    else:
-        errname = 'IOError'
-    assert lasterr.startswith(errname + ': [Errno 2] No such file or directory:')
-    assert lasterr.endswith("/activate_this.py'")
+    assert lasterr == 'OSError: [Errno 2] No such file or directory', err
 
-    out = out.split('\n')
-    assert out[-3] == ('> virtualenv virtualenv_run --version')
+    lines = out.split('\n')
+    assert lines[-3] == ('> virtualenv virtualenv_run --version'), out
 
 
 def test_arguments_system_packages(tmpdir, capfd):

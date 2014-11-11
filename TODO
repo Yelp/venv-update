@@ -1,4 +1,9 @@
-# Things that I want to do, but would put me past my deadline:
+Should probably do before it hits users
+
+* currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
+
+
+Things that I want to do, but would put me past my deadline:
 
 * I could remove the --cov-config with a small patch to pytest-cov
     use os.path.abspath(options.cov_config) in postprocess(options)
@@ -21,5 +26,3 @@
 * pypy support. Some icky subprocess bugs makes it impossible to make not-flakey:
     * https://bitbucket.org/pypy/pypy/issue/1910/fdopen-of-pty-doesnt-match-cpython
     * https://bitbucket.org/pypy/pypy/issue/1912/subprocess-deadlock-in-pypy3
-
-* fixture to delete all PIP* environment vars before starting tests
