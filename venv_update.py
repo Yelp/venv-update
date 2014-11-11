@@ -134,9 +134,6 @@ def clean_venv(venv_path, venv_args):
     with active_virtualenv(venv_path):
         yield
 
-    # Postprocess: Make our venv relocatable, since we do plan to relocate it, sometimes.
-    colorize(virtualenv, '--relocatable')
-
 
 def do_install(reqs):
     requirements_as_options = tuple(
