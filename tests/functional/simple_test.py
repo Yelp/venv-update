@@ -180,6 +180,25 @@ def test_timestamps_multiple(tmpdir):
     assert_timestamps('requirements.txt', 'requirements2.txt')
 
 
+def readall(fd):
+    """My own read loop, bc the one in python3.4 is derpy atm:
+    http://bugs.python.org/issue21090#msg231093
+    """
+    from os import read
+    result = []
+    lastread = None
+    while lastread != '':
+        try:
+            lastread = read(fd, 4 * 1024)
+        except OSError as error:
+            if error.errno == 5:  # pty end-of-file  -.-
+                break
+            else:
+                raise
+        result.append(lastread)
+    return b''.join(result).decode('US-ASCII')
+
+
 def pipe_output(read, write):
     from os import environ
     environ = environ.copy()
@@ -193,10 +212,10 @@ def pipe_output(read, write):
         close_fds=True,
     )
 
-    from os import fdopen
-    fdopen(write, 'w').close()
-    with fdopen(read) as output:
-        result = output.read()
+    from os import close
+    close(write)
+    result = readall(read)
+    close(read)
     vupdate.wait()
     return result
 
