@@ -1,17 +1,8 @@
 # minimal set of packages to run tests (under tox, for example)
 -r testing.txt
+-r coverage.txt
 
-coverage
 pytest-xdist
 pytest-timeout
 pytest-rerunfailures
 
-# NOTE: versions must be specified in dependency DFS post-order or else we get the wrong versions.
-
-# cov-core ## pending pull requests:
-#       * https://github.com/schlamar/cov-core/pull/6
-#       * https://github.com/schlamar/cov-core/pull/7
-git+git://github.com/bukzor/cov-core.git@master
-
-# pytest-cov ## pending pull request: https://github.com/schlamar/pytest-cov/pull/21
-git+git://github.com/bukzor/pytest-cov.git@enable-coveragerc

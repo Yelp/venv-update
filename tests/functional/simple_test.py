@@ -3,10 +3,7 @@ from __future__ import unicode_literals
 from py._path.local import LocalPath as Path
 import pytest
 
-from testing import run, strip_coverage_warnings, venv_update
-
-TOP = Path(__file__) / '../../..'
-SCENARIOS = TOP/'tests/scenarios'
+from testing import get_scenario, run, strip_coverage_warnings, venv_update
 
 from sys import version_info, builtin_module_names
 PY33 = (version_info >= (3, 3))
@@ -15,9 +12,7 @@ PYPY = ('__pypy__' in builtin_module_names)
 
 def test_trivial(tmpdir):
     tmpdir.chdir()
-
-    # Trailing slash is essential to rsync
-    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    get_scenario('trivial')
     venv_update()
 
 
@@ -25,9 +20,8 @@ def test_trivial(tmpdir):
 def test_second_install_faster(tmpdir):
     """install twice, and the second one should be faster, due to whl caching"""
     tmpdir.chdir()
+    get_scenario('trivial')
 
-    # Trailing slash is essential to rsync
-    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
     with open('requirements.txt', 'w') as requirements:
         # An arbitrary package that takes a bit of time to install: twisted
         # Should I make my own fake c-extention just to remove this dependency?
@@ -82,7 +76,8 @@ def test_arguments_version(capfd):
 def test_arguments_system_packages(tmpdir, capfd):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
-    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    get_scenario('trivial')
+
     venv_update('--system-site-packages')
     out, err = capfd.readouterr()  # flush buffers
 
@@ -116,7 +111,7 @@ def pip_freeze(capfd):
 
 def test_update_while_active(tmpdir, capfd):
     tmpdir.chdir()
-    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    get_scenario('trivial')
 
     venv_update()
     assert 'mccabe' not in pip_freeze(capfd)
@@ -131,9 +126,8 @@ def test_update_while_active(tmpdir, capfd):
 
 def test_scripts_left_behind(tmpdir):
     tmpdir.chdir()
+    get_scenario('trivial')
 
-    # Trailing slash is essential to rsync
-    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
     venv_update()
 
     # an arbitrary small package with a script: pep8
@@ -148,8 +142,7 @@ def test_scripts_left_behind(tmpdir):
 
 
 def assert_timestamps(*reqs):
-    # Trailing slash is essential to rsync
-    run('rsync', '-a', str(SCENARIOS) + '/trivial/', '.')
+    get_scenario('trivial')
     venv_update('virtualenv_run', *reqs)
 
     assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()

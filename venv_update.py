@@ -101,8 +101,8 @@ def pip(args):
 
 def clean_venv(venv_path, venv_args):
     """Make a clean virtualenv."""
-    from os.path import exists
-    if exists(venv_path):
+    from os.path import isdir
+    if isdir(venv_path):
         # virtualenv --clear has two problems:
         #   it doesn't properly clear out the venv/bin, causing wacky errors
         #   it writes over (rather than replaces) the python binary, so there's an error if it's in use.
@@ -191,7 +191,7 @@ def venv_update(stage, venv_path, reqs, venv_args):
         )  # never returns
     elif stage == 2:
         import sys
-        assert sys.executable == venv_python, (sys.executable, venv_python)
+        assert sys.executable == venv_python, "Executable not in venv: %s != %s" % (sys.executable, venv_python)
         # we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
         return do_install(reqs)
     else:
