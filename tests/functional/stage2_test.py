@@ -29,7 +29,7 @@ def test_trivial(tmpdir):
     run(
         'myvenv/bin/pip',
         'install',
-        '-r', TOP/'requirements.d/coverage.txt'
+        '-r', (TOP/'requirements.d/coverage.txt').strpath
     )
 
     stage2('myvenv/bin/python', tmpdir)
