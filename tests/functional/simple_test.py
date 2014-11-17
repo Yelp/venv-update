@@ -185,7 +185,7 @@ def readall(fd):
     from os import read
     result = []
     lastread = None
-    while lastread != '':
+    while lastread != b'':
         try:
             lastread = read(fd, 4 * 1024)
         except OSError as error:
