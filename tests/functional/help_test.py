@@ -6,7 +6,7 @@ def test_help(capfd):
     assert HELP_OUTPUT
     assert HELP_OUTPUT.startswith('usage:')
     last_line = HELP_OUTPUT.rsplit('\n', 2)[-2].strip()
-    assert last_line.startswith('-h, --help ')
+    assert last_line.startswith('Version control at: http')
 
     venv_update('--help')
     out, err = capfd.readouterr()

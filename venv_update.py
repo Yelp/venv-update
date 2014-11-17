@@ -10,14 +10,14 @@ removed, then rebuilt.
 To set the index server, export a PIP_INDEX_SERVER variable.
     See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
 
-Version control at: https://github.com/yelp/venv-update
-
 positional arguments:
   virtualenv_dir  Destination virtualenv directory (default: virtualenv_run)
   requirements    Requirements files. (default: requirements.txt)
 
 optional arguments:
   -h, --help      show this help message and exit
+
+Version control at: https://github.com/yelp/venv-update
 '''
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -195,7 +195,7 @@ def venv_update(stage, venv_path, reqs, venv_args):
         # we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
         return do_install(reqs)
     else:
-        raise ValueError('unexpected stage value: %r' % stage)
+        raise AssertionError('impossible stage value: %r' % stage)
 
 
 def main():

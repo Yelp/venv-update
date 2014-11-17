@@ -2,11 +2,14 @@ Should probably do before it hits users
 
 * currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
 
-* coverage: 37-38, 47-50, 86-99, 116-151, 156-162, 170-176, 192-198, 209, 211, 213, 218-221
-* coverage: 32-33, 46, 50, 53, 72, 78-80, 99, 104-112, 156-162, 168-176, 185-188, 198, 208-221, 54->57
+* coverage: 50, 99, 198, 209, 211, 213, 218-221, 47->50, 54->57, 97->99, 192->198
 
 
 Things that I want to do, but would put me past my deadline:
+
+* On ubuntu stock python2.7 I have to rm -rf $VIRTUAL_ENV/local
+    to avoid the AssertionError('unexpected third case')
+    https://bitbucket.org/ned/coveragepy/issue/340/keyerror-subpy
 
 * I could remove the --cov-config with a small patch to pytest-cov
     use os.path.abspath(options.cov_config) in postprocess(options)

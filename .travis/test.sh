@@ -5,8 +5,6 @@ SITEPACKAGES=${SITEPACKAGES:-.}
 PROJECT=venv_update
 NCPU=$(getconf _NPROCESSORS_CONF)
 
-export PYTHONPATH=$(readlink -f $SITEPACKAGES)
-
 python --version
 coverage --version
 py.test --version
@@ -15,4 +13,4 @@ py.test -n $NCPU \
     --cov-enable --cov-config=$TOP/.coveragerc --cov-report='' \
     "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
 coverage combine
-coverage report --fail-under 75  # FIXME: should be 100
+coverage report --rcfile=$TOP/.coveragerc --fail-under 95  # FIXME: should be 100
