@@ -58,10 +58,18 @@ def parseargs(args):
     return stage, virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
+def timid_relpath(arg):
+    from os.path import exists, isabs, relpath
+    if isabs(arg) and exists(arg):
+        return relpath(arg)
+    else:
+        return arg
+
+
 def shellescape(args):
     # TODO: unit test
     from pipes import quote
-    return ' '.join(quote(arg) for arg in args)
+    return ' '.join(quote(timid_relpath(arg)) for arg in args)
 
 
 def colorize(cmd):
@@ -222,6 +230,13 @@ def mark_venv_invalid(venv_path, reqs):
         print()
 
 
+def dotpy(filename):
+    if filename.endswith('.pyc'):
+        return filename[:-1]
+    else:
+        return filename
+
+
 def venv_update(stage, venv_path, reqs, venv_args):
     from os.path import join, abspath
     venv_python = abspath(join(venv_path, 'bin', 'python'))
@@ -230,11 +245,7 @@ def venv_update(stage, venv_path, reqs, venv_args):
         # make a fresh venv at the right spot, and use it to perform stage 2
         clean_venv(venv_path, venv_args)
 
-        from os import execv
-        execv(
-            venv_python,
-            (venv_python, __file__, '--stage2', venv_path) + reqs + venv_args
-        )  # never returns
+        run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs + venv_args)
     elif stage == 2:
         import sys
         assert sys.executable == venv_python, "Executable not in venv: %s != %s" % (sys.executable, venv_python)
