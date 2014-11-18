@@ -26,7 +26,7 @@ def test_trivial(tmpdir):
 
     with open('requirements.txt', 'w') as requirements:
         # An arbitrary small package: mccabe
-        requirements.write('mccabe\nsix==0.9.0')
+        requirements.write('mccabe\npep8==1.0')
 
     run('virtualenv', 'myvenv')
     # need this to get coverage. surely there's a better way...

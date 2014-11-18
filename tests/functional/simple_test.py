@@ -5,9 +5,8 @@ import pytest
 
 from testing import get_scenario, run, strip_coverage_warnings, venv_update
 
-from sys import version_info, builtin_module_names
+from sys import version_info
 PY33 = (version_info >= (3, 3))
-PYPY = ('__pypy__' in builtin_module_names)
 
 
 def test_trivial(tmpdir):
@@ -31,7 +30,7 @@ pyyaml
 coverage
 pylint
 pytest
-six==0.9.0
+pep8==1.0
 ''')
 
     from time import time
@@ -46,15 +45,12 @@ six==0.9.0
     # second install should be at least twice as fast
     ratio = time1 / time2
     print('%.2fx speedup' % ratio)
-    if PYPY:
-        # pypy is too fast :(
-        assert ratio > 1.5
-    else:
-        assert ratio > 2
+    assert ratio > 4
 
 
-def test_arguments_version(capfd):
+def test_arguments_version(tmpdir, capfd):
     """Show that we can pass arguments through to virtualenv"""
+    tmpdir.chdir()
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
@@ -158,7 +154,7 @@ def assert_timestamps(*reqs):
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('virtualenv_run', *reqs)
 
-    assert excinfo.value.returncode == 2
+    assert excinfo.value.returncode == 1
     assert Path(reqs[0]).mtime() > Path('virtualenv_run').mtime()
 
     with open(reqs[-1], 'w') as requirements:
