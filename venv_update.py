@@ -24,6 +24,7 @@ from __future__ import unicode_literals
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
+from contextlib import contextmanager
 
 
 def parseargs(args):
@@ -80,9 +81,52 @@ def run(cmd):
     check_call(cmd)
 
 
+@contextmanager
+def faster_pip_packagefinder():
+    """Provide a short-circuited search when the requirement is pinned and appears on disk.
+
+    Suggested upstream at: https://github.com/pypa/pip/pull/2114
+    """
+    from pip.index import PackageFinder, DistributionNotFound, HTMLPage
+
+    orig_packagefinder = vars(PackageFinder).copy()
+
+    def find_requirement(self, req, upgrade):
+        if any(op == '==' for op, ver in req.req.specs):
+            # if the version is pinned-down by a ==, do an optimistic search
+            # for a satisfactory package on the local filesystem.
+            try:
+                self.network_allowed = False
+                result = orig_packagefinder['find_requirement'](self, req, upgrade)
+            except DistributionNotFound:
+                result = None
+
+            if result is not None:
+                return result
+
+        # otherwise, do the full network search
+        self.network_allowed = True
+        return orig_packagefinder['find_requirement'](self, req, upgrade)
+
+    def _get_page(self, link, req):
+        if self.network_allowed or link.url.startswith('file:'):
+            return orig_packagefinder['_get_page'](self, link, req)
+        else:
+            return HTMLPage('', 'fake://' + link.url)
+
+    # A poor man's dependency injection: monkeypatch :(
+    # pylint:disable=protected-access
+    PackageFinder.find_requirement = find_requirement
+    PackageFinder._get_page = _get_page
+    try:
+        yield
+    finally:
+        PackageFinder.find_requirement = orig_packagefinder['find_requirement']
+        PackageFinder._get_page = orig_packagefinder['_get_page']
+
+
 def pip(args):
     """Run pip, in-process."""
-    # NOTE: pip *must* be imported here, so that we get the venv's pip
     import pip as pipmodule
     import sys
 
@@ -93,7 +137,9 @@ def pip(args):
     sys.stdout.write('\n')
     sys.stdout.flush()
 
-    result = pipmodule.main(list(args))
+    with faster_pip_packagefinder():
+        result = pipmodule.main(list(args))
+
     if result != 0:
         # pip exited with failure, then we should too
         exit(result)
