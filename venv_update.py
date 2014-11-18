@@ -24,6 +24,7 @@ from __future__ import unicode_literals
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
+from contextlib import contextmanager
 
 
 def parseargs(args):
@@ -57,10 +58,18 @@ def parseargs(args):
     return stage, virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
+def timid_relpath(arg):
+    from os.path import exists, isabs, relpath
+    if isabs(arg) and exists(arg):
+        return relpath(arg)
+    else:
+        return arg
+
+
 def shellescape(args):
     # TODO: unit test
     from pipes import quote
-    return ' '.join(quote(arg) for arg in args)
+    return ' '.join(quote(timid_relpath(arg)) for arg in args)
 
 
 def colorize(cmd):
@@ -80,9 +89,52 @@ def run(cmd):
     check_call(cmd)
 
 
+@contextmanager
+def faster_pip_packagefinder():
+    """Provide a short-circuited search when the requirement is pinned and appears on disk.
+
+    Suggested upstream at: https://github.com/pypa/pip/pull/2114
+    """
+    from pip.index import PackageFinder, DistributionNotFound, HTMLPage
+
+    orig_packagefinder = vars(PackageFinder).copy()
+
+    def find_requirement(self, req, upgrade):
+        if any(op == '==' for op, ver in req.req.specs):
+            # if the version is pinned-down by a ==, do an optimistic search
+            # for a satisfactory package on the local filesystem.
+            try:
+                self.network_allowed = False
+                result = orig_packagefinder['find_requirement'](self, req, upgrade)
+            except DistributionNotFound:
+                result = None
+
+            if result is not None:
+                return result
+
+        # otherwise, do the full network search
+        self.network_allowed = True
+        return orig_packagefinder['find_requirement'](self, req, upgrade)
+
+    def _get_page(self, link, req):
+        if self.network_allowed or link.url.startswith('file:'):
+            return orig_packagefinder['_get_page'](self, link, req)
+        else:
+            return HTMLPage('', 'fake://' + link.url)
+
+    # A poor man's dependency injection: monkeypatch :(
+    # pylint:disable=protected-access
+    PackageFinder.find_requirement = find_requirement
+    PackageFinder._get_page = _get_page
+    try:
+        yield
+    finally:
+        PackageFinder.find_requirement = orig_packagefinder['find_requirement']
+        PackageFinder._get_page = orig_packagefinder['_get_page']
+
+
 def pip(args):
     """Run pip, in-process."""
-    # NOTE: pip *must* be imported here, so that we get the venv's pip
     import pip as pipmodule
     import sys
 
@@ -93,7 +145,9 @@ def pip(args):
     sys.stdout.write('\n')
     sys.stdout.flush()
 
-    result = pipmodule.main(list(args))
+    with faster_pip_packagefinder():
+        result = pipmodule.main(list(args))
+
     if result != 0:
         # pip exited with failure, then we should too
         exit(result)
@@ -176,6 +230,13 @@ def mark_venv_invalid(venv_path, reqs):
         print()
 
 
+def dotpy(filename):
+    if filename.endswith('.pyc'):
+        return filename[:-1]
+    else:
+        return filename
+
+
 def venv_update(stage, venv_path, reqs, venv_args):
     from os.path import join, abspath
     venv_python = abspath(join(venv_path, 'bin', 'python'))
@@ -184,11 +245,7 @@ def venv_update(stage, venv_path, reqs, venv_args):
         # make a fresh venv at the right spot, and use it to perform stage 2
         clean_venv(venv_path, venv_args)
 
-        from os import execv
-        execv(
-            venv_python,
-            (venv_python, __file__, '--stage2', venv_path) + reqs + venv_args
-        )  # never returns
+        run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs + venv_args)
     elif stage == 2:
         import sys
         assert sys.executable == venv_python, "Executable not in venv: %s != %s" % (sys.executable, venv_python)

@@ -31,6 +31,7 @@ pyyaml
 coverage
 pylint
 pytest
+six==0.9.0
 ''')
 
     from time import time
@@ -67,10 +68,12 @@ def test_arguments_version(capfd):
         errname = 'FileNotFoundError'
     else:
         errname = 'OSError'
-    assert lasterr == errname + ': [Errno 2] No such file or directory', err
+    assert lasterr.startswith(errname + ': [Errno 2] No such file or directory'), err
 
     lines = out.split('\n')
-    assert lines[-3] == ('> virtualenv virtualenv_run --version'), out
+    assert lines[-4] == ('> virtualenv virtualenv_run --version'), out
+    assert lines[-2].startswith('> /'), out
+    assert lines[-2].endswith('venv_update.py --stage2 virtualenv_run requirements.txt --version'), out
 
 
 def test_arguments_system_packages(tmpdir, capfd):
@@ -78,7 +81,7 @@ def test_arguments_system_packages(tmpdir, capfd):
     tmpdir.chdir()
     get_scenario('trivial')
 
-    venv_update('--system-site-packages')
+    venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
     out, err = capfd.readouterr()  # flush buffers
 
     run('virtualenv_run/bin/python', '-c', '''\

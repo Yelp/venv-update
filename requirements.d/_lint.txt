@@ -2,5 +2,6 @@
 flake8
 # pylint  # PR merged: https://bitbucket.org/logilab/pylint/pull-request/186/fixed_up_import_test-and-tests/diff
 # pending fresh release: https://bitbucket.org/logilab/pylint/issue/363/please-cut-a-release-131
-hg+https://bitbucket.org/logilab/pylint@58c66aa083777059a2e6b46f6a0545a2f4977097
+# note: pylint is set up such that -e simply doesn't work. Their __init__ is in their top directory.
+hg+https://bitbucket.org/logilab/pylint@58c66aa083777059a2e6b46f6a0545a2f4977097#egg=pylint
 pre-commit
