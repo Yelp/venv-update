@@ -169,7 +169,10 @@ def clean_venv(venv_path, venv_args):
     yield
 
     # Postprocess: Make our venv relocatable, since we do plan to relocate it, sometimes.
-    run(virtualenv + ('--relocatable',))
+    run(
+        virtualenv +
+        ('--relocatable', '--python={0}/bin/python'.format(venv_path))
+    )
 
 
 def do_install(reqs):
