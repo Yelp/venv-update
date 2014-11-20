@@ -3,13 +3,11 @@ from __future__ import unicode_literals
 
 from testing import run
 
+from functional.get_installed_test import set_up
 
-def test_pip_install_flake8(tmpdir, capfd, sdist):
-    tmpdir.chdir()
 
-    run('virtualenv', 'myvenv')
-    # surely there's a better way -.-
-    run('myvenv/bin/pip', 'install', '--no-deps', sdist.strpath)
+def test_pip_install_flake8(tmpdir, capfd):
+    set_up(tmpdir)
     run('myvenv/bin/pip', 'install', 'flake8')
 
     out, err = capfd.readouterr()  # flush buffers

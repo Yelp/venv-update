@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from py._path.local import LocalPath as Path
 import pytest
 
-from testing import get_scenario, run, strip_coverage_warnings, venv_update
+from testing import get_scenario, run, strip_coverage_warnings, venv_update, TOP
 
 from sys import version_info
 PY33 = (version_info >= (3, 3))
@@ -27,11 +27,11 @@ def test_second_install_faster(tmpdir):
         requirements.write('''\
 simplejson
 pyyaml
-coverage
 pylint
 pytest
 pep8==1.0
-''')
+-r {0}/requirements.d/coverage.txt
+'''.format(TOP))
 
     from time import time
     start = time()
@@ -45,7 +45,7 @@ pep8==1.0
     # second install should be at least twice as fast
     ratio = time1 / time2
     print('%.2fx speedup' % ratio)
-    assert ratio > 4
+    assert ratio > 3
 
 
 def test_arguments_version(tmpdir, capfd):

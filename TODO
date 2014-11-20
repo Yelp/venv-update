@@ -2,10 +2,10 @@ Should probably do before it hits users
 
 * currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
 
-* coverage: 50, 99, 209, 211, 213, 218-221, 47->50, 54->57, 97->99
-
 
 Things that I want to do, but would put me past my deadline:
+
+* coverage: 155, 208, 225, 229-231, 338, 368, 372
 
 * On ubuntu stock python2.7 I have to rm -rf $VIRTUAL_ENV/local
     to avoid the AssertionError('unexpected third case')

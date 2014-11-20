@@ -1,13 +1,10 @@
 #!/bin/bash
 set -ex
-TOP=$(readlink -f ${TOP:-.})
-SITEPACKAGES=${SITEPACKAGES:-.}
-PROJECT=venv_update
+export TOP=$(readlink -f ${TOP:-.})
+export SITEPACKAGES=${SITEPACKAGES:-.}
+export PROJECT=venv_update
 NCPU=$(getconf _NPROCESSORS_CONF)
 
-python --version
-coverage --version
-py.test --version
 coverage erase
 py.test -n $NCPU \
     --cov --cov-config=$TOP/.coveragerc --cov-report='' \

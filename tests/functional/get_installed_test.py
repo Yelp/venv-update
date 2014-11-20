@@ -1,16 +1,17 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from testing import run
+from testing import run, Path
+import venv_update
 
 
-def set_up(tmpdir, sdist):
+def set_up(tmpdir):
     tmpdir.chdir()
 
     run('virtualenv', 'myvenv')
     # surely there's a better way -.-
     # NOTE: `pip install TOP` causes an infinite copyfiles loop, under tox
-    run('myvenv/bin/pip', 'install', '--no-deps', sdist.strpath)
+    Path(venv_update.__file__).copy(tmpdir)
 
 
 def get_installed(capfd):
@@ -26,12 +27,10 @@ for p in sorted(v.pip_get_installed()):
     return out.split()
 
 
-def test_pip_get_installed_empty(tmpdir, capfd, sdist):
-    set_up(tmpdir, sdist)
-    assert get_installed(capfd) == ['venv-update']
-
-
-def test_pip_get_installed_flake8(tmpdir, capfd, sdist):
-    set_up(tmpdir, sdist)
+def test_pip_get_installed(tmpdir, capfd):
+    set_up(tmpdir)
+    assert get_installed(capfd) == []
     run('myvenv/bin/pip', 'install', 'flake8')
-    assert get_installed(capfd) == ['flake8', 'mccabe', 'pep8', 'pyflakes', 'venv-update']
+    assert get_installed(capfd) == ['flake8', 'mccabe', 'pep8', 'pyflakes']
+    run('myvenv/bin/pip', 'uninstall', '--yes', 'flake8')
+    assert get_installed(capfd) == ['mccabe', 'pep8', 'pyflakes']
