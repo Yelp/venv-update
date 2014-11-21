@@ -1,4 +1,5 @@
 language: python
+
 env: # These should match the tox env list
     # ordered by "most likely to fail in a unique way" first
     - TOXENV=py34-lint
@@ -8,20 +9,27 @@ env: # These should match the tox env list
     - TOXENV=py26-test
     - TOXENV=py27-test
     - TOXENV=py27-lint
+
 matrix:
     # notify a failed build as soon as anything fails
     fast_finish: true
-install: pip install -r requirements.d/travis.txt
-script: tox
+
+sudo: false
+
 cache:
-    # This doesn't seem to do anything :(
     directories:
         - $HOME/.pip
         - $HOME/.pre-commit
+
+install: pip install -r requirements.d/travis.txt
+
+script: tox
+
 after_success:
     - find -name '.coverage*' | xargs mv -t .
     - coverage combine
     - coveralls
+
 after_failure:
     # attempt to show any pip.log on failure
     - find -name pip.log | xargs -r tail -n99999
