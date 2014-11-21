@@ -61,9 +61,11 @@ def parseargs(args):
 def timid_relpath(arg):
     from os.path import exists, isabs, relpath
     if isabs(arg) and exists(arg):
-        return relpath(arg)
-    else:
-        return arg
+        result = relpath(arg)
+        if len(result) < len(arg):
+            return result
+
+    return arg
 
 
 def shellescape(args):
@@ -136,14 +138,14 @@ def faster_pip_packagefinder():
 def pip(args):
     """Run pip, in-process."""
     import pip as pipmodule
-    import sys
 
     # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
     pipmodule.logger.consumers = []
 
-    sys.stdout.write(colorize(('pip',) + args))
-    sys.stdout.write('\n')
-    sys.stdout.flush()
+    from sys import stdout
+    stdout.write(colorize(('pip',) + args))
+    stdout.write('\n')
+    stdout.flush()
 
     with faster_pip_packagefinder():
         result = pipmodule.main(list(args))
@@ -153,16 +155,93 @@ def pip(args):
         exit(result)
 
 
-@contextmanager
-def clean_venv(venv_path, venv_args):
-    """Make a clean virtualenv."""
-    from os.path import isdir
-    if isdir(venv_path):
-        # virtualenv --clear has two problems:
-        #   it doesn't properly clear out the venv/bin, causing wacky errors
-        #   it writes over (rather than replaces) the python binary, so there's an error if it's in use.
-        run(('rm', '-rf', venv_path))
+def pip_get_installed():
+    """Code extracted from the middle of the pip freeze command.
+    """
+    from pip import FrozenRequirement
+    from pip._vendor.pkg_resources import working_set
+    from pip.util import get_installed_distributions
 
+    dependency_links = []
+
+    for dist in working_set:
+        if dist.has_metadata('dependency_links.txt'):
+            dependency_links.extend(
+                dist.get_metadata_lines('dependency_links.txt')
+            )
+
+    installed = {}
+    for dist in get_installed_distributions(local_only=True):
+        req = FrozenRequirement.from_dist(
+            dist,
+            dependency_links,
+        )
+
+        installed[req.name] = req
+
+    return installed
+
+
+def pip_parse_requirements(requirement_files):
+    from pip.req import parse_requirements
+
+    required = {}
+    for reqfile in requirement_files:
+        for req in parse_requirements(reqfile):
+            required[req.name] = req
+    return required
+
+
+def pip_install(args):
+    """Run pip install, and return the set of packages installed.
+    """
+    from sys import stdout
+    stdout.write(colorize(('pip', 'install') + args))
+    stdout.write('\n')
+    stdout.flush()
+
+    from pip.commands.install import InstallCommand
+    install = InstallCommand()
+    parsed = install.parse_args(list(args))
+    successfully_installed = install.run(*parsed)
+    if successfully_installed is None:
+        return {}
+    else:
+        return dict(successfully_installed.requirements)
+
+
+def trace_requirements(requirements):
+    """given an iterable of pkg_resources requirements,
+    return the set of required packages, given their transitive requirements.
+    """
+    from pip._vendor.pkg_resources import get_provider, DistributionNotFound
+
+    stack = list(requirements)
+    result = {}
+    while stack:
+        req = stack.pop()
+        if req is None:
+            # a file:/// requirement
+            continue
+
+        try:
+            dist = get_provider(req)
+        except (DistributionNotFound, IOError):
+            result[req.project_name] = None
+            continue
+
+        result[dist.project_name] = dist
+
+        for req in dist.requires():  # should we support extras?
+            if req.project_name not in result:
+                stack.append(req)
+
+    return result
+
+
+@contextmanager
+def venv(venv_path, venv_args):
+    """Ensure we have a virtualenv."""
     virtualenv = ('virtualenv', venv_path)
     run(virtualenv + venv_args)
 
@@ -178,6 +257,8 @@ def clean_venv(venv_path, venv_args):
 def do_install(reqs):
     from os import environ
 
+    previously_installed = pip_get_installed()
+    required = pip_parse_requirements(reqs)
     requirements_as_options = tuple(
         '--requirement={0}'.format(requirement) for requirement in reqs
     )
@@ -197,11 +278,11 @@ def do_install(reqs):
     )
 
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install = ('install', '--ignore-installed', '--use-wheel') + cache_opts
+    install_opts = ('--use-wheel',) + cache_opts
     wheel = ('wheel',) + cache_opts
 
     # Bootstrap the install system; setuptools and pip are alreayd installed, just need wheel
-    pip(install + ('wheel',))
+    pip_install(install_opts + ('wheel',))
 
     # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     pip(wheel + ('--wheel-dir=' + pip_download_cache, 'wheel') + requirements_as_options)
@@ -209,7 +290,23 @@ def do_install(reqs):
     # Install: Use our well-populated cache (only) to do the installations.
     # The --ignore-installed gives more-repeatable behavior in the face of --system-site-packages,
     #   and brings us closer to a --no-site-packages future
-    pip(install + ('--no-index',) + requirements_as_options)
+    recently_installed = pip_install(install_opts + ('--upgrade', '--no-index',) + requirements_as_options)
+
+    required_with_deps = trace_requirements(
+        (req.req for req in required.values())
+    )
+
+    # TODO-TEST require A==1 then A==2
+    extraneous = (
+        set(previously_installed) -
+        set(required_with_deps) -
+        set(recently_installed) -
+        set(['wheel'])   # no need to install/uninstall wheel every run
+    )
+
+    # Finally, uninstall any extraneous packages
+    if extraneous:
+        pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 
     return 0  # posix:success!
 
@@ -252,7 +349,7 @@ def venv_update(stage, venv_path, reqs, venv_args):
     if stage == 1:
         # we have a random python interpreter active, (possibly) outside the virtualenv we want.
         # make a fresh venv at the right spot, and use it to perform stage 2
-        with clean_venv(venv_path, venv_args):
+        with venv(venv_path, venv_args):
             run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs + venv_args)
     elif stage == 2:
         import sys
