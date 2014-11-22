@@ -303,7 +303,7 @@ def do_install(reqs):
         print('Detected --system-site-packages; using --ignore-installed. This makes things slower.')
         install_opts += ('--ignore-installed',)
 
-    recently_installed = pip_install(install_opts + ('--upgrade', '--no-index',) + requirements_as_options)
+    recently_installed = pip_install(install_opts + requirements_as_options)
 
     required_with_deps = trace_requirements(
         (req.req for req in required.values())

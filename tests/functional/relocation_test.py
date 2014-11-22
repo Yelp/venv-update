@@ -9,6 +9,8 @@ from py._path.local import LocalPath as Path
 
 from testing import get_scenario, run, venv_update
 
+PY27 = sys.version_info[:2] == (2, 7)
+
 
 def test_is_relocatable(tmpdir):
     tmpdir.chdir()
@@ -27,10 +29,7 @@ def test_is_relocatable_different_python_version(tmpdir):
     with io.open('requirements.txt', 'w') as reqs:
         reqs.write('doge==3.5.0')
 
-    if sys.version_info[:2] == (2, 7):  # pragma: no cover PY27 only
-        python_arg = '--python=python2.6'
-    else:  # pragma: no cover PY26 only
-        python_arg = '--python=python2.7'
+    python_arg = '--python=python' + ('2.7' if not PY27 else '2.6')
 
     venv_update(python_arg)
 

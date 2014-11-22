@@ -62,10 +62,7 @@ def test_arguments_version(tmpdir, capfd):
     assert excinfo.value.returncode == 1
     out, err = capfd.readouterr()
     lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
-    if PY33:
-        errname = 'FileNotFoundError'
-    else:
-        errname = 'OSError'
+    errname = 'FileNotFoundError' if PY33 else 'OSError'
     assert lasterr.startswith(errname + ': [Errno 2] No such file or directory'), err
 
     lines = out.split('\n')
