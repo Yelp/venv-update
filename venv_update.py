@@ -202,8 +202,9 @@ def pip_install(args):
 
     from pip.commands.install import InstallCommand
     install = InstallCommand()
-    parsed = install.parse_args(list(args))
-    successfully_installed = install.run(*parsed)
+    options, args = install.parse_args(list(args))
+
+    successfully_installed = install.run(options, args)
     if successfully_installed is None:
         return {}
     else:
@@ -254,6 +255,12 @@ def venv(venv_path, venv_args):
     )
 
 
+def venv_uses_system_site_packages():
+    from glob import glob
+    from sys import prefix
+    return not glob(prefix + '/lib/python*/no-global-site-packages.txt')
+
+
 def do_install(reqs):
     from os import environ
 
@@ -281,15 +288,21 @@ def do_install(reqs):
     install_opts = ('--use-wheel',) + cache_opts
     wheel = ('wheel',) + cache_opts
 
-    # Bootstrap the install system; setuptools and pip are alreayd installed, just need wheel
+    # 1) Bootstrap the install system; setuptools and pip are already installed, just need wheel
     pip_install(install_opts + ('wheel',))
 
-    # Caching: Make sure everything we want is downloaded, cached, and has a wheel.
+    # 2) Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     pip(wheel + ('--wheel-dir=' + pip_download_cache, 'wheel') + requirements_as_options)
 
-    # Install: Use our well-populated cache (only) to do the installations.
-    # The --ignore-installed gives more-repeatable behavior in the face of --system-site-packages,
-    #   and brings us closer to a --no-site-packages future
+    # 3) Install: Use our well-populated cache (only) to do the installations.
+    install_opts += ('--upgrade', '--no-index',)
+    if venv_uses_system_site_packages():
+        # In the worst case, a --system-site-packages venv will be missing packages because it was built in an
+        # environment which satisfied requirements at the system level, then be relocated to a system that doesn't have
+        # the requirement, breaking it.  This has bitten us before. --ignore-installed avoids the issue.
+        print('Detected --system-site-packages; using --ignore-installed. This makes things slower.')
+        install_opts += ('--ignore-installed',)
+
     recently_installed = pip_install(install_opts + ('--upgrade', '--no-index',) + requirements_as_options)
 
     required_with_deps = trace_requirements(
@@ -304,7 +317,7 @@ def do_install(reqs):
         set(['wheel'])   # no need to install/uninstall wheel every run
     )
 
-    # Finally, uninstall any extraneous packages
+    # 4) Uninstall any extraneous packages.
     if extraneous:
         pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 
@@ -337,7 +350,7 @@ def mark_venv_invalid(venv_path, reqs):
 
 
 def dotpy(filename):
-    if filename.endswith('.pyc'):
+    if filename.endswith(('.pyc', '.pyo', '.pyd')):
         return filename[:-1]
     else:
         return filename
