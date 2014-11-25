@@ -135,26 +135,6 @@ def faster_pip_packagefinder():
         PackageFinder._get_page = orig_packagefinder['_get_page']
 
 
-def pip(args):
-    """Run pip, in-process."""
-    import pip as pipmodule
-
-    # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
-    pipmodule.logger.consumers = []
-
-    from sys import stdout
-    stdout.write(colorize(('pip',) + args))
-    stdout.write('\n')
-    stdout.flush()
-
-    with faster_pip_packagefinder():
-        result = pipmodule.main(list(args))
-
-    if result != 0:
-        # pip exited with failure, then we should too
-        exit(result)
-
-
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     """
@@ -204,7 +184,8 @@ def pip_install(args):
     install = InstallCommand()
     options, args = install.parse_args(list(args))
 
-    successfully_installed = install.run(options, args)
+    with faster_pip_packagefinder():
+        successfully_installed = install.run(options, args)
     if successfully_installed is None:
         return {}
     else:
@@ -233,7 +214,14 @@ def trace_requirements(requirements):
 
         result[dist.project_name] = dist
 
-        for req in dist.requires():  # should we support extras?
+        try:
+            dist_reqs = dist.requires()  # should we support extras?
+        except IOError:
+            # This happens sometimes with setuptools. Don't understand why, yet.
+            #   IOError: [Errno 2] No such file or directory: '${site-packages}/setuptools-3.6.dist-info/METADATA'
+            continue
+
+        for req in dist_reqs:
             if req.project_name not in result:
                 stack.append(req)
 
@@ -257,6 +245,7 @@ def venv(venv_path, venv_args):
 
 def do_install(reqs):
     from os import environ
+    from sys import executable as python
 
     previously_installed = pip_get_installed()
     required = pip_parse_requirements(reqs)
@@ -278,18 +267,9 @@ def do_install(reqs):
         '--find-links=file://' + pip_download_cache,
     )
 
-    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install_opts = ('--use-wheel',) + cache_opts
-    wheel = ('wheel',) + cache_opts
-
-    # 1) Bootstrap the install system; setuptools and pip are already installed, just need wheel
-    pip_install(install_opts + ('wheel',))
-
-    # 2) Caching: Make sure everything we want is downloaded, cached, and has a wheel.
-    pip(wheel + ('--wheel-dir=' + pip_download_cache, 'wheel') + requirements_as_options)
-
     # 3) Install: Use our well-populated cache (only) to do the installations.
-    install_opts += ('--upgrade', '--no-index',)
+    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
+    install_opts = ('--upgrade', '--use-wheel',) + cache_opts
     recently_installed = pip_install(install_opts + requirements_as_options)
 
     required_with_deps = trace_requirements(
@@ -300,13 +280,12 @@ def do_install(reqs):
     extraneous = (
         set(previously_installed) -
         set(required_with_deps) -
-        set(recently_installed) -
-        set(['wheel'])   # no need to install/uninstall wheel every run
+        set(recently_installed)
     )
 
     # 4) Uninstall any extraneous packages.
     if extraneous:
-        pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
+        run((python, '-m', 'pip', 'uninstall', '--yes') + tuple(sorted(extraneous)))
 
     return 0  # posix:success!
 

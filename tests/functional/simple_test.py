@@ -28,10 +28,9 @@ def test_second_install_faster(tmpdir):
         # Should I make my own fake c-extention just to remove this dependency?
         requirements.write('''\
 simplejson
-pyyaml
+pyyaml==3.11
 pylint
 pytest
-pep8==1.0
 -r {0}/requirements.d/coverage.txt
 '''.format(TOP))
 
@@ -47,7 +46,7 @@ pep8==1.0
     # second install should be at least twice as fast
     ratio = time1 / time2
     print('%.2fx speedup' % ratio)
-    assert ratio > 3
+    assert ratio > 2.5
 
 
 def test_arguments_version(tmpdir, capfd):
