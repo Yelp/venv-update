@@ -14,8 +14,8 @@ def test_pip_install_flake8(tmpdir, capfd):
 
     venv_update_script('''\
 import json
-from venv_update import pip_install
-print(json.dumps(sorted(pip_install(('flake8',)))))
+from venv_update import pip_install, reqnames
+print(json.dumps(sorted(reqnames(pip_install(('flake8',))))))
 ''', venv='myvenv')
 
     out, err = capfd.readouterr()

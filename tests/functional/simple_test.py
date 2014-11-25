@@ -27,6 +27,7 @@ def test_second_install_faster(tmpdir):
         # An arbitrary package that takes a bit of time to install: twisted
         # Should I make my own fake c-extention just to remove this dependency?
         requirements.write('''\
+pudb==2014.1
 simplejson
 pyyaml==3.11
 pylint

@@ -135,29 +135,42 @@ def faster_pip_packagefinder():
         PackageFinder._get_page = orig_packagefinder['_get_page']
 
 
+def pip(args):
+    """Run pip, in-process."""
+    import pip as pipmodule
+
+    # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
+    pipmodule.logger.consumers = []
+
+    from sys import stdout
+    stdout.write(colorize(('pip',) + args))
+    stdout.write('\n')
+    stdout.flush()
+
+    with faster_pip_packagefinder():
+        result = pipmodule.main(list(args))
+
+    if result != 0:
+        # pip exited with failure, then we should too
+        exit(result)
+
+
+def dist_to_req(dist):
+    """Make a pip.FrozenRequirement from a pkg_resources distribution object"""
+    from pip import FrozenRequirement
+    # TODO: does it matter that we completely ignore dependency_links?
+    return FrozenRequirement.from_dist(dist, [])
+
+
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     """
-    from pip import FrozenRequirement
-    from pip._vendor.pkg_resources import working_set
     from pip.util import get_installed_distributions
 
-    dependency_links = []
-
-    for dist in working_set:
-        if dist.has_metadata('dependency_links.txt'):
-            dependency_links.extend(
-                dist.get_metadata_lines('dependency_links.txt')
-            )
-
-    installed = {}
+    installed = []
     for dist in get_installed_distributions(local_only=True):
-        req = FrozenRequirement.from_dist(
-            dist,
-            dependency_links,
-        )
-
-        installed[req.name] = req
+        req = dist_to_req(dist)
+        installed.append(req)
 
     return installed
 
@@ -165,31 +178,85 @@ def pip_get_installed():
 def pip_parse_requirements(requirement_files):
     from pip.req import parse_requirements
 
-    required = {}
+    # ordering matters =/
+    required = []
     for reqfile in requirement_files:
         for req in parse_requirements(reqfile):
-            required[req.name] = req
+            required.append(req)
     return required
+
+
+def is_absolute(requirement):
+    # TODO: unit-test
+    if not requirement:
+        # url-style requirement
+        return False
+
+    for qualifier, dummy_version in requirement.specs:
+        if qualifier == '==':
+            return True
+    return False
+
+
+def exactly_satisfied(pipreq):
+    if not is_absolute(pipreq.req):
+        return False
+
+    return pipreq.check_if_exists()
+
+
+def filter_exactly_satisfied(reqs):
+    result = []
+    for req in reqs:
+        if exactly_satisfied(req):
+            print('Requirement already up-to-date: %s' % req)
+        else:
+            result.append(req)
+    return result
+
+
+def format_req(pipreq):
+    """un-parse a pip requirement back to commandline arguments"""
+    if pipreq.editable:
+        editable = ('-e',)
+    else:
+        editable = ()
+
+    if pipreq.url:
+        spec = (pipreq.url,)
+    else:
+        spec = (str(pipreq.req),)
+
+    return editable + spec
 
 
 def pip_install(args):
     """Run pip install, and return the set of packages installed.
     """
-    from sys import stdout
-    stdout.write(colorize(('pip', 'install') + args))
-    stdout.write('\n')
-    stdout.flush()
-
     from pip.commands.install import InstallCommand
-    install = InstallCommand()
-    options, args = install.parse_args(list(args))
 
-    with faster_pip_packagefinder():
-        successfully_installed = install.run(options, args)
-    if successfully_installed is None:
-        return {}
+    orig_installcommand = vars(InstallCommand).copy()
+
+    class _nonlocal(object):
+        successfully_installed = None
+
+    def install(self, options, args):
+        """capture the list of successfully installed packages as they pass through"""
+        result = orig_installcommand['run'](self, options, args)
+        _nonlocal.successfully_installed = result
+        return result
+
+    # A poor man's dependency injection: monkeypatch :(
+    InstallCommand.run = install
+    try:
+        pip(('install',) + args)
+    finally:
+        InstallCommand.run = orig_installcommand['run']
+
+    if _nonlocal.successfully_installed is None:
+        return []
     else:
-        return dict(successfully_installed.requirements)
+        return _nonlocal.successfully_installed.requirements.values()
 
 
 def trace_requirements(requirements):
@@ -199,7 +266,7 @@ def trace_requirements(requirements):
     from pip._vendor.pkg_resources import get_provider, DistributionNotFound
 
     stack = list(requirements)
-    result = {}
+    result = []
     while stack:
         req = stack.pop()
         if req is None:
@@ -209,15 +276,14 @@ def trace_requirements(requirements):
         try:
             dist = get_provider(req)
         except (DistributionNotFound, IOError):
-            result[req.project_name] = None
             continue
 
-        result[dist.project_name] = dist
+        result.append(dist_to_req(dist))
 
         try:
             dist_reqs = dist.requires()  # should we support extras?
         except IOError:
-            # This happens sometimes with setuptools. Don't understand why, yet.
+            # This happens sometimes with setuptools. I don't understand why, yet.
             #   IOError: [Errno 2] No such file or directory: '${site-packages}/setuptools-3.6.dist-info/METADATA'
             continue
 
@@ -226,6 +292,10 @@ def trace_requirements(requirements):
                 stack.append(req)
 
     return result
+
+
+def reqnames(reqs):
+    return set(req.name for req in reqs)
 
 
 @contextmanager
@@ -245,12 +315,17 @@ def venv(venv_path, venv_args):
 
 def do_install(reqs):
     from os import environ
-    from sys import executable as python
 
     previously_installed = pip_get_installed()
     required = pip_parse_requirements(reqs)
-    requirements_as_options = tuple(
-        '--requirement={0}'.format(requirement) for requirement in reqs
+
+    unsatisfied = filter_exactly_satisfied(required)
+    requirements_as_options = sum(
+        (
+            format_req(req)
+            for req in unsatisfied
+        ),
+        ()
     )
 
     # We put the cache in the directory that pip already uses.
@@ -267,25 +342,26 @@ def do_install(reqs):
         '--find-links=file://' + pip_download_cache,
     )
 
-    # 3) Install: Use our well-populated cache (only) to do the installations.
+    # 3) Install: Use our well-populated cache to do the installations.
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
     install_opts = ('--upgrade', '--use-wheel',) + cache_opts
+
     recently_installed = pip_install(install_opts + requirements_as_options)
 
     required_with_deps = trace_requirements(
-        (req.req for req in required.values())
+        (req.req for req in required)
     )
 
     # TODO-TEST require A==1 then A==2
     extraneous = (
-        set(previously_installed) -
-        set(required_with_deps) -
-        set(recently_installed)
+        reqnames(previously_installed) -
+        reqnames(required_with_deps) -
+        reqnames(recently_installed)
     )
 
     # 4) Uninstall any extraneous packages.
     if extraneous:
-        run((python, '-m', 'pip', 'uninstall', '--yes') + tuple(sorted(extraneous)))
+        pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 
     return 0  # posix:success!
 

@@ -5,7 +5,10 @@ Should probably do before it hits users
 
 Things that I want to do, but would put me past my deadline:
 
-* coverage: 155, 209, 226, 230-232, 303-304, 384, 388
+* coverage: 115, 155, 193, 257, 274, 285-288, 426, 430
+
+* populate wheels into the cache during build
+    see also: https://github.com/pypa/pip/pull/1572
 
 * On ubuntu stock python2.7 I have to rm -rf $VIRTUAL_ENV/local
     to avoid the AssertionError('unexpected third case')
