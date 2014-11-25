@@ -4,7 +4,7 @@ from py._path.local import LocalPath as Path
 import pytest
 
 from testing import (
-    get_scenario, run, strip_coverage_warnings, venv_update, venv_update_script, TOP,
+    get_scenario, run, strip_coverage_warnings, venv_update, TOP,
 )
 
 from sys import version_info
@@ -242,29 +242,3 @@ def test_uncolored_pipe():
     out = pipe_output(read, write)
 
     assert not unprintable(out), out
-
-
-@pytest.mark.parametrize("options,expected", [
-    (('--system-site-packages',), True),
-    ((), False),
-])
-def test_venv_uses_system_site_packages(capfd, tmpdir, options, expected):
-    tmpdir.chdir()
-    Path('requirements.txt').write('')
-
-    for options, expected in (
-            (options, expected),
-            # also show that going back and forth works
-            ((), False),
-            (('--system-site-packages',), True),
-    ):
-        venv_update(*options)
-
-        out, err = capfd.readouterr()  # flush buffers
-        venv_update_script('''\
-from venv_update import venv_uses_system_site_packages
-print(venv_uses_system_site_packages())''')
-
-        out, err = capfd.readouterr()  # flush buffers
-        assert err == ''
-        assert out == '%s\n' % expected

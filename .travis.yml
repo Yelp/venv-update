@@ -15,14 +15,7 @@ matrix:
         # pylint has dropped 2.6 support -.-
         - python: "2.6"
           env: TOXENV=lint
-install:
-    - pip install -r requirements.d/travis.txt
-    # My tests need some package to be reliably installed to system-site-packages.
-    # This should maybe be a fixture of some kind,
-    # but I'd have to build python from source I think =/
-    - SYS_REAL_PREFIX=$(python -c 'import sys; print(sys.real_prefix)')
-    - echo $SYS_REAL_PREFIX
-    - sudo $SYS_REAL_PREFIX/bin/pip install virtualenv
+install: pip install -r requirements.d/travis.txt
 script: tox
 after_success:
     - find -name '.coverage*' | xargs mv -t .
@@ -32,11 +25,12 @@ after_failure:
     # attempt to show any pip.log on failure
     - find -name pip.log | xargs -r tail -n99999
 
-sudo: true
+
+# public caches only supported under sudo:false currently
+#   closest thing to documentation:
+#   http://blog.travis-ci.com/2014-10-07-free-builds-for-students-github-student-developer-pack
+sudo: false
 cache:
-    # public caches only supported under sudo:false currently
-    #   closest thing to documentation:
-    #   http://blog.travis-ci.com/2014-10-07-free-builds-for-students-github-student-developer-pack
     directories:
         - $HOME/.pip
         - $HOME/.pre-commit

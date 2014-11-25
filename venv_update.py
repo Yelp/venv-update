@@ -255,12 +255,6 @@ def venv(venv_path, venv_args):
     )
 
 
-def venv_uses_system_site_packages():
-    from glob import glob
-    from sys import prefix
-    return not glob(prefix + '/lib/python*/no-global-site-packages.txt')
-
-
 def do_install(reqs):
     from os import environ
 
@@ -296,13 +290,6 @@ def do_install(reqs):
 
     # 3) Install: Use our well-populated cache (only) to do the installations.
     install_opts += ('--upgrade', '--no-index',)
-    if venv_uses_system_site_packages():
-        # In the worst case, a --system-site-packages venv will be missing packages because it was built in an
-        # environment which satisfied requirements at the system level, then be relocated to a system that doesn't have
-        # the requirement, breaking it.  This has bitten us before. --ignore-installed avoids the issue.
-        print('Detected --system-site-packages; using --ignore-installed. This makes things slower.')
-        install_opts += ('--ignore-installed',)
-
     recently_installed = pip_install(install_opts + requirements_as_options)
 
     required_with_deps = trace_requirements(
