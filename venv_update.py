@@ -186,35 +186,6 @@ def pip_parse_requirements(requirement_files):
     return required
 
 
-def is_absolute(requirement):
-    # TODO: unit-test
-    if not requirement:
-        # url-style requirement
-        return False
-
-    for qualifier, dummy_version in requirement.specs:
-        if qualifier == '==':
-            return True
-    return False
-
-
-def exactly_satisfied(pipreq):
-    if not is_absolute(pipreq.req):
-        return False
-
-    return pipreq.check_if_exists() and pipreq.satisfied_by
-
-
-def filter_exactly_satisfied(reqs):
-    result = []
-    for req in reqs:
-        if exactly_satisfied(req):
-            print('Requirement already up-to-date: %s' % req)
-        else:
-            result.append(req)
-    return result
-
-
 def format_req(pipreq):
     """un-parse a pip requirement back to commandline arguments"""
     if pipreq.editable:
@@ -264,7 +235,17 @@ def trace_requirements(requirements):
     return the set of required packages, given their transitive requirements.
     """
     from pip.req import InstallRequirement
-    from pip._vendor.pkg_resources import get_provider, DistributionNotFound, VersionConflict
+    from pip._vendor import pkg_resources
+
+    class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
+        def add_entry(self, entry):
+            """Same as the original .add_entry, but sets only=False, so that egg-links are honored."""
+            self.entry_keys.setdefault(entry, [])
+            self.entries.append(entry)
+            for dist in pkg_resources.find_distributions(entry, False):
+                self.add(dist, entry, False)
+
+    working_set = WorkingSetPlusEditableInstalls()
 
     stack = list(requirements)
     result = []
@@ -275,26 +256,17 @@ def trace_requirements(requirements):
             continue
 
         try:
-            dist = get_provider(req.req)
-        except (DistributionNotFound, IOError):
-            continue
-        except VersionConflict as conflict:
-            # provide essential debug information in case of conflict:
-            print("Version Conflict: %s %s" % (conflict, req))
+            dist = working_set.find(req.req)
+        except pkg_resources.VersionConflict as conflict:
+            # TODO: This should really be an error, but throw a warning for now, while we integrate.
+            print("Warning: version conflict: %s %s" % (conflict, req))
             continue
 
         result.append(dist_to_req(dist))
 
-        try:
-            dist_reqs = dist.requires()  # should we support extras?
-        except IOError:
-            # This happens sometimes with setuptools. I don't understand why, yet.
-            #   IOError: [Errno 2] No such file or directory: '${site-packages}/setuptools-3.6.dist-info/METADATA'
-            continue
-
-        for dist_req in dist_reqs:
-            if dist_req.project_name not in result:
-                stack.append(InstallRequirement(dist_req, str(req)))
+        for dist_req in dist.requires():  # should we support extras?
+            # there really shouldn't be any circular dependencies...
+            stack.append(InstallRequirement(dist_req, str(req)))
 
     return result
 
@@ -324,13 +296,8 @@ def do_install(reqs):
     previously_installed = pip_get_installed()
     required = pip_parse_requirements(reqs)
 
-    unsatisfied = filter_exactly_satisfied(required)
-    requirements_as_options = sum(
-        (
-            format_req(req)
-            for req in unsatisfied
-        ),
-        ()
+    requirements_as_options = tuple(
+        '--requirement={0}'.format(requirement) for requirement in reqs
     )
 
     # We put the cache in the directory that pip already uses.
