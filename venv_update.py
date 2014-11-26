@@ -78,7 +78,7 @@ def colorize(cmd):
     from os import isatty
 
     if isatty(1):
-        template = '\033[01;36m>\033[m \033[01;33m{0}\033[m'
+        template = '\033[01;36m>\033[m \033[01;32m{0}\033[m'
     else:
         template = '> {0}'
 
@@ -91,20 +91,40 @@ def run(cmd):
     check_call(cmd)
 
 
+def req_is_absolute(requirement):
+    # TODO: unit-test
+    if not requirement:
+        # url-style requirement
+        return False
+
+    for qualifier, dummy_version in requirement.specs:
+        if qualifier == '==':
+            return True
+    return False
+
+
 @contextmanager
 def faster_pip_packagefinder():
     """Provide a short-circuited search when the requirement is pinned and appears on disk.
 
     Suggested upstream at: https://github.com/pypa/pip/pull/2114
     """
-    from pip.index import PackageFinder, DistributionNotFound, HTMLPage
+    from pip.index import PackageFinder, DistributionNotFound, HTMLPage, BestVersionAlreadyInstalled
 
     orig_packagefinder = vars(PackageFinder).copy()
 
     def find_requirement(self, req, upgrade):
-        if any(op == '==' for op, ver in req.req.specs):
-            # if the version is pinned-down by a ==, do an optimistic search
-            # for a satisfactory package on the local filesystem.
+        if req_is_absolute(req.req):
+            # if the version is pinned-down by a ==
+            # first try to use any installed packge that satisfies the req
+            if req.satisfied_by:
+                if upgrade:
+                    # the superclass method only raises during upgrade -- shrug
+                    raise BestVersionAlreadyInstalled
+                else:
+                    return None
+
+            # then try an optimistic search on the local filesystem.
             try:
                 self.network_allowed = False
                 result = orig_packagefinder['find_requirement'](self, req, upgrade)
@@ -234,6 +254,7 @@ def trace_requirements(requirements):
     """given an iterable of pip InstallRequirements,
     return the set of required packages, given their transitive requirements.
     """
+    from pip import logger
     from pip.req import InstallRequirement
     from pip._vendor import pkg_resources
 
@@ -259,8 +280,16 @@ def trace_requirements(requirements):
             dist = working_set.find(req.req)
         except pkg_resources.VersionConflict as conflict:
             # TODO: This should really be an error, but throw a warning for now, while we integrate.
-            print("Warning: version conflict: %s %s" % (conflict, req))
-            continue
+            # TODO: test case, eg: install pylint, install old astroid, update
+            # astroid should still be installed after
+            logger.warn("Warning: version conflict: %s %s" % (conflict, req))
+            dist = conflict.args[0]
+
+        if dist is None:
+            # TODO: test case, eg: install pylint, uninstall astroid, update
+            # Unmet dependency: astroid>=1.3.2 (from pylint (from -r faster.txt (line 4)))
+            logger.error('Unmet dependency: %s' % req)
+            exit(1)
 
         result.append(dist_to_req(dist))
 
