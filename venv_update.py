@@ -202,7 +202,7 @@ def exactly_satisfied(pipreq):
     if not is_absolute(pipreq.req):
         return False
 
-    return pipreq.check_if_exists()
+    return pipreq.check_if_exists() and pipreq.satisfied_by
 
 
 def filter_exactly_satisfied(reqs):
@@ -260,10 +260,11 @@ def pip_install(args):
 
 
 def trace_requirements(requirements):
-    """given an iterable of pkg_resources requirements,
+    """given an iterable of pip InstallRequirements,
     return the set of required packages, given their transitive requirements.
     """
-    from pip._vendor.pkg_resources import get_provider, DistributionNotFound
+    from pip.req import InstallRequirement
+    from pip._vendor.pkg_resources import get_provider, DistributionNotFound, VersionConflict
 
     stack = list(requirements)
     result = []
@@ -274,8 +275,12 @@ def trace_requirements(requirements):
             continue
 
         try:
-            dist = get_provider(req)
+            dist = get_provider(req.req)
         except (DistributionNotFound, IOError):
+            continue
+        except VersionConflict as conflict:
+            # provide essential debug information in case of conflict:
+            print("Version Conflict: %s %s" % (conflict, req))
             continue
 
         result.append(dist_to_req(dist))
@@ -287,9 +292,9 @@ def trace_requirements(requirements):
             #   IOError: [Errno 2] No such file or directory: '${site-packages}/setuptools-3.6.dist-info/METADATA'
             continue
 
-        for req in dist_reqs:
-            if req.project_name not in result:
-                stack.append(req)
+        for dist_req in dist_reqs:
+            if dist_req.project_name not in result:
+                stack.append(InstallRequirement(dist_req, str(req)))
 
     return result
 
@@ -348,9 +353,7 @@ def do_install(reqs):
 
     recently_installed = pip_install(install_opts + requirements_as_options)
 
-    required_with_deps = trace_requirements(
-        (req.req for req in required)
-    )
+    required_with_deps = trace_requirements(required)
 
     # TODO-TEST require A==1 then A==2
     extraneous = (
