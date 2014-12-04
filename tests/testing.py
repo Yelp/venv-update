@@ -34,8 +34,7 @@ def venv_update(*args):
     )
 
 
-def venv_update_script(pyscript, venv='virtualenv_run'):
-    """Run a python script that imports venv_update"""
+def venv_update_symlink_pwd():
     # I wish I didn't need this =/
     # surely there's a better way -.-
     # NOTE: `pip install TOP` causes an infinite copyfiles loop, under tox
@@ -47,6 +46,13 @@ def venv_update_script(pyscript, venv='virtualenv_run'):
     if local_vu.exists():
         local_vu.remove()
     local_vu.mksymlinkto(venv_update_path)
+
+
+def venv_update_script(pyscript, venv='virtualenv_run'):
+    """Run a python script that imports venv_update"""
+
+    # symlink so that we get coverage, where possible
+    venv_update_symlink_pwd()
 
     # write it to a file so we get more-reasonable stack traces
     testscript = Path('testscript.py')

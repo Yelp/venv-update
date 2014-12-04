@@ -4,7 +4,12 @@ from py._path.local import LocalPath as Path
 import pytest
 
 from testing import (
-    get_scenario, run, strip_coverage_warnings, venv_update, TOP,
+    get_scenario,
+    run,
+    strip_coverage_warnings,
+    venv_update,
+    venv_update_symlink_pwd,
+    TOP,
 )
 
 from sys import version_info
@@ -118,7 +123,8 @@ def test_update_while_active(tmpdir, capfd):
         # An arbitrary small package: mccabe
         requirements.write('mccabe')
 
-    run('sh', '-c', '. virtualenv_run/bin/activate && venv-update')
+    venv_update_symlink_pwd()
+    run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
     assert 'mccabe' in pip_freeze(capfd)
 
 
