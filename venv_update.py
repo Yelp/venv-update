@@ -103,25 +103,38 @@ def req_is_absolute(requirement):
     return False
 
 
+@contextmanager
+def patch(obj, attr, val):
+    """Temporarily set an attribute to a particular value"""
+    orig = getattr(obj, attr)
+    setattr(obj, attr, val)
+    try:
+        yield
+    finally:
+        setattr(obj, attr, orig)
+
+
 def faster_find_requirement(self, req, upgrade):
     """see faster_pip_packagefinder"""
-    from pip.index import DistributionNotFound, BestVersionAlreadyInstalled
+    from pip.index import DistributionNotFound, BestVersionAlreadyInstalled, logger
     if req_is_absolute(req.req):
         # if the version is pinned-down by a ==
         # first try to use any installed packge that satisfies the req
         if req.satisfied_by:
             if upgrade:
-                # the superclass method only raises during upgrade -- shrug
+                # as a matter of api, find_requirement() only raises during upgrade -- shrug
                 raise BestVersionAlreadyInstalled
             else:
                 return None
 
         # then try an optimistic search on the local filesystem.
-        try:
-            self.network_allowed = False
-            result = self.unpatched['find_requirement'](self, req, upgrade)
-        except DistributionNotFound:
-            result = None
+        # while silencing spurious "could not find" messages TODO-TEST
+        with patch(logger, 'consumers', []):
+            try:
+                self.network_allowed = False
+                result = self.unpatched['find_requirement'](self, req, upgrade)
+            except DistributionNotFound:
+                result = None
 
         if result is not None:
             return result
@@ -256,12 +269,8 @@ def pip_install(args):
         return _nonlocal.successfully_installed.requirements.values()
 
 
-def trace_requirements(requirements):
-    """given an iterable of pip InstallRequirements,
-    return the set of required packages, given their transitive requirements.
-    """
-    from pip import logger
-    from pip.req import InstallRequirement
+def fresh_working_set():
+    """return a pkg_resources "working set", representing the *currently* installed pacakges"""
     from pip._vendor import pkg_resources
 
     class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
@@ -272,12 +281,26 @@ def trace_requirements(requirements):
             for dist in pkg_resources.find_distributions(entry, False):
                 self.add(dist, entry, False)
 
-    working_set = WorkingSetPlusEditableInstalls()
+    return WorkingSetPlusEditableInstalls()
 
-    stack = list(requirements)
+
+def trace_requirements(requirements):
+    """given an iterable of pip InstallRequirements,
+    return the set of required packages, given their transitive requirements.
+    """
+    from collections import deque
+    from pip import logger
+    from pip.req import InstallRequirement
+    from pip._vendor import pkg_resources
+
+    working_set = fresh_working_set()
+
+    # breadth-first traversal:
+    queue = deque(requirements)
     result = []
-    while stack:
-        req = stack.pop()
+    seen_warnings = set()
+    while queue:
+        req = queue.popleft()
         if req is None:
             # a file:/// requirement
             continue
@@ -287,13 +310,15 @@ def trace_requirements(requirements):
         except pkg_resources.VersionConflict as conflict:
             # TODO: This should really be an error, but throw a warning for now, while we integrate.
             # TODO: test case, eg: install pylint, install old astroid, update
-            # astroid should still be installed after
-            logger.warn("Warning: version conflict: %s %s" % (conflict, req))
+            #       astroid should still be installed after
             dist = conflict.args[0]
+            if req.name not in seen_warnings:
+                logger.warn("Warning: version conflict: %s <-> %s" % (dist, req))
+                seen_warnings.add(req.name)
 
         if dist is None:
             # TODO: test case, eg: install pylint, uninstall astroid, update
-            # Unmet dependency: astroid>=1.3.2 (from pylint (from -r faster.txt (line 4)))
+            #       -> Unmet dependency: astroid>=1.3.2 (from pylint (from -r faster.txt (line 4)))
             logger.error('Unmet dependency: %s' % req)
             exit(1)
 
@@ -301,7 +326,7 @@ def trace_requirements(requirements):
 
         for dist_req in dist.requires():  # should we support extras?
             # there really shouldn't be any circular dependencies...
-            stack.append(InstallRequirement(dist_req, str(req)))
+            queue.append(InstallRequirement(dist_req, str(req)))
 
     return result
 
