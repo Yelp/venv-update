@@ -311,7 +311,8 @@ def reqnames(reqs):
 
 
 def path_is_within(path, within):
-    from os.path import relpath
+    from os.path import relpath, join
+    path = join('.', path)  # eliminate empty-string edge case
     return not relpath(path, within).startswith('..')
 
 

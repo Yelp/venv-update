@@ -8,7 +8,7 @@ def test_pip_install_flake8(tmpdir, capfd):
     tmpdir.chdir()
 
     run('virtualenv', 'myvenv')
-    run('myvenv/bin/pip', 'install', 'flake8')
+    run('myvenv/bin/pip', 'install', 'pep8')
 
     out, err = capfd.readouterr()  # flush buffers
 
