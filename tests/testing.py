@@ -37,7 +37,7 @@ def venv_update(*args):
 def venv_update_symlink_pwd():
     # I wish I didn't need this =/
     # surely there's a better way -.-
-    # NOTE: `pip install TOP` causes an infinite copyfiles loop, under tox
+    # NOTE: `pip install TOP` causes an infinite copyfiles loop, under tox >.<
     from venv_update import __file__ as venv_update_path, dotpy
 
     # symlink so that we get coverage, where possible

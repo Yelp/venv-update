@@ -310,9 +310,22 @@ def reqnames(reqs):
     return set(req.name for req in reqs)
 
 
+def path_is_within(path, within):
+    from os.path import relpath
+    return not relpath(path, within).startswith('..')
+
+
 @contextmanager
 def venv(venv_path, venv_args):
     """Ensure we have a virtualenv."""
+    from sys import executable
+    if path_is_within(executable, venv_path):
+        # to avoid the "text file busy" issue, we must move our executable away before virtualenv runs
+        # we also copy it back, for consistency's sake
+        tmpexe = venv_path + '/bin/.python.tmp'
+        run(('mv', executable, tmpexe))
+        run(('cp', tmpexe, executable))
+
     virtualenv = ('virtualenv', venv_path)
     run(virtualenv + venv_args)
 
@@ -407,7 +420,7 @@ def venv_update(stage, venv_path, reqs, venv_args):
     from os.path import join, abspath
     venv_python = abspath(join(venv_path, 'bin', 'python'))
     if stage == 1:
-        # we have a random python interpreter active, (possibly) outside the virtualenv we want.
+        # we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
         # make a fresh venv at the right spot, and use it to perform stage 2
         with venv(venv_path, venv_args):
             run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs + venv_args)
