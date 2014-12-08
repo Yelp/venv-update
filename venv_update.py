@@ -225,21 +225,6 @@ def pip_parse_requirements(requirement_files):
     return required
 
 
-def format_req(pipreq):
-    """un-parse a pip requirement back to commandline arguments"""
-    if pipreq.editable:
-        editable = ('-e',)
-    else:
-        editable = ()
-
-    if pipreq.url:
-        spec = (pipreq.url,)
-    else:
-        spec = (str(pipreq.req),)
-
-    return editable + spec
-
-
 def pip_install(args):
     """Run pip install, and return the set of packages installed.
     """
@@ -388,7 +373,7 @@ def do_install(reqs):
         '--find-links=file://' + pip_download_cache,
     )
 
-    # 3) Install: Use our well-populated cache to do the installations.
+    # 1) Install: Use our well-populated cache to do the installations.
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
     install_opts = ('--upgrade', '--use-wheel',) + cache_opts
 
@@ -403,7 +388,7 @@ def do_install(reqs):
         reqnames(recently_installed)
     )
 
-    # 4) Uninstall any extraneous packages.
+    # 2) Uninstall any extraneous packages.
     if extraneous:
         pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 

@@ -52,3 +52,7 @@ Things that I want to do, but would put me past my deadline:
 * pypy support. Some icky subprocess bugs makes it impossible to make not-flakey:
     * https://bitbucket.org/pypy/pypy/issue/1910/fdopen-of-pty-doesnt-match-cpython
     * https://bitbucket.org/pypy/pypy/issue/1912/subprocess-deadlock-in-pypy3
+
+* Go through all my forks/branches and see how close i can get back to master
+    some of this stuff has been merged
+    wait till March 2014

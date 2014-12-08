@@ -22,8 +22,19 @@ def test_trivial(tmpdir):
     venv_update()
 
 
-@pytest.mark.flaky(reruns=10)
-def test_second_install_faster(tmpdir):
+def enable_coverage(tmpdir):
+    venv = tmpdir.join('virtualenv_run')
+    if not venv.isdir():
+        run('virtualenv', venv.strpath)
+    run(
+        venv.join('bin/python').strpath,
+        '-m', 'pip.__main__',
+        'install',
+        '-r', TOP.join('requirements.d/coverage.txt').strpath,
+    )
+
+
+def install_twice(tmpdir, between):
     """install twice, and the second one should be faster, due to whl caching"""
     tmpdir.chdir()
     get_scenario('trivial')
@@ -33,26 +44,52 @@ def test_second_install_faster(tmpdir):
         # Should I make my own fake c-extention just to remove this dependency?
         requirements.write('''\
 pudb==2014.1
-simplejson
+urwid==1.3.0
+simplejson==3.6.5
 pyyaml==3.11
-pylint
+pylint==1.4.0
 pytest
--r {0}/requirements.d/coverage.txt
-'''.format(TOP))
+''')
 
     from time import time
+    enable_coverage(tmpdir)
     start = time()
     venv_update()
     time1 = time() - start
 
+    between()
+
+    enable_coverage(tmpdir)
     start = time()
+    # second install should also need no network access
+    # these are arbitrary closed localhost ports
     venv_update()
     time2 = time() - start
 
     # second install should be at least twice as fast
     ratio = time1 / time2
     print('%.2fx speedup' % ratio)
-    assert ratio > 2.5
+    return ratio
+
+
+@pytest.mark.flaky(reruns=10)
+def test_noop_install_faster(tmpdir):
+    def do_nothing():
+        pass
+
+    assert install_twice(tmpdir, between=do_nothing) >= 5
+
+
+@pytest.mark.flaky(reruns=10)
+def test_cached_clean_install_faster(tmpdir):
+    def clean():
+        venv = tmpdir.join('virtualenv_run')
+        assert venv.isdir()
+        venv.remove()
+        assert not venv.exists()
+        enable_coverage(tmpdir)
+
+    assert install_twice(tmpdir, between=clean) >= 1.2
 
 
 def test_arguments_version(tmpdir, capfd):
