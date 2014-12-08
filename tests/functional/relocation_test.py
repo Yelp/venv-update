@@ -27,7 +27,7 @@ def test_is_relocatable(tmpdir):
 def test_is_relocatable_different_python_version(tmpdir):
     tmpdir.chdir()
     with io.open('requirements.txt', 'w') as reqs:
-        reqs.write('argparse\ndoge==3.5.0')
+        reqs.write('doge==3.5.0')
 
     python_arg = '--python=python' + ('2.7' if not PY27 else '2.6')
 

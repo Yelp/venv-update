@@ -26,6 +26,13 @@ from __future__ import unicode_literals
 #   stdlib>=2.6 and virtualenv>1.11
 from contextlib import contextmanager
 
+# TODO: provide a way for projects to pin their own versions of wheel, argparse
+#       probably ./requirements.d/venv-update.txt
+BOOTSTRAP_VERSIONS = (
+    'argparse==1.2.1',
+    'wheel==0.24.0',
+)
+
 
 def parseargs(args):
     # TODO: unit test
@@ -373,11 +380,24 @@ def do_install(reqs):
         '--find-links=file://' + pip_download_cache,
     )
 
-    # 1) Install: Use our well-populated cache to do the installations.
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
     install_opts = ('--upgrade', '--use-wheel',) + cache_opts
+    recently_installed = []
 
-    recently_installed = pip_install(install_opts + requirements_as_options)
+    # 1) Bootstrap the install system; setuptools and pip are already installed, just need wheel
+    recently_installed += pip_install(install_opts + BOOTSTRAP_VERSIONS)
+
+    # 2) Caching: Make sure everything we want is downloaded, cached, and has a wheel.
+    pip(
+        ('wheel', '--wheel-dir=' + pip_download_cache) +
+        BOOTSTRAP_VERSIONS +
+        cache_opts +
+        requirements_as_options
+    )
+
+    # 3) Install: Use our well-populated cache, to do the installations.
+    install_opts += ('--no-index',)  # only use the cache
+    recently_installed += pip_install(install_opts + requirements_as_options)
 
     required_with_deps = trace_requirements(required)
 

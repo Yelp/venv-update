@@ -25,12 +25,13 @@ def run(*cmd, **env):
     check_call(cmd, env=env)
 
 
-def venv_update(*args):
+def venv_update(*args, **env):
     # we get coverage for free via the (patched) pytest-cov plugin
     run(
         'venv-update',
         *args,
-        HOME=str(Path('.').realpath())
+        HOME=str(Path('.').realpath()),
+        **env
     )
 
 

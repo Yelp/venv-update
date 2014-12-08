@@ -63,7 +63,11 @@ pytest
     start = time()
     # second install should also need no network access
     # these are arbitrary closed localhost ports
-    venv_update()
+    venv_update(
+        http_proxy='http://127.10.20.30:40',
+        https_proxy='http://127.11.22.33:44',
+        ftp_proxy='http://127.4.3.2:1',
+    )
     time2 = time() - start
 
     # second install should be at least twice as fast
@@ -77,7 +81,7 @@ def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
-    assert install_twice(tmpdir, between=do_nothing) >= 5
+    assert install_twice(tmpdir, between=do_nothing) >= 8
 
 
 @pytest.mark.flaky(reruns=10)
