@@ -55,22 +55,6 @@ pep8''')
         (None, 'file:///my/random/project2'),
     ]
 
-    # cheat: also unit-test format_req:
-    assert [
-        venv_update.format_req(req)
-        for req in parsed
-    ] == [
-        ('file://' + tmpdir.strpath,),
-        ('pep8',),
-        ('mccabe',),
-        ('pep8==1.0',),
-        ('-e', 'hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=aweirdname'),
-        ('-e', 'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core'),
-        ('hg+https://bitbucket.org/logilab/pylint@58c66aa083777059a2e6b46f6a0545a2f4977097',),
-        ('file:///my/random/project',),
-        ('-e', 'file:///my/random/project2'),
-    ]
-
 
 def test_pip_get_installed():
     installed = venv_update.pip_get_installed()
