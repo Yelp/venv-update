@@ -1,11 +1,5 @@
 Should probably do before it hits users
 
-* fails the update-while-python-running use case with "text file busy"
-    implies my acceptance test for this is wrong >.<
-
-* clean-rebuild from cache still hits pypi for each package without wheel step
-    let's restore the wheel step
-
 * ctrl-c during stage2 does the 'somthing went wrong!' flow twice
 
 * currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
@@ -24,7 +18,8 @@ Things that I want to do, but would put me past my deadline:
 
 * coverage: 105, 124, 135, 184, 242, 281, 285-292, 297-298, 326-328, 461, 465
 
-* populate wheels into the cache during build
+* populate wheels into the cache during build. This would shave 5s off all scenarios.
+    see: https://github.com/pypa/pip/issues/2140
     see also: https://github.com/pypa/pip/pull/1572
 
 * On ubuntu stock python2.7 I have to rm -rf $VIRTUAL_ENV/local
@@ -41,9 +36,8 @@ Things that I want to do, but would put me past my deadline:
 
 
 * Make doubly sure these test scenarios are covered:
-   * entirely clean -- <venv_path> does not exist
-   * noop -- Requirements haven't changed since last run
-   * each of these should behave similarly whether caused by the user or the requirements file:
+   * each of these should behave similarly whether caused by the user
+     (mucking between venv-updates) or the requirements file:
        * upgrade
        * downgrade
        * add
@@ -58,6 +52,3 @@ Things that I want to do, but would put me past my deadline:
     wait till March 2014
 
 * pip micro-bug: pip wheel unzips found wheels even with --no-deps
-
-* combine the wheel and install steps. This would shave 5s off all scenarios.
-    see: https://github.com/pypa/pip/issues/2140 
