@@ -91,7 +91,6 @@ def test_cached_clean_install_faster(tmpdir):
         assert venv.isdir()
         venv.remove()
         assert not venv.exists()
-        enable_coverage(tmpdir)
 
     # I get ~4x locally, but only 2.5x on travis
     assert install_twice(tmpdir, between=clean) >= 2.5
