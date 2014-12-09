@@ -2,9 +2,10 @@
 # NOTE: versions must be specified in post-order or else we get the wrong versions.
 
 #coverage  ## pending pull request: https://bitbucket.org/ned/coveragepy/pull-request/42
--e hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=coverage
+hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=coverage
 
 # cov-core ## pending pull requests:
 #       * https://github.com/schlamar/cov-core/pull/6
 #       * https://github.com/schlamar/cov-core/pull/7
--e git+git://github.com/bukzor/cov-core.git@master#egg=cov-core
+# -e doesn't work here because of setuptools data_files >.<
+git+git://github.com/bukzor/cov-core.git@master#egg=cov-core

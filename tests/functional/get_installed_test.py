@@ -9,7 +9,7 @@ def get_installed(capfd):
 
     venv_update_script('''\
 import venv_update as v
-for p in sorted(v.pip_get_installed()):
+for p in sorted(v.reqnames(v.pip_get_installed())):
     print(p)''', venv='myvenv')
 
     out, err = capfd.readouterr()
