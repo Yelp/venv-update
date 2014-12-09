@@ -81,7 +81,7 @@ def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
-    assert install_twice(tmpdir, between=do_nothing) >= 8
+    assert install_twice(tmpdir, between=do_nothing) >= 6
 
 
 @pytest.mark.flaky(reruns=10)
@@ -93,8 +93,8 @@ def test_cached_clean_install_faster(tmpdir):
         assert not venv.exists()
         enable_coverage(tmpdir)
 
-    # the clean reinstall case isn't actually faster :(
-    assert install_twice(tmpdir, between=clean) >= 1.0
+    # I get ~4x locally, but only 2.5x on travis
+    assert install_twice(tmpdir, between=clean) >= 2.5
 
 
 def test_arguments_version(tmpdir, capfd):

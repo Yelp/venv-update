@@ -123,7 +123,7 @@ def patch(obj, attr, val):
 
 def faster_find_requirement(self, req, upgrade):
     """see faster_pip_packagefinder"""
-    from pip.index import DistributionNotFound, BestVersionAlreadyInstalled, logger
+    from pip.index import BestVersionAlreadyInstalled
     if req_is_absolute(req.req):
         # if the version is pinned-down by a ==
         # first try to use any installed packge that satisfies the req
@@ -134,17 +134,23 @@ def faster_find_requirement(self, req, upgrade):
             else:
                 return None
 
-        # then try an optimistic search on the local filesystem.
-        # while silencing spurious "could not find" messages TODO-TEST
-        with patch(logger, 'consumers', []):
-            try:
-                self.network_allowed = False
-                result = self.unpatched['find_requirement'](self, req, upgrade)
-            except DistributionNotFound:
-                result = None
-
-        if result is not None:
-            return result
+        # then try an optimistic search for a .whl file:
+        from os.path import join
+        from glob import glob
+        from pip.wheel import Wheel
+        from pip.index import Link
+        for findlink in self.find_links:
+            if findlink.startswith('file://'):
+                findlink = findlink[7:]
+            else:
+                continue
+            # this matches the name-munging done in pip.wheel:
+            reqname = req.name.replace('-', '_')
+            for link in glob(join(findlink, reqname + '-*.whl')):
+                link = Link('file://' + link)
+                wheel = Wheel(link.filename)
+                if wheel.version in req.req:
+                    return link
 
     # otherwise, do the full network search
     self.network_allowed = True
@@ -369,7 +375,10 @@ def do_install(reqs):
     # We put the cache in the directory that pip already uses.
     # This has better security characteristics than a machine-wide cache, and is a
     #   pattern people can use for open-source projects
-    pip_download_cache = environ['HOME'] + '/.pip/cache'
+    pipdir = environ['HOME'] + '/.pip'
+    # We could combine these caches to one directory, but pip would search everything twice, going slower.
+    pip_download_cache = pipdir + '/cache'
+    pip_wheels = pipdir + '/wheelhouse'
 
     environ.update(
         PIP_DOWNLOAD_CACHE=pip_download_cache,
@@ -377,7 +386,7 @@ def do_install(reqs):
 
     cache_opts = (
         '--download-cache=' + pip_download_cache,
-        '--find-links=file://' + pip_download_cache,
+        '--find-links=file://' + pip_wheels,
     )
 
     # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
@@ -389,7 +398,7 @@ def do_install(reqs):
 
     # 2) Caching: Make sure everything we want is downloaded, cached, and has a wheel.
     pip(
-        ('wheel', '--wheel-dir=' + pip_download_cache) +
+        ('wheel', '--wheel-dir=' + pip_wheels) +
         BOOTSTRAP_VERSIONS +
         cache_opts +
         requirements_as_options

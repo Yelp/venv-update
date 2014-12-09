@@ -56,3 +56,8 @@ Things that I want to do, but would put me past my deadline:
 * Go through all my forks/branches and see how close i can get back to master
     some of this stuff has been merged
     wait till March 2014
+
+* pip micro-bug: pip wheel unzips found wheels even with --no-deps
+
+* combine the wheel and install steps. This would shave 5s off all scenarios.
+    see: https://github.com/pypa/pip/issues/2140 
