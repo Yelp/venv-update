@@ -22,7 +22,7 @@ Should probably do before it hits users
 ------------------------------------------------------------
 Things that I want to do, but would put me past my deadline:
 
-* coverage: 115, 155, 193, 257, 274, 285-288, 426, 430
+* coverage: 105, 124, 135, 184, 242, 281, 285-292, 297-298, 326-328, 461, 465
 
 * populate wheels into the cache during build
     see also: https://github.com/pypa/pip/pull/1572

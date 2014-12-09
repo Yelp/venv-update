@@ -110,17 +110,6 @@ def req_is_absolute(requirement):
     return False
 
 
-@contextmanager
-def patch(obj, attr, val):
-    """Temporarily set an attribute to a particular value"""
-    orig = getattr(obj, attr)
-    setattr(obj, attr, val)
-    try:
-        yield
-    finally:
-        setattr(obj, attr, orig)
-
-
 def faster_find_requirement(self, req, upgrade):
     """see faster_pip_packagefinder"""
     from pip.index import BestVersionAlreadyInstalled
@@ -153,17 +142,7 @@ def faster_find_requirement(self, req, upgrade):
                     return link
 
     # otherwise, do the full network search
-    self.network_allowed = True
     return self.unpatched['find_requirement'](self, req, upgrade)
-
-
-def faster__get_page(self, link, req):
-    """see faster_pip_packagefinder"""
-    from pip.index import HTMLPage
-    if self.network_allowed or link.url.startswith('file:'):
-        return self.unpatched['_get_page'](self, link, req)
-    else:
-        return HTMLPage('', 'fake://' + link.url)
 
 
 @contextmanager
@@ -178,11 +157,9 @@ def faster_pip_packagefinder():
 
     PackageFinder.unpatched = vars(PackageFinder).copy()
     PackageFinder.find_requirement = faster_find_requirement
-    PackageFinder._get_page = faster__get_page
     try:
         yield
     finally:
-        PackageFinder._get_page = PackageFinder.unpatched['_get_page']
         PackageFinder.find_requirement = PackageFinder.unpatched['find_requirement']
         del PackageFinder.unpatched
 
