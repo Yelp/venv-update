@@ -40,8 +40,8 @@ def install_twice(tmpdir, between):
     get_scenario('trivial')
 
     with open('requirements.txt', 'w') as requirements:
-        # An arbitrary package that takes a bit of time to install: twisted
-        # Should I make my own fake c-extention just to remove this dependency?
+        # Arbitrary packages that takes a bit of time to install:
+        # Should I make a fixture c-extention to remove these dependencies?
         requirements.write('''\
 pudb==2014.1
 urwid==1.3.0
