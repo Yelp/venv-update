@@ -98,7 +98,6 @@ def run(cmd):
 
 
 def req_is_absolute(requirement):
-    # TODO: unit-test
     if not requirement:
         # url-style requirement
         return False

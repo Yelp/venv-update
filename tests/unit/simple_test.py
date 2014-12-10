@@ -204,3 +204,34 @@ def test_shellescape_relpath_longer(tmpdir):
     assert path.exists()
     args = (path.strpath,)
     assert venv_update.shellescape(args) == path.strpath
+
+
+@pytest.mark.parametrize('req,expected', [
+    (
+        'foo',
+        False,
+    ), (
+        'foo==1',
+        True,
+    ), (
+        'bar<3,==2,>1',
+        True,
+    ), (
+        'quux<3,!=2,>1',
+        False,
+    ), (
+        'wat==2,!=2',
+        True,
+    ), (
+        'wat-more==2,==3',
+        True,
+    )
+])
+def test_req_is_absolute(req, expected):
+    from pkg_resources import Requirement
+    req = Requirement.parse(req)
+    assert venv_update.req_is_absolute(req) is expected
+
+
+def test_req_is_absolute_null():
+    assert venv_update.req_is_absolute(None) is False
