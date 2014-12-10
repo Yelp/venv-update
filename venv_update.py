@@ -35,11 +35,11 @@ BOOTSTRAP_VERSIONS = (
 
 
 def parseargs(args):
-    # TODO: unit test
     if set(args) & set(('-h', '--help')):
         print(__doc__, end='')
         exit(0)
 
+    args = list(args)
     stage = 1
     while '--stage2' in args:
         stage = 2

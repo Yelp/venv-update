@@ -96,3 +96,60 @@ def test_dotpy(filename, expected):
 ])
 def test_path_is_within(path, within, expected):
     assert venv_update.path_is_within(path, within) == expected
+
+
+@pytest.mark.parametrize('args,expected', [
+    (
+        (),
+        (1, 'virtualenv_run', ('requirements.txt',), ()),
+    ),
+    (
+        ('a',),
+        (1, 'a', ('requirements.txt',), ())
+    ),
+    (
+        ('a', 'b'),
+        (1, 'a', ('b',), ())
+    ),
+    (
+        ('a', 'b', 'c'),
+        (1, 'a', ('b', 'c'), ())
+    ),
+    (
+        ('a', 'b', 'c', 'd'),
+        (1, 'a', ('b', 'c', 'd'), ())
+    ),
+    (
+        ('a', '--opt', 'optval', 'b', 'c', 'd'),
+        (1, 'a', ('optval', 'b', 'c', 'd'), ('--opt',))
+    ),
+    (
+        ('a', '--opt', 'optval', 'b', '--stage2', 'c', 'd'),
+        (2, 'a', ('optval', 'b', 'c', 'd'), ('--opt',))
+    ),
+    (
+        ('--stage2', 'a', '--opt', 'optval', 'b', '--stage2', 'c', 'd'),
+        (2, 'a', ('optval', 'b', 'c', 'd'), ('--opt',))
+    ),
+])
+def test_parseargs(args, expected):
+    assert venv_update.parseargs(args) == expected
+
+
+@pytest.mark.parametrize('args', [
+    ('-h',),
+    ('a', '-h',),
+    ('-h', 'b'),
+    ('--help',),
+    ('a', '--help',),
+    ('--help', 'b'),
+])
+def test_parseargs_help(args, capsys):
+    from venv_update import __doc__ as HELP_OUTPUT
+    with pytest.raises(SystemExit) as excinfo:
+        assert venv_update.parseargs(args)
+
+    out, err = capsys.readouterr()
+    assert err == ''
+    assert out == HELP_OUTPUT
+    assert excinfo.value.code == 0
