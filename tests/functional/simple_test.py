@@ -290,3 +290,24 @@ def test_uncolored_pipe():
     out = pipe_output(read, write)
 
     assert not unprintable(out), out
+
+
+def test_args_backward(tmpdir, capfd):
+    tmpdir.chdir()
+    requirements('')
+
+    from subprocess import CalledProcessError
+    with pytest.raises(CalledProcessError) as excinfo:
+        venv_update('requirements.txt', 'myvenv')
+
+    assert excinfo.value.returncode == 1
+    out, err = capfd.readouterr()
+    print('OUT:', out)
+    print('ERR:', err)
+    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
+    errname = 'NotADirectoryError' if PY33 else 'OSError'
+    assert lasterr.startswith(errname + ': [Errno 20] Not a directory'), err
+
+    assert Path('requirements.txt').isfile()
+    assert Path('requirements.txt').read() == ''
+    assert not Path('myvenv').exists()

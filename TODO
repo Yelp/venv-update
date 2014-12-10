@@ -3,8 +3,6 @@ NOW: Should probably do before it hits users
 
 * ctrl-c during stage2 does the 'somthing went wrong!' flow twice
 
-* currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
-
 * acceptance tests:
    * upgrading from A==1.0 to A==2.0 works
    * downgrading "
@@ -12,6 +10,8 @@ NOW: Should probably do before it hits users
       shutil.Error: `/nail/home/buck/pg/2/virtualenv_run/bin/python` and `virtualenv_run/bin/python` are the same file
    * conflict error message
    * all requirements already satisfied -> "must specify at least one requirement" error
+
+* resolve all the todo:unit-test notes
 
 
 LATER: Things that I want to do, but would put me past my deadline:
