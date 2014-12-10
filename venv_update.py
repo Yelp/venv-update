@@ -194,14 +194,12 @@ def dist_to_req(dist):
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     """
-    from pip.util import get_installed_distributions
-
-    installed = []
-    for dist in get_installed_distributions(local_only=True):
-        req = dist_to_req(dist)
-        installed.append(req)
-
-    return installed
+    from pip.util import dist_is_local
+    return tuple(
+        dist_to_req(dist)
+        for dist in fresh_working_set()
+        if dist_is_local(dist)
+    )
 
 
 def pip_parse_requirements(requirement_files):
@@ -391,7 +389,8 @@ def do_install(reqs):
     extraneous = (
         reqnames(previously_installed) -
         reqnames(required_with_deps) -
-        reqnames(recently_installed)
+        reqnames(recently_installed) -
+        set(['setuptools', 'pip'])
     )
 
     # 2) Uninstall any extraneous packages.

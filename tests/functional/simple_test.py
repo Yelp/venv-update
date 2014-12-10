@@ -74,16 +74,19 @@ pytest
     return ratio
 
 
-@pytest.mark.flaky(reruns=10)
+@pytest.mark.flaky(reruns=5)
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
     # constrain both ends, to show that we know what's going on
-    assert 4 < install_twice(tmpdir, between=do_nothing) < 6
+    # 2014-12-10: osx, py27: 4.3, 4.6, 5.0, 5.3
+    # 2014-12-10: osx, py34: 8-9
+    # 2014-12-10: travis, py34: 11-12
+    assert 4 < install_twice(tmpdir, between=do_nothing) < 13
 
 
-@pytest.mark.flaky(reruns=10)
+@pytest.mark.flaky(reruns=5)
 def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')
@@ -93,7 +96,9 @@ def test_cached_clean_install_faster(tmpdir):
 
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
-    assert 2 < install_twice(tmpdir, between=clean) < 5
+    # 2014-12-10: osx, py34: 4.4, 4.6
+    # 2014-12-10: travis, py34: 6.5-7.0
+    assert 2 < install_twice(tmpdir, between=clean) < 7
 
 
 def test_arguments_version(tmpdir, capfd):

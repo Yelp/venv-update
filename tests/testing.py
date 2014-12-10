@@ -19,6 +19,7 @@ def run(*cmd, **env):
     else:
         env = None
 
+    # we can't print the cmd here because it would mess up our tests' output capture
     check_call(cmd, env=env)
 
 
