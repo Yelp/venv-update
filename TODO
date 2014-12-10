@@ -1,4 +1,5 @@
-Should probably do before it hits users
+NOW: Should probably do before it hits users
+--------------------------------------------
 
 * ctrl-c during stage2 does the 'somthing went wrong!' flow twice
 
@@ -13,8 +14,8 @@ Should probably do before it hits users
    * all requirements already satisfied -> "must specify at least one requirement" error
 
 
+LATER: Things that I want to do, but would put me past my deadline:
 ------------------------------------------------------------
-Things that I want to do, but would put me past my deadline:
 
 * coverage: 105, 124, 135, 184, 242, 281, 285-292, 297-298, 326-328, 461, 465
 
@@ -52,3 +53,9 @@ Things that I want to do, but would put me past my deadline:
     wait till March 2014
 
 * pip micro-bug: pip wheel unzips found wheels even with --no-deps
+
+* make a fixture containing the necessary wheels for the enable_coverage function
+
+* somehow avoid the "installing pip, setuptools" on a noop venv-update
+    shaves 2-7 seconds off the noop update
+    seems to be closer to 7s on osx

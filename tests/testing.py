@@ -1,14 +1,11 @@
 from py._path.local import LocalPath as Path
 
 TOP = Path(__file__) / '../..'
-SCENARIOS = TOP/'tests/scenarios'
 
 
-def get_scenario(name):
-    """Sync all the files from test/scenarios/{name} to the current directory
-    """
-    # Trailing slash is essential to rsync
-    run('rsync', '-a', '%s/%s/' % (SCENARIOS, name), '.')
+def requirements(reqs):
+    """Write a requirements.txt file to the current working directory."""
+    Path('requirements.txt').write(reqs)
 
 
 def run(*cmd, **env):

@@ -4,7 +4,7 @@ from py._path.local import LocalPath as Path
 import pytest
 
 from testing import (
-    get_scenario,
+    requirements,
     run,
     strip_coverage_warnings,
     venv_update,
@@ -18,7 +18,7 @@ PY33 = (version_info >= (3, 3))
 
 def test_trivial(tmpdir):
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
     venv_update()
 
 
@@ -37,12 +37,10 @@ def enable_coverage(tmpdir):
 def install_twice(tmpdir, between):
     """install twice, and the second one should be faster, due to whl caching"""
     tmpdir.chdir()
-    get_scenario('trivial')
 
-    with open('requirements.txt', 'w') as requirements:
-        # Arbitrary packages that takes a bit of time to install:
-        # Should I make a fixture c-extention to remove these dependencies?
-        requirements.write('''\
+    # Arbitrary packages that takes a bit of time to install:
+    # Should I make a fixture c-extention to remove these dependencies?
+    requirements('''\
 pudb==2014.1
 urwid==1.3.0
 simplejson==3.6.5
@@ -62,11 +60,11 @@ pytest
     enable_coverage(tmpdir)
     start = time()
     # second install should also need no network access
-    # these are arbitrary closed localhost ports
+    # these are arbitrary invalid IP's
     venv_update(
-        http_proxy='http://127.10.20.30:40',
-        https_proxy='http://127.11.22.33:44',
-        ftp_proxy='http://127.4.3.2:1',
+        http_proxy='http://300.10.20.30:40',
+        https_proxy='http://400.11.22.33:44',
+        ftp_proxy='http://500.4.3.2:1',
     )
     time2 = time() - start
 
@@ -81,7 +79,8 @@ def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
-    assert install_twice(tmpdir, between=do_nothing) >= 6
+    # constrain both ends, to show that we know what's going on
+    assert 4 < install_twice(tmpdir, between=do_nothing) < 6
 
 
 @pytest.mark.flaky(reruns=10)
@@ -93,7 +92,8 @@ def test_cached_clean_install_faster(tmpdir):
         assert not venv.exists()
 
     # I get ~4x locally, but only 2.5x on travis
-    assert install_twice(tmpdir, between=clean) >= 2.5
+    # constrain both ends, to show that we know what's going on
+    assert 2 < install_twice(tmpdir, between=clean) < 5
 
 
 def test_arguments_version(tmpdir, capfd):
@@ -120,7 +120,7 @@ def test_arguments_version(tmpdir, capfd):
 def test_arguments_system_packages(tmpdir, capfd):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
     out, err = capfd.readouterr()  # flush buffers
@@ -155,14 +155,13 @@ def pip_freeze(capfd):
 
 def test_update_while_active(tmpdir, capfd):
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     venv_update()
     assert 'mccabe' not in pip_freeze(capfd)
 
-    with open('requirements.txt', 'w') as requirements:
-        # An arbitrary small package: mccabe
-        requirements.write('mccabe')
+    # An arbitrary small package: mccabe
+    requirements('mccabe')
 
     venv_update_symlink_pwd()
     run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
@@ -171,7 +170,7 @@ def test_update_while_active(tmpdir, capfd):
 
 def test_scripts_left_behind(tmpdir):
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     venv_update()
 
@@ -187,25 +186,25 @@ def test_scripts_left_behind(tmpdir):
 
 
 def assert_timestamps(*reqs):
-    get_scenario('trivial')
+    firstreq = Path(reqs[0])
+    lastreq = Path(reqs[-1])
+
     venv_update('virtualenv_run', *reqs)
 
-    assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
+    assert firstreq.mtime() < Path('virtualenv_run').mtime()
 
-    with open(reqs[-1], 'w') as requirements:
-        # garbage, to cause a failure
-        requirements.write('-w wat')
+    # garbage, to cause a failure
+    lastreq.write('-w wat')
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('virtualenv_run', *reqs)
 
     assert excinfo.value.returncode == 1
-    assert Path(reqs[0]).mtime() > Path('virtualenv_run').mtime()
+    assert firstreq.mtime() > Path('virtualenv_run').mtime()
 
-    with open(reqs[-1], 'w') as requirements:
-        # blank requirements should succeed
-        requirements.write('')
+    # blank requirements should succeed
+    lastreq.write('')
 
     venv_update('virtualenv_run', *reqs)
     assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
@@ -213,13 +212,14 @@ def assert_timestamps(*reqs):
 
 def test_timestamps_single(tmpdir):
     tmpdir.chdir()
+    requirements('')
     assert_timestamps('requirements.txt')
 
 
 def test_timestamps_multiple(tmpdir):
     tmpdir.chdir()
-    with open('requirements2.txt', 'w') as requirements:
-        requirements.write('')
+    requirements('')
+    Path('requirements2.txt').write('')
     assert_timestamps('requirements.txt', 'requirements2.txt')
 
 
@@ -265,6 +265,7 @@ def pipe_output(read, write):
 
 def unprintable(mystring):
     """return only the unprintable characters of a string"""
+    # TODO: unit-test
     from string import printable
     return ''.join(
         character
