@@ -265,7 +265,6 @@ def pipe_output(read, write):
 
 def unprintable(mystring):
     """return only the unprintable characters of a string"""
-    # TODO: unit-test
     from string import printable
     return ''.join(
         character

@@ -11,8 +11,6 @@ NOW: Should probably do before it hits users
    * conflict error message
    * all requirements already satisfied -> "must specify at least one requirement" error
 
-* resolve all the todo:unit-test notes
-
 
 LATER: Things that I want to do, but would put me past my deadline:
 ------------------------------------------------------------
