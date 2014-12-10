@@ -76,7 +76,6 @@ def timid_relpath(arg):
 
 
 def shellescape(args):
-    # TODO: unit test
     from pipes import quote
     return ' '.join(quote(timid_relpath(arg)) for arg in args)
 
