@@ -400,7 +400,6 @@ def do_install(reqs):
 
 
 def wait_for_all_subprocesses():
-    # TODO: unit-test
     from os import wait
     try:
         while True:

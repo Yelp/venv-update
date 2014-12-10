@@ -235,3 +235,23 @@ def test_req_is_absolute(req, expected):
 
 def test_req_is_absolute_null():
     assert venv_update.req_is_absolute(None) is False
+
+
+def test_wait_for_all_subprocesses(monkeypatch):
+    class _nonlocal(object):
+        wait = 10
+        thrown = False
+
+    def fakewait():
+        if _nonlocal.wait <= 0:
+            _nonlocal.thrown = True
+            raise OSError(10, 'No child process')
+        else:
+            _nonlocal.wait -= 1
+
+    import os
+    monkeypatch.setattr(os, 'wait', fakewait)
+    venv_update.wait_for_all_subprocesses()
+
+    assert _nonlocal.wait == 0
+    assert _nonlocal.thrown is True
