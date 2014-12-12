@@ -8,7 +8,7 @@ It's optimized for big projects (hundreds of requirements), and as such makes he
 
 ## Installation
 
-Because this tool is meant to be the entry-point for handling requirements and dependencies, it's not meant to be installed via pip usually. The design allows the single venv_update.py to be vendored into your project (checked in) without any dependencies.
+Because this tool is meant to be the entry-point for handling requirements and dependencies, it's not meant to be installed via pip usually. The design allows the single venv_update.py to be vendored (directly checked in) to your project, and run without any dependencies beyond the python standard library.
 
 
 ## Usage
