@@ -15,3 +15,11 @@ Because this tool is meant to be the entry-point for handling requirements and d
 
 
 Simply running `venv_update.py` will create a virtualenv named `virtualenv_run` in the current directory, using `requirements.txt` in the current directory. These are default values that can be overridden by providing arguments. Pass `--help` for more detail.
+
+
+## Features:
+
+ * All packages are built to wheels before installation. This means that if you're using a package that takes a bit to compile (`lxml`) or on a platform that doesn't have public-pypi wheel support (linux), you still get the speed advantages associated with wheels.
+ * Extraneous packages are uninstalled. This helps ensure that your dev environment isn't polluted by any previous state of your project. "Extraneous" packages are those that are neither directly required, nor required by any direct requirement.
+ * Caching: All downloads and wheels are cached (in `~/.pip/cache` and `~/.pip/wheelhouse`, respectively). You shouldn't have to wait for anything to download or build twice.
+ * Dependency conflict detection: stock pip will happily install two packages with conflicting requirements, with undefined behavior for the conflicted requirement. For now, venv-update gives the same result as pip, but at least throws you a yellow warning when such a situation arises. In future (once we fix our code base's issues) this will be an error.
