@@ -2,6 +2,9 @@
 [![Build Status](https://travis-ci.org/Yelp/venv-update.svg?branch=master)](https://travis-ci.org/Yelp/venv-update)
 [![Coverage Status](https://img.shields.io/coveralls/Yelp/venv-update.svg?branch=master)](https://coveralls.io/r/Yelp/venv-update)
 
+Venv-update is a tool for keeping a virtualenv up-to-date with version-controlled requirement lists.
+It's optimized for big projects (hundreds of requirements), and a such makes heavy use of caches and wheels, and wheel-caches. We use it when working on the main Yelp codebase. The tool also ensures that no "extraneous" packages are installed after an update; the goal is that your virtualenv in the same state as if you had rebuilt it from scratch, but *much* more quickly.
+
 
 ## Installation
 
