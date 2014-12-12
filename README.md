@@ -1,16 +1,14 @@
 # venv-update
-[![Build Status](https://travis-ci.org/Yelp/venv-update.svg)](https://travis-ci.org/Yelp/venv-update)
+[![Build Status](https://travis-ci.org/Yelp/venv-update.svg?branch=master)](https://travis-ci.org/Yelp/venv-update)
 [![Coverage Status](https://img.shields.io/coveralls/Yelp/venv-update.svg?branch=master)](https://coveralls.io/r/Yelp/venv-update)
 
 
 ## Installation
--- FIXME: update with bootstrap details
 
-For a primer on pip and virtualenv, see the [Python Packaging User Guide](https://python-packaging-user-guide.readthedocs.org/en/latest/tutorial.html).
-
-TL;DR: `pip install venv-update`
+Because this tool is meant to be the entry-point for handling requirements and dependencies, it's not meant to be installed via pip usually. The design allows the single venv_update.py to be vendored into your project without any dependencies.
 
 
 ## Usage
 
--- FIXME: show how to use the thing
+
+Simply running `venv_update.py` will create a virtualenv named `virtualenv_run` in the current directory, using `requirements.txt` in the current directory. These are default values that can be overridden by providing arguments. Pass `--help` for more detail.
