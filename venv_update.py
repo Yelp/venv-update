@@ -187,8 +187,14 @@ def pip(args):
 def dist_to_req(dist):
     """Make a pip.FrozenRequirement from a pkg_resources distribution object"""
     from pip import FrozenRequirement
-    # TODO: does it matter that we completely ignore dependency_links?
-    return FrozenRequirement.from_dist(dist, [])
+
+    # normalize the casing, dashes in the req name
+    orig_name, dist.project_name = dist.project_name, dist.key
+    result = FrozenRequirement.from_dist(dist, [])
+    # put things back the way we found it.
+    dist.project_name = orig_name
+
+    return result
 
 
 def pip_get_installed():
@@ -213,6 +219,15 @@ def pip_parse_requirements(requirement_files):
     return required
 
 
+def importlib_invalidate_caches():
+    """importlib.invalidate_caches is necessary if anything has been installed after python startup.
+    New in python3.3.
+    """
+    import importlib
+    invalidate_caches = getattr(importlib, 'invalidate_caches', lambda: None)
+    invalidate_caches()
+
+
 def pip_install(args):
     """Run pip install, and return the set of packages installed.
     """
@@ -235,6 +250,9 @@ def pip_install(args):
         pip(('install',) + args)
     finally:
         InstallCommand.run = orig_installcommand['run']
+
+    # make sure the just-installed stuff is visible to this process.
+    importlib_invalidate_caches()
 
     if _nonlocal.successfully_installed is None:
         return []
@@ -390,7 +408,7 @@ def do_install(reqs):
         reqnames(previously_installed) -
         reqnames(required_with_deps) -
         reqnames(recently_installed) -
-        set(['setuptools', 'pip'])
+        set(['pip', 'setuptools'])
     )
 
     # 2) Uninstall any extraneous packages.
@@ -432,19 +450,38 @@ def dotpy(filename):
         return filename
 
 
+def stage1(venv_python, reqs, venv_path):
+    """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
+
+    make a fresh venv at the right spot, and use it to perform stage 2
+    """
+    from os.path import join, exists, samefile
+    this_script = dotpy(__file__)
+    stage2_script = join(venv_path, 'bin', 'venv-update')
+    if exists(stage2_script) and samefile(this_script, stage2_script):
+        pass
+    else:
+        # This copy ensures that we're not importing stuff from another virtualenv
+        run(('cp', this_script, stage2_script))
+    run((venv_python, stage2_script, '--stage2', venv_path) + reqs)
+
+
+def stage2(venv_python, reqs):
+    """we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
+    """
+    import sys
+    assert sys.executable == venv_python, "Executable not in venv: %s != %s" % (sys.executable, venv_python)
+    return do_install(reqs)
+
+
 def venv_update(stage, venv_path, reqs, venv_args):
     from os.path import join, abspath
     venv_python = abspath(join(venv_path, 'bin', 'python'))
     if stage == 1:
-        # we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
-        # make a fresh venv at the right spot, and use it to perform stage 2
         with venv(venv_path, venv_args):
-            run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs + venv_args)
+            stage1(venv_python, reqs, venv_path)
     elif stage == 2:
-        import sys
-        assert sys.executable == venv_python, "Executable not in venv: %s != %s" % (sys.executable, venv_python)
-        # we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
-        return do_install(reqs)
+        stage2(venv_python, reqs)
     else:
         raise AssertionError('impossible stage value: %r' % stage)
 
