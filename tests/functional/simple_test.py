@@ -34,7 +34,7 @@ def enable_coverage(tmpdir):
     )
 
 
-def install_twice(tmpdir, between):
+def install_twice(tmpdir, capfd, between):
     """install twice, and the second one should be faster, due to whl caching"""
     tmpdir.chdir()
 
@@ -46,18 +46,45 @@ urwid==1.3.0
 simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
-pytest
+pytest==2.6.4
+chroniker
 ''')
 
     from time import time
     enable_coverage(tmpdir)
+    assert pip_freeze(capfd) == '\n'.join((
+        'cov-core==1.15.0',
+        'coverage==4.0a1',
+        ''
+    ))
+
     start = time()
     venv_update()
     time1 = time() - start
+    assert pip_freeze(capfd) == '\n'.join((
+        'PyYAML==3.11',
+        'Pygments==2.0.1',
+        'argparse==1.2.1',
+        'astroid==1.3.2',
+        'chroniker==0.0.0',
+        'logilab-common==0.63.2',
+        'pudb==2014.1',
+        'py==1.4.26',
+        'pylint==1.4.0',
+        'pytest==2.6.4',
+        'simplejson==3.6.5',
+        'six==1.8.0',
+        'urwid==1.3.0',
+        'wheel==0.24.0',
+        ''
+    ))
 
     between()
 
     enable_coverage(tmpdir)
+    # there may be more or less packages depending on what exactly happened between
+    assert 'cov-core==1.15.0\ncoverage==4.0a1\n' in pip_freeze(capfd)
+
     start = time()
     # second install should also need no network access
     # these are arbitrary invalid IP's
@@ -67,6 +94,23 @@ pytest
         ftp_proxy='http://500.4.3.2:1',
     )
     time2 = time() - start
+    assert pip_freeze(capfd) == '\n'.join((
+        'PyYAML==3.11',
+        'Pygments==2.0.1',
+        'argparse==1.2.1',
+        'astroid==1.3.2',
+        'chroniker==0.0.0',
+        'logilab-common==0.63.2',
+        'pudb==2014.1',
+        'py==1.4.26',
+        'pylint==1.4.0',
+        'pytest==2.6.4',
+        'simplejson==3.6.5',
+        'six==1.8.0',
+        'urwid==1.3.0',
+        'wheel==0.24.0',
+        ''
+    ))
 
     # second install should be at least twice as fast
     ratio = time1 / time2
@@ -75,7 +119,7 @@ pytest
 
 
 @pytest.mark.flaky(reruns=5)
-def test_noop_install_faster(tmpdir):
+def test_noop_install_faster(tmpdir, capfd):
     def do_nothing():
         pass
 
@@ -83,11 +127,11 @@ def test_noop_install_faster(tmpdir):
     # 2014-12-10: osx, py27: 4.3, 4.6, 5.0, 5.3
     # 2014-12-10: osx, py34: 8-9
     # 2014-12-10: travis, py34: 11-12
-    assert 4 < install_twice(tmpdir, between=do_nothing) < 13
+    assert 4 < install_twice(tmpdir, capfd, between=do_nothing) < 13
 
 
 @pytest.mark.flaky(reruns=5)
-def test_cached_clean_install_faster(tmpdir):
+def test_cached_clean_install_faster(tmpdir, capfd):
     def clean():
         venv = tmpdir.join('virtualenv_run')
         assert venv.isdir()
@@ -98,7 +142,7 @@ def test_cached_clean_install_faster(tmpdir):
     # constrain both ends, to show that we know what's going on
     # 2014-12-10: osx, py34: 4.4, 4.6
     # 2014-12-10: travis, py34: 6.5-7.0
-    assert 2 < install_twice(tmpdir, between=clean) < 7
+    assert 4 < install_twice(tmpdir, capfd, between=clean) < 7
 
 
 def test_arguments_version(tmpdir, capfd):
@@ -113,13 +157,12 @@ def test_arguments_version(tmpdir, capfd):
     assert excinfo.value.returncode == 1
     out, err = capfd.readouterr()
     lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
-    errname = 'FileNotFoundError' if PY33 else 'OSError'
-    assert lasterr.startswith(errname + ': [Errno 2] No such file or directory'), err
+    assert lasterr.startswith('virtualenv executable not found: /'), err
+    assert lasterr.endswith('/virtualenv_run/bin/python'), err
 
     lines = out.split('\n')
-    assert lines[-4] == ('> virtualenv virtualenv_run --version'), out
-    assert lines[-2].startswith('> /'), out
-    assert lines[-2].endswith('venv_update.py --stage2 virtualenv_run requirements.txt --version'), out
+    assert len(lines) == 3, lines
+    assert lines[0] == ('> virtualenv virtualenv_run --version'), lines
 
 
 def test_arguments_system_packages(tmpdir, capfd):
@@ -151,7 +194,7 @@ def pip(*args):
 def pip_freeze(capfd):
     out, err = capfd.readouterr()  # flush any previous output
 
-    pip('freeze')
+    pip('freeze', '--local')
     out, err = capfd.readouterr()
 
     assert strip_coverage_warnings(err) == ''

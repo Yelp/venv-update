@@ -455,15 +455,11 @@ def stage1(venv_python, reqs, venv_path):
 
     make a fresh venv at the right spot, and use it to perform stage 2
     """
-    from os.path import join, exists, samefile
-    this_script = dotpy(__file__)
-    stage2_script = join(venv_path, 'bin', 'venv-update')
-    if exists(stage2_script) and samefile(this_script, stage2_script):
-        pass
-    else:
-        # This copy ensures that we're not importing stuff from another virtualenv
-        run(('cp', this_script, stage2_script))
-    run((venv_python, stage2_script, '--stage2', venv_path) + reqs)
+    from os.path import exists
+    if not exists(venv_python):
+        exit('virtualenv executable not found: %s' % venv_python)
+
+    run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs)
 
 
 def stage2(venv_python, reqs):
@@ -487,7 +483,8 @@ def venv_update(stage, venv_path, reqs, venv_args):
 
 
 def main():
-    from sys import argv
+    from sys import argv, path
+    del path[:1]  # we don't (want to) import anything from pwd or the script's directory
     stage, venv_path, reqs, venv_args = parseargs(argv[1:])
 
     from subprocess import CalledProcessError
