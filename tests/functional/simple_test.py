@@ -142,7 +142,8 @@ def test_cached_clean_install_faster(tmpdir, capfd):
     # constrain both ends, to show that we know what's going on
     # 2014-12-10: osx, py34: 4.4, 4.6
     # 2014-12-10: travis, py34: 6.5-7.0
-    assert 4 < install_twice(tmpdir, capfd, between=clean) < 7
+    # 2014-12-16: travis, py27: 2.8-3.7
+    assert 2.75 < install_twice(tmpdir, capfd, between=clean) < 7
 
 
 def test_arguments_version(tmpdir, capfd):

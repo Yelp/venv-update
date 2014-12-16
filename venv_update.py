@@ -223,7 +223,10 @@ def importlib_invalidate_caches():
     """importlib.invalidate_caches is necessary if anything has been installed after python startup.
     New in python3.3.
     """
-    import importlib
+    try:
+        import importlib
+    except ImportError:
+        return
     invalidate_caches = getattr(importlib, 'invalidate_caches', lambda: None)
     invalidate_caches()
 
