@@ -4,21 +4,18 @@ from __future__ import unicode_literals
 from testing import run, venv_update_script
 
 
-def test_pip_install_flake8(tmpdir, capfd):
+def test_pip_install_flake8(tmpdir):
     tmpdir.chdir()
 
     run('virtualenv', 'myvenv')
     run('myvenv/bin/pip', 'install', 'pep8')
 
-    out, err = capfd.readouterr()  # flush buffers
-
-    venv_update_script('''\
+    out, err, _ = venv_update_script('''\
 import json
 from venv_update import pip_install, reqnames
 print(json.dumps(sorted(reqnames(pip_install(('flake8',))))))
 ''', venv='myvenv')
 
-    out, err = capfd.readouterr()
     assert err == ''
 
     from json import loads
