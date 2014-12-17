@@ -7,7 +7,7 @@ This should maybe be a package in its own right, someday.
 from __future__ import print_function
 
 import os
-from subprocess import Popen
+from subprocess import Popen, CalledProcessError
 
 
 # posix standard file descriptors
@@ -150,9 +150,17 @@ def capture_subprocess(cmd, **popen_kwargs):
     result = _communicate_with_select((stdout_teed.read, stderr_teed.read, combined.read))
 
     # clean up left-over processes and pipes:
-    outputter.wait()
+    exit_code = outputter.wait()
     stdout_teed.closed()
     stderr_teed.closed()
     combined.closed()
 
-    return result
+    # normalize newlines coming from the pty
+    result = (result[0].replace('\r\n', '\n'),) + result[1:]
+
+    if exit_code == 0:
+        return result
+    else:
+        error = CalledProcessError(exit_code, cmd)
+        error.result = result
+        raise error

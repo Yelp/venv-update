@@ -62,8 +62,8 @@ def test_capture_subprocess(tmpdir):
     assert stderr.count(b'\n') == 793
     assert combined.count(b'\n') == 4000
 
-    assert stdout.strip(b'.\r\n') == b''
-    assert stderr.strip(b'%\r\n') == b''
+    assert stdout.strip(b'.\n') == b''
+    assert stderr.strip(b'%\n') == b''
 
     # I'd like to also assert that the two streams are interleaved strictly by line,
     # but I haven't been able to produce such output reliably =/

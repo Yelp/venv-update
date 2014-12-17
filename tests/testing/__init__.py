@@ -1,7 +1,7 @@
 # NOTE WELL: No side-effects are allowed in __init__ files. This means you!
 from py._path.local import LocalPath as Path
 
-TOP = Path(__file__) / '../..'
+TOP = Path(__file__) / '../../..'
 
 
 def requirements(reqs):
@@ -20,8 +20,10 @@ def run(*cmd, **env):
 
     from .capture_subprocess import capture_subprocess
     from venv_update import colorize
-    capture_subprocess(('echo', 'TEST>', colorize(cmd)))
-    return capture_subprocess(cmd, env=env)
+    capture_subprocess(('echo', '\nTEST>', colorize(cmd)))
+    out, err, combined = capture_subprocess(cmd, env=env)
+    err = strip_coverage_warnings(err)
+    return out, err, combined
 
 
 def venv_update(*args, **env):
