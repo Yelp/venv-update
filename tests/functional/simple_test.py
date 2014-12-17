@@ -325,7 +325,9 @@ def pipe_output(read, write):
     return out, uncolored
 
 
-def test_colored_tty():
+def test_colored_tty(tmpdir):
+    tmpdir.chdir()
+
     from os import openpty
     read, write = openpty()
 
@@ -334,7 +336,9 @@ def test_colored_tty():
     assert out != uncolored
 
 
-def test_uncolored_pipe():
+def test_uncolored_pipe(tmpdir):
+    tmpdir.chdir()
+
     from os import pipe
     read, write = pipe()
 
