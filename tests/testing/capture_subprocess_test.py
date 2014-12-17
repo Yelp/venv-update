@@ -46,7 +46,7 @@ coverage_warnings_regex = Regex(
 
 
 # buglet: floating-point, zero, negative values interpreted as infinite =/
-#@pytest.mark.flaky(reruns=10)
+@pytest.mark.flaky(reruns=5)
 @pytest.mark.timeout(12)  # ~50% at 6 seconds
 def test_capture_subprocess(tmpdir):
     tmpdir.chdir()
@@ -68,4 +68,11 @@ def test_capture_subprocess(tmpdir):
     # I'd like to also assert that the two streams are interleaved strictly by line,
     # but I haven't been able to produce such output reliably =/
 
-    assert sorted(stdout + stderr) == sorted(combined)
+    # instead, we assert that all individual characters are preserved in the combination
+    histogram = {}
+    for string in (stderr, stdout):
+        for char in string:
+            histogram[char] = histogram.get(char, 0) + 1
+    for char in histogram:
+        combined = combined.replace(char, '', histogram[char])
+    assert combined == '', histogram

@@ -156,7 +156,10 @@ def capture_subprocess(cmd, **popen_kwargs):
     combined.closed()
 
     # normalize newlines coming from the pty
-    result = (result[0].replace('\r\n', '\n'),) + result[1:]
+    out, err, combined = result
+    out = out.replace('\r\n', '\n')
+    combined = combined.replace('\r\n', '\n')
+    result = (out, err, combined)
 
     if exit_code == 0:
         return result
