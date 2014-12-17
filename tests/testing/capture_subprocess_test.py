@@ -46,8 +46,8 @@ coverage_warnings_regex = Regex(
 
 
 # buglet: floating-point, zero, negative values interpreted as infinite =/
-@pytest.mark.flaky(reruns=10)
-@pytest.mark.timeout(8)  # ~50% at 6 seconds
+#@pytest.mark.flaky(reruns=10)
+@pytest.mark.timeout(12)  # ~50% at 6 seconds
 def test_capture_subprocess(tmpdir):
     tmpdir.chdir()
     make_outputter()
