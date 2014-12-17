@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import pytest
 
-from testing import get_scenario, run, strip_coverage_warnings, TOP
+from testing import requirements, run, strip_coverage_warnings, TOP
 import venv_update
 
 
@@ -22,11 +22,9 @@ def stage2(executable, tmpdir):
 
 def test_trivial(tmpdir):
     tmpdir.chdir()
-    get_scenario('trivial')
 
-    with open('requirements.txt', 'w') as requirements:
-        # An arbitrary small package: mccabe
-        requirements.write('mccabe\npep8==1.0')
+    # An arbitrary small package: mccabe
+    requirements('mccabe\npep8==1.0')
 
     run('virtualenv', 'myvenv')
     # need this to get coverage. surely there's a better way...
@@ -43,7 +41,6 @@ def test_error_with_wrong_python(tmpdir, capfd):
     from sys import executable
 
     tmpdir.chdir()
-    get_scenario('trivial')
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
@@ -61,7 +58,7 @@ def test_touch_on_error(tmpdir, capfd):
     from sys import executable
 
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     from os import mkdir
     mkdir('myvenv')

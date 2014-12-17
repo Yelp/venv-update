@@ -4,7 +4,7 @@ from py._path.local import LocalPath as Path
 import pytest
 
 from testing import (
-    get_scenario,
+    requirements,
     run,
     strip_coverage_warnings,
     venv_update,
@@ -18,7 +18,7 @@ PY33 = (version_info >= (3, 3))
 
 def test_trivial(tmpdir):
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
     venv_update()
 
 
@@ -34,41 +34,86 @@ def enable_coverage(tmpdir):
     )
 
 
-def install_twice(tmpdir, between):
+def install_twice(tmpdir, capfd, between):
     """install twice, and the second one should be faster, due to whl caching"""
     tmpdir.chdir()
-    get_scenario('trivial')
 
-    with open('requirements.txt', 'w') as requirements:
-        # Arbitrary packages that takes a bit of time to install:
-        # Should I make a fixture c-extention to remove these dependencies?
-        requirements.write('''\
+    # Arbitrary packages that takes a bit of time to install:
+    # Should I make a fixture c-extention to remove these dependencies?
+    requirements('''\
 pudb==2014.1
 urwid==1.3.0
 simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
-pytest
+pytest==2.6.4
+unittest2==0.8.0
+chroniker
 ''')
 
     from time import time
     enable_coverage(tmpdir)
+    assert pip_freeze(capfd) == '\n'.join((
+        'cov-core==1.15.0',
+        'coverage==4.0a1',
+        ''
+    ))
+
     start = time()
     venv_update()
     time1 = time() - start
+    assert pip_freeze(capfd) == '\n'.join((
+        'PyYAML==3.11',
+        'Pygments==2.0.1',
+        'argparse==1.2.1',
+        'astroid==1.3.2',
+        'chroniker==0.0.0',
+        'logilab-common==0.63.2',
+        'pudb==2014.1',
+        'py==1.4.26',
+        'pylint==1.4.0',
+        'pytest==2.6.4',
+        'simplejson==3.6.5',
+        'six==1.8.0',
+        'unittest2==0.8.0',
+        'urwid==1.3.0',
+        'wheel==0.24.0',
+        ''
+    ))
 
     between()
 
     enable_coverage(tmpdir)
+    # there may be more or less packages depending on what exactly happened between
+    assert 'cov-core==1.15.0\ncoverage==4.0a1\n' in pip_freeze(capfd)
+
     start = time()
     # second install should also need no network access
-    # these are arbitrary closed localhost ports
+    # these are arbitrary invalid IP's
     venv_update(
-        http_proxy='http://127.10.20.30:40',
-        https_proxy='http://127.11.22.33:44',
-        ftp_proxy='http://127.4.3.2:1',
+        http_proxy='http://300.10.20.30:40',
+        https_proxy='http://400.11.22.33:44',
+        ftp_proxy='http://500.4.3.2:1',
     )
     time2 = time() - start
+    assert pip_freeze(capfd) == '\n'.join((
+        'PyYAML==3.11',
+        'Pygments==2.0.1',
+        'argparse==1.2.1',
+        'astroid==1.3.2',
+        'chroniker==0.0.0',
+        'logilab-common==0.63.2',
+        'pudb==2014.1',
+        'py==1.4.26',
+        'pylint==1.4.0',
+        'pytest==2.6.4',
+        'simplejson==3.6.5',
+        'six==1.8.0',
+        'unittest2==0.8.0',
+        'urwid==1.3.0',
+        'wheel==0.24.0',
+        ''
+    ))
 
     # second install should be at least twice as fast
     ratio = time1 / time2
@@ -76,16 +121,20 @@ pytest
     return ratio
 
 
-@pytest.mark.flaky(reruns=10)
-def test_noop_install_faster(tmpdir):
+@pytest.mark.flaky(reruns=5)
+def test_noop_install_faster(tmpdir, capfd):
     def do_nothing():
         pass
 
-    assert install_twice(tmpdir, between=do_nothing) >= 6
+    # constrain both ends, to show that we know what's going on
+    # 2014-12-10: osx, py27: 4.3, 4.6, 5.0, 5.3
+    # 2014-12-10: osx, py34: 8-9
+    # 2014-12-10: travis, py34: 11-12
+    assert 4 < install_twice(tmpdir, capfd, between=do_nothing) < 13
 
 
-@pytest.mark.flaky(reruns=10)
-def test_cached_clean_install_faster(tmpdir):
+@pytest.mark.flaky(reruns=5)
+def test_cached_clean_install_faster(tmpdir, capfd):
     def clean():
         venv = tmpdir.join('virtualenv_run')
         assert venv.isdir()
@@ -93,7 +142,11 @@ def test_cached_clean_install_faster(tmpdir):
         assert not venv.exists()
 
     # I get ~4x locally, but only 2.5x on travis
-    assert install_twice(tmpdir, between=clean) >= 2.5
+    # constrain both ends, to show that we know what's going on
+    # 2014-12-10: osx, py34: 4.4, 4.6
+    # 2014-12-10: travis, py34: 6.5-7.0
+    # 2014-12-16: travis, py27: 2.8-3.7
+    assert 2.75 < install_twice(tmpdir, capfd, between=clean) < 7
 
 
 def test_arguments_version(tmpdir, capfd):
@@ -108,19 +161,18 @@ def test_arguments_version(tmpdir, capfd):
     assert excinfo.value.returncode == 1
     out, err = capfd.readouterr()
     lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
-    errname = 'FileNotFoundError' if PY33 else 'OSError'
-    assert lasterr.startswith(errname + ': [Errno 2] No such file or directory'), err
+    assert lasterr.startswith('virtualenv executable not found: /'), err
+    assert lasterr.endswith('/virtualenv_run/bin/python'), err
 
     lines = out.split('\n')
-    assert lines[-4] == ('> virtualenv virtualenv_run --version'), out
-    assert lines[-2].startswith('> /'), out
-    assert lines[-2].endswith('venv_update.py --stage2 virtualenv_run requirements.txt --version'), out
+    assert len(lines) == 3, lines
+    assert lines[0] == ('> virtualenv virtualenv_run --version'), lines
 
 
 def test_arguments_system_packages(tmpdir, capfd):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
     out, err = capfd.readouterr()  # flush buffers
@@ -146,7 +198,7 @@ def pip(*args):
 def pip_freeze(capfd):
     out, err = capfd.readouterr()  # flush any previous output
 
-    pip('freeze')
+    pip('freeze', '--local')
     out, err = capfd.readouterr()
 
     assert strip_coverage_warnings(err) == ''
@@ -155,14 +207,13 @@ def pip_freeze(capfd):
 
 def test_update_while_active(tmpdir, capfd):
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     venv_update()
     assert 'mccabe' not in pip_freeze(capfd)
 
-    with open('requirements.txt', 'w') as requirements:
-        # An arbitrary small package: mccabe
-        requirements.write('mccabe')
+    # An arbitrary small package: mccabe
+    requirements('mccabe')
 
     venv_update_symlink_pwd()
     run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
@@ -171,7 +222,7 @@ def test_update_while_active(tmpdir, capfd):
 
 def test_scripts_left_behind(tmpdir):
     tmpdir.chdir()
-    get_scenario('trivial')
+    requirements('')
 
     venv_update()
 
@@ -187,25 +238,25 @@ def test_scripts_left_behind(tmpdir):
 
 
 def assert_timestamps(*reqs):
-    get_scenario('trivial')
+    firstreq = Path(reqs[0])
+    lastreq = Path(reqs[-1])
+
     venv_update('virtualenv_run', *reqs)
 
-    assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
+    assert firstreq.mtime() < Path('virtualenv_run').mtime()
 
-    with open(reqs[-1], 'w') as requirements:
-        # garbage, to cause a failure
-        requirements.write('-w wat')
+    # garbage, to cause a failure
+    lastreq.write('-w wat')
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('virtualenv_run', *reqs)
 
     assert excinfo.value.returncode == 1
-    assert Path(reqs[0]).mtime() > Path('virtualenv_run').mtime()
+    assert firstreq.mtime() > Path('virtualenv_run').mtime()
 
-    with open(reqs[-1], 'w') as requirements:
-        # blank requirements should succeed
-        requirements.write('')
+    # blank requirements should succeed
+    lastreq.write('')
 
     venv_update('virtualenv_run', *reqs)
     assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
@@ -213,13 +264,14 @@ def assert_timestamps(*reqs):
 
 def test_timestamps_single(tmpdir):
     tmpdir.chdir()
+    requirements('')
     assert_timestamps('requirements.txt')
 
 
 def test_timestamps_multiple(tmpdir):
     tmpdir.chdir()
-    with open('requirements2.txt', 'w') as requirements:
-        requirements.write('')
+    requirements('')
+    Path('requirements2.txt').write('')
     assert_timestamps('requirements.txt', 'requirements2.txt')
 
 
@@ -265,6 +317,7 @@ def pipe_output(read, write):
 
 def unprintable(mystring):
     """return only the unprintable characters of a string"""
+    # TODO: unit-test
     from string import printable
     return ''.join(
         character
