@@ -47,6 +47,7 @@ simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
 pytest==2.6.4
+unittest2==0.8.0
 chroniker
 ''')
 
@@ -74,6 +75,7 @@ chroniker
         'pytest==2.6.4',
         'simplejson==3.6.5',
         'six==1.8.0',
+        'unittest2==0.8.0',
         'urwid==1.3.0',
         'wheel==0.24.0',
         ''
@@ -107,6 +109,7 @@ chroniker
         'pytest==2.6.4',
         'simplejson==3.6.5',
         'six==1.8.0',
+        'unittest2==0.8.0',
         'urwid==1.3.0',
         'wheel==0.24.0',
         ''
