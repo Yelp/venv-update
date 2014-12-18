@@ -72,3 +72,9 @@ coverage_warnings_regex = Regex(
 
 def strip_coverage_warnings(stderr):
     return coverage_warnings_regex.sub('', stderr)
+
+
+def uncolor(text):
+    # the colored_tty, uncolored_pipe tests cover this pretty well.
+    from re import sub
+    return sub('\033\\[[^A-z]*[A-z]', '', text)
