@@ -1,6 +1,8 @@
 NOW: Should probably do before it hits users
 --------------------------------------------
 
+* apparently broken if virtualenv active, again...
+
 * ctrl-c during stage2 does the 'somthing went wrong!' flow twice
 
 * currently if you get your arguments backwards, your requirements get deleted, replaced with empty dir. this is bad
@@ -61,3 +63,5 @@ LATER: Things that I want to do, but would put me past my deadline:
     seems to be closer to 7s on osx
 
 * restore the three-pipe subprocess system. I think things would be a lot cleaner.
+
+* dogfood venv-update during travis, tox
