@@ -125,7 +125,7 @@ def _communicate_with_select(read_set):
     )
 
 
-def capture_subprocess(cmd, **popen_kwargs):
+def capture_subprocess(cmd, encoding='UTF-8', **popen_kwargs):
     """Run a command, showing its usual outputs in real time,
     and return its stdout, stderr, as well as combined output as strings.
 
@@ -168,6 +168,12 @@ def capture_subprocess(cmd, **popen_kwargs):
     stdout_teed.closed()
     stderr_teed.closed()
     combined.closed()
+
+    if encoding is not None:
+        result = tuple(
+            bytestring.decode(encoding)
+            for bytestring in result
+        )
 
     if exit_code == 0:
         return result

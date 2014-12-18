@@ -1,6 +1,7 @@
 import pytest
 
 from .capture_subprocess import capture_subprocess
+from testing import coverage_warnings_regex
 
 
 def make_outputter():
@@ -37,14 +38,6 @@ for i in range(LINES):
 ''')
 
 
-# coverage.py adds some helpful warnings to stderr, with no way to quiet them.
-from re import compile as Regex, MULTILINE
-coverage_warnings_regex = Regex(
-    br'^Coverage.py warning: (Module .* was never imported\.|No data was collected\.)\n',
-    flags=MULTILINE,
-)
-
-
 # buglet: floating-point, zero, negative values interpreted as infinite =/
 @pytest.mark.flaky(reruns=5)
 @pytest.mark.timeout(12)  # ~50% at 6 seconds
@@ -55,15 +48,15 @@ def test_capture_subprocess(tmpdir):
     cmd = ('python', 'outputter.py')
     stdout, stderr, combined = capture_subprocess(cmd)
 
-    stderr = coverage_warnings_regex.sub(b'', stderr)
-    combined = coverage_warnings_regex.sub(b'', combined)
+    stderr = coverage_warnings_regex.sub('', stderr)
+    combined = coverage_warnings_regex.sub('', combined)
 
-    assert stdout.count(b'\n') == 3207
-    assert stderr.count(b'\n') == 793
-    assert combined.count(b'\n') == 4000
+    assert stdout.count('\n') == 3207
+    assert stderr.count('\n') == 793
+    assert combined.count('\n') == 4000
 
-    assert stdout.strip(b'.\n') == b''
-    assert stderr.strip(b'%\n') == b''
+    assert stdout.strip('.\n') == ''
+    assert stderr.strip('%\n') == ''
 
     # I'd like to also assert that the two streams are interleaved strictly by line,
     # but I haven't been able to produce such output reliably =/
