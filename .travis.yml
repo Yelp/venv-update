@@ -1,20 +1,28 @@
 language: python
 python:
-    - "2.6"
-    - "2.7"
+    # in order of most-valuable tests first
     - "3.4"
-    - pypy
     - pypy3
-env: TOXENV=test
+    - "2.6"
+    - pypy
+    - "2.7"
+env:
+    # start lint before tests
+    - TOXENV=lint
+    - TOXENV=test
+
 matrix:
     # notify a failed build as soon as anything fails
     fast_finish: true
+    # really only need to run lint twice
+    exclude:
+        - env: TOXENV=lint
     include:
-        # really only need to run lint twice
         - python: "3.4"
           env: TOXENV=lint
         - python: "2.7"
           env: TOXENV=lint
+
 install: pip install -r requirements.d/travis.txt
 script: tox
 after_success:
@@ -26,9 +34,8 @@ after_failure:
     - find -name pip.log | xargs -r tail -n99999
 
 
-# public caches only supported under sudo:false currently
-#   closest thing to documentation:
-#   http://blog.travis-ci.com/2014-10-07-free-builds-for-students-github-student-developer-pack
+# sudo:false gives us the new, faster cluster and enables caches for public repos
+# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
 sudo: false
 cache:
     directories:
