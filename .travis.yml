@@ -16,11 +16,11 @@ matrix:
     fast_finish: true
     # really only need to run lint twice
     exclude:
-        - env: TOXENV=lint
-    include:
-        - python: "3.4"
+        - python: pypy3
           env: TOXENV=lint
-        - python: "2.7"
+        - python: "2.6"
+          env: TOXENV=lint
+        - python: pypy
           env: TOXENV=lint
 
 install: pip install -r requirements.d/travis.txt
