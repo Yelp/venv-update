@@ -12,7 +12,7 @@ PY27 = sys.version_info[:2] == (2, 7)
 def test_is_relocatable(tmpdir):
     tmpdir.chdir()
     requirements('')
-    venv_update()
+    venv_update('--python=python')  # this makes pypy work right. derp.
 
     Path('virtualenv_run').rename('relocated')
 
@@ -25,7 +25,7 @@ def test_is_relocatable_different_python_version(tmpdir):
     tmpdir.chdir()
     requirements('doge==3.5.0')
 
-    python_arg = '--python=python' + ('2.7' if not PY27 else '2.6')
+    python_arg = '--python=python' + ('2.6' if PY27 else '2.7')
 
     venv_update(python_arg)
 
