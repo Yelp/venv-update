@@ -63,7 +63,6 @@ chroniker
     time1 = time() - start
     assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
-        'Pygments==2.0.1',
         'argparse==1.2.1',
         'astroid==1.3.2',
         'chroniker==0.0.0',
@@ -95,7 +94,6 @@ chroniker
     time2 = time() - start
     assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
-        'Pygments==2.0.1',
         'argparse==1.2.1',
         'astroid==1.3.2',
         'chroniker==0.0.0',
