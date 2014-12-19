@@ -65,3 +65,5 @@ LATER: Things that I want to do, but would put me past my deadline:
 * restore the three-pipe subprocess system. I think things would be a lot cleaner.
 
 * dogfood venv-update during travis, tox
+
+* we might use the wrong virtualenv if there's none installed in the current venv, but elsewhere

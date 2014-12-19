@@ -166,22 +166,8 @@ def faster_pip_packagefinder():
 
 def pip(args):
     """Run pip, in-process."""
-    import pip as pipmodule
-
-    # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
-    pipmodule.logger.consumers = []
-
-    from sys import stdout
-    stdout.write(colorize(('pip',) + args))
-    stdout.write('\n')
-    stdout.flush()
-
-    with faster_pip_packagefinder():
-        result = pipmodule.main(list(args))
-
-    if result != 0:
-        # pip exited with failure, then we should too
-        exit(result)
+    import sys
+    run((sys.executable, '-m', 'pip',) + args)
 
 
 def dist_to_req(dist):
