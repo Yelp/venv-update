@@ -295,7 +295,7 @@ def trace_requirements(requirements):
     seen_warnings = set()
     while queue:
         req = queue.popleft()
-        if req is None:
+        if req.req is None:
             # a file:/// requirement
             continue
 

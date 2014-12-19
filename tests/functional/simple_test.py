@@ -220,6 +220,20 @@ def test_update_while_active(tmpdir, capfd):
     assert 'mccabe' in pip_freeze(capfd)
 
 
+def test_eggless_url(tmpdir, capfd):
+    tmpdir.chdir()
+    requirements('')
+
+    venv_update()
+    assert 'venv-update' not in pip_freeze(capfd)
+
+    # An arbitrary git-url requirement.
+    requirements('git+git://github.com/Yelp/venv-update.git')
+
+    venv_update()
+    assert 'venv-update' in pip_freeze(capfd)
+
+
 def test_scripts_left_behind(tmpdir):
     tmpdir.chdir()
     requirements('')
