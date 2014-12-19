@@ -40,9 +40,8 @@ def install_twice(tmpdir, between):
 
     # Arbitrary packages that takes a bit of time to install:
     # Should I make a fixture c-extention to remove these dependencies?
+    # NOTE: Avoid projects that use 2to3 (urwid). It makes the runtime vary too widely.
     requirements('''\
-pudb==2014.1
-urwid==1.3.0
 simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
@@ -64,19 +63,16 @@ chroniker
     time1 = time() - start
     assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
-        'Pygments==2.0.1',
         'argparse==1.2.1',
         'astroid==1.3.2',
         'chroniker==0.0.0',
         'logilab-common==0.63.2',
-        'pudb==2014.1',
         'py==1.4.26',
         'pylint==1.4.0',
         'pytest==2.6.4',
         'simplejson==3.6.5',
         'six==1.8.0',
         'unittest2==0.8.0',
-        'urwid==1.3.0',
         'wheel==0.24.0',
         ''
     ))
@@ -98,19 +94,16 @@ chroniker
     time2 = time() - start
     assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
-        'Pygments==2.0.1',
         'argparse==1.2.1',
         'astroid==1.3.2',
         'chroniker==0.0.0',
         'logilab-common==0.63.2',
-        'pudb==2014.1',
         'py==1.4.26',
         'pylint==1.4.0',
         'pytest==2.6.4',
         'simplejson==3.6.5',
         'six==1.8.0',
         'unittest2==0.8.0',
-        'urwid==1.3.0',
         'wheel==0.24.0',
         ''
     ))
@@ -127,10 +120,12 @@ def test_noop_install_faster(tmpdir):
         pass
 
     # constrain both ends, to show that we know what's going on
-    # 2014-12-10: osx, py27: 4.3, 4.6, 5.0, 5.3
-    # 2014-12-10: osx, py34: 8-9
-    # 2014-12-10: travis, py34: 11-12
-    assert 4 < install_twice(tmpdir, between=do_nothing) < 14
+    # performance log: (clear when numbers become invalidated)
+    #   2014-12-22 travis py26: 9.4-12
+    #   2014-12-22 travis py27: 10-13
+    #   2014-12-22 travis py34: 6-14
+    #   2014-12-22 travis pypy: 5.5-7.5
+    assert 5 < install_twice(tmpdir, between=do_nothing) < 14
 
 
 @pytest.mark.flaky(reruns=5)
@@ -143,11 +138,12 @@ def test_cached_clean_install_faster(tmpdir):
 
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
-    # 2014-12-10: osx, py27: 2.1, 2.4
-    # 2014-12-16: travis, py27: 2.8-3.7
-    # 2014-12-10: osx, py34: 4.4, 4.6
-    # 2014-12-10: travis, py34: 6.5-7.0
-    assert 2 < install_twice(tmpdir, between=clean) < 7
+    # performance log: (clear when numbers become invalidated)
+    #   2014-12-22 travis py26: 4-6
+    #   2014-12-22 travis py27: 3.2-5.5
+    #   2014-12-22 travis py34: 3.7-6
+    #   2014-12-22 travis pypy: 3.5-4
+    assert 3.5 < install_twice(tmpdir, between=clean) < 7
 
 
 def test_arguments_version(tmpdir):
