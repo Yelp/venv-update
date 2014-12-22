@@ -21,9 +21,9 @@ def run(*cmd, **env):
     from .capture_subprocess import capture_subprocess
     from venv_update import colorize
     capture_subprocess(('echo', '\nTEST>', colorize(cmd)))
-    out, err, combined = capture_subprocess(cmd, env=env)
+    out, err = capture_subprocess(cmd, env=env)
     err = strip_coverage_warnings(err)
-    return out, err, combined
+    return out, err
 
 
 def venv_update(*args, **env):

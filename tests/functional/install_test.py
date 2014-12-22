@@ -10,7 +10,7 @@ def test_pip_install_flake8(tmpdir):
     run('virtualenv', 'myvenv')
     run('myvenv/bin/pip', 'install', 'pep8')
 
-    out, err, _ = venv_update_script('''\
+    out, err = venv_update_script('''\
 import json
 from venv_update import pip_install, reqnames
 print(json.dumps(sorted(reqnames(pip_install(('flake8',))))))

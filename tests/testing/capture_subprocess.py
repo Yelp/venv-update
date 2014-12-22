@@ -88,6 +88,37 @@ def tee(read_fd, write_fd, *other_fds):
     os.close(read_fd)
 
 
+def read_block(fd, block=4 * 1024):
+    """Read up to 4k bytes from fd.
+    Returns empty-string upon end of file.
+    """
+    from os import read
+    try:
+        return read(fd, block)
+    except OSError as error:
+        if error.errno == 5:
+            # pty end-of-file, sometimes:
+            #   http://bugs.python.org/issue21090#msg231093
+            return b''
+        else:
+            raise
+
+
+def read_all(fd):
+    """My own read loop, bc the one in python3.4 is derpy atm:
+    http://bugs.python.org/issue21090#msg231093
+    """
+    from os import close
+
+    result = []
+    lastread = None
+    while lastread != b'':
+        lastread = read_block(fd)
+        result.append(lastread)
+    close(fd)
+    return b''.join(result)
+
+
 def _communicate_with_select(read_set):
     """stolen from stdlib subprocess.Popen._communicate_with_select
 
@@ -113,7 +144,7 @@ def _communicate_with_select(read_set):
             raise
 
         for fd in readable:
-            data = os.read(fd, 1024)
+            data = read_block(fd, 1024)
             if data == b'':
                 os.close(fd)
                 read_set.remove(fd)
@@ -127,7 +158,7 @@ def _communicate_with_select(read_set):
 
 def capture_subprocess(cmd, encoding='UTF-8', **popen_kwargs):
     """Run a command, showing its usual outputs in real time,
-    and return its stdout, stderr, as well as combined output as strings.
+    and return its stdout, stderr output as strings.
 
     No temporary files are used.
     """
@@ -149,25 +180,21 @@ def capture_subprocess(cmd, encoding='UTF-8', **popen_kwargs):
     # writing each to three places:
     #    1. the original destination
     #    2. a pipe just for that one stream
-    #    3. a pipe that shows the combined output
     stdout_teed = Pipe()
     stderr_teed = Pipe()
-    combined = Pipe()
 
-    tee(stdout_orig.read, STDOUT, stdout_teed.write, combined.write)
-    tee(stderr_orig.read, STDERR, stderr_teed.write, combined.write)
+    tee(stdout_orig.read, STDOUT, stdout_teed.write)
+    tee(stderr_orig.read, STDERR, stderr_teed.write)
     stdout_teed.readonly()  # deadlock otherwise
     stderr_teed.readonly()  # deadlock otherwise
-    combined.readonly()  # deadlock otherwise
 
     # communicate closes fds when it's done with them
-    result = _communicate_with_select((stdout_teed.read, stderr_teed.read, combined.read))
+    result = _communicate_with_select((stdout_teed.read, stderr_teed.read))
 
     # clean up left-over processes and pipes:
     exit_code = outputter.wait()
     stdout_teed.closed()
     stderr_teed.closed()
-    combined.closed()
 
     if encoding is not None:
         result = tuple(

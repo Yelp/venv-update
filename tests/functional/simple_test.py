@@ -151,14 +151,14 @@ def test_arguments_version(tmpdir):
         venv_update('--version')
 
     assert excinfo.value.returncode == 1
-    out, err, _ = excinfo.value.result
+    out, err = excinfo.value.result
     lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr.startswith('virtualenv executable not found: /'), err
     assert lasterr.endswith('/virtualenv_run/bin/python'), err
 
     lines = [uncolor(line) for line in out.split('\n')]
     assert len(lines) == 3, lines
-    assert lines[0] == ('> virtualenv virtualenv_run --version'), repr(lines[0])
+    assert lines[0].endswith(' -m virtualenv virtualenv_run --version'), repr(lines[0])
 
 
 def test_arguments_system_packages(tmpdir):
@@ -168,7 +168,7 @@ def test_arguments_system_packages(tmpdir):
 
     venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
 
-    out, err, _ = run('virtualenv_run/bin/python', '-c', '''\
+    out, err = run('virtualenv_run/bin/python', '-c', '''\
 import sys
 for p in sys.path:
     if p.startswith(sys.real_prefix) and p.endswith("-packages"):
@@ -186,7 +186,7 @@ def pip(*args):
 
 
 def pip_freeze():
-    out, err, _ = pip('freeze', '--local')
+    out, err = pip('freeze', '--local')
 
     assert err == ''
     return out
@@ -194,13 +194,13 @@ def pip_freeze():
 
 def test_update_while_active(tmpdir):
     tmpdir.chdir()
-    requirements('')
+    requirements('virtualenv<2')
 
     venv_update()
     assert 'mccabe' not in pip_freeze()
 
     # An arbitrary small package: mccabe
-    requirements('mccabe')
+    requirements('virtualenv<2\nmccabe')
 
     venv_update_symlink_pwd()
     run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
@@ -262,25 +262,6 @@ def test_timestamps_multiple(tmpdir):
     assert_timestamps('requirements.txt', 'requirements2.txt')
 
 
-def readall(fd):
-    """My own read loop, bc the one in python3.4 is derpy atm:
-    http://bugs.python.org/issue21090#msg231093
-    """
-    from os import read
-    result = []
-    lastread = None
-    while lastread != b'':
-        try:
-            lastread = read(fd, 4 * 1024)
-        except OSError as error:
-            if error.errno == 5:  # pty end-of-file  -.-
-                break
-            else:
-                raise
-        result.append(lastread)
-    return b''.join(result).decode('US-ASCII')
-
-
 def pipe_output(read, write):
     from os import environ
     environ = environ.copy()
@@ -295,20 +276,20 @@ def pipe_output(read, write):
     )
 
     from os import close
+    from testing.capture_subprocess import read_all
     close(write)
-    result = readall(read)
-    close(read)
+    result = read_all(read)
     vupdate.wait()
 
-    # normalize for pty returning \r\n
-    out = result.replace('\r\n', '\n')
-    uncolored = uncolor(out)
-    assert uncolored == '''\
-> virtualenv virtualenv_run --version
+    result = result.decode('US-ASCII')
+    uncolored = uncolor(result)
+    assert uncolored.startswith('> ')
+    assert uncolored.endswith('''\
+virtualenv virtualenv_run --version
 1.11.6
-'''
+''')
 
-    return out, uncolored
+    return result, uncolored
 
 
 def test_colored_tty(tmpdir):

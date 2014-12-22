@@ -47,7 +47,7 @@ def test_error_with_wrong_python(tmpdir):
         stage2(executable, tmpdir)
 
     assert excinfo.value.returncode == 1
-    out, err, _ = excinfo.value.result
+    out, err = excinfo.value.result
     lasterr = err.rsplit('\n', 2)[-2]
 
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
@@ -68,7 +68,7 @@ def test_touch_on_error(tmpdir):
         stage2(executable, tmpdir)
 
     assert excinfo.value.returncode == 1
-    out, err, _ = excinfo.value.result
+    out, err = excinfo.value.result
 
     lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
