@@ -397,7 +397,7 @@ def do_install(reqs):
         reqnames(previously_installed) -
         reqnames(required_with_deps) -
         reqnames(recently_installed) -
-        set(['pip', 'setuptools'])
+        set(['pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
     )
 
     # 2) Uninstall any extraneous packages.
