@@ -2,3 +2,4 @@
 # this is used by the lint environment.
 -r prod.txt
 pytest
+pip<2

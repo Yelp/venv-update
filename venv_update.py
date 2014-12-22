@@ -200,7 +200,14 @@ def dist_to_req(dist):
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     """
-    from pip.util import dist_is_local
+    if True:
+        # pragma:no cover:pylint:disable=no-name-in-module,import-error
+        try:
+            from pip.utils import dist_is_local
+        except ImportError:
+            # pip < 6.0
+            from pip.util import dist_is_local
+
     return tuple(
         dist_to_req(dist)
         for dist in fresh_working_set()
@@ -307,13 +314,13 @@ def trace_requirements(requirements):
             #       astroid should still be installed after
             dist = conflict.args[0]
             if req.name not in seen_warnings:
-                logger.warn("Warning: version conflict: %s <-> %s" % (dist, req))
+                logger.warn("Warning: version conflict: %s <-> %s", dist, req)
                 seen_warnings.add(req.name)
 
         if dist is None:
             # TODO: test case, eg: install pylint, uninstall astroid, update
             #       -> Unmet dependency: astroid>=1.3.2 (from pylint (from -r faster.txt (line 4)))
-            logger.error('Unmet dependency: %s' % req)
+            logger.error('Unmet dependency: %s', req)
             exit(1)
 
         result.append(dist_to_req(dist))
