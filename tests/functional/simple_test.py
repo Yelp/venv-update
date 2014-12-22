@@ -120,6 +120,8 @@ def test_noop_install_faster(tmpdir):
         pass
 
     # constrain both ends, to show that we know what's going on
+    # performance log: (clear when numbers become invalidated)
+    #   2014-12-22 travis py34: 3.5-6.4
     assert 4 < install_twice(tmpdir, between=do_nothing) < 4
 
 
@@ -133,7 +135,10 @@ def test_cached_clean_install_faster(tmpdir):
 
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
-    assert 2 < install_twice(tmpdir, between=clean) < 2
+    # performance log: (clear when numbers become invalidated)
+    #   2014-12-22 travis py34: 2.1-3.9
+    #   2014-12-22 travis py27: 2.6-3.1
+    assert 2 < install_twice(tmpdir, between=clean) < 4
 
 
 def test_arguments_version(tmpdir):
