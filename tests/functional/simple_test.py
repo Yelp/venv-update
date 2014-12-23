@@ -121,8 +121,11 @@ def test_noop_install_faster(tmpdir):
 
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2014-12-22 travis py34: 3.5-6.4
-    assert 4 < install_twice(tmpdir, between=do_nothing) < 4
+    #   2014-12-22 travis py26: 9.4-12
+    #   2014-12-22 travis py27: 10-13
+    #   2014-12-22 travis py34: 6-14
+    #   2014-12-22 travis pypy: 5.5-7.5
+    assert 5 < install_twice(tmpdir, between=do_nothing) < 14
 
 
 @pytest.mark.flaky(reruns=5)
@@ -136,9 +139,11 @@ def test_cached_clean_install_faster(tmpdir):
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2014-12-22 travis py34: 2.1-3.9
-    #   2014-12-22 travis py27: 2.6-3.1
-    assert 2 < install_twice(tmpdir, between=clean) < 4
+    #   2014-12-22 travis py26: 4-6
+    #   2014-12-22 travis py27: 3.2-5.5
+    #   2014-12-22 travis py34: 3.7-6
+    #   2014-12-22 travis pypy: 3.5-4
+    assert 3.5 < install_twice(tmpdir, between=clean) < 7
 
 
 def test_arguments_version(tmpdir):
