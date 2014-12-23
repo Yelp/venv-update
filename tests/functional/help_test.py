@@ -8,10 +8,10 @@ def test_help():
     last_line = HELP_OUTPUT.rsplit('\n', 2)[-2].strip()
     assert last_line.startswith('Version control at: http')
 
-    out, err, _ = venv_update('--help')
+    out, err = venv_update('--help')
     assert strip_coverage_warnings(err) == ''
     assert out == HELP_OUTPUT
 
-    out, err, _ = venv_update('-h')
+    out, err = venv_update('-h')
     assert strip_coverage_warnings(err) == ''
     assert out == HELP_OUTPUT

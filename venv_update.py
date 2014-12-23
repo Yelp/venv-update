@@ -339,15 +339,16 @@ def path_is_within(path, within):
 def venv(venv_path, venv_args):
     """Ensure we have a virtualenv."""
     from sys import executable
-    if path_is_within(executable, venv_path):
-        # to avoid the "text file busy" issue, we must move our executable away before virtualenv runs
-        # we also copy it back, for consistency's sake
-        tmpexe = venv_path + '/bin/.python.tmp'
-        run(('mv', executable, tmpexe))
-        run(('cp', tmpexe, executable))
+    virtualenv = (executable, '-m', 'virtualenv', venv_path)
 
-    virtualenv = ('virtualenv', venv_path)
-    run(virtualenv + venv_args)
+    from os.path import exists, join
+    if exists(join(venv_path, 'bin', 'python')):
+        # already done!
+        # TODO: keep a hash of venv_args, to make this reliable
+        #   on hash diff, rm -rf (worst case: -p pypy -> -p py34)
+        pass
+    else:
+        run(virtualenv + venv_args)
 
     yield
 

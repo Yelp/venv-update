@@ -5,7 +5,7 @@ from testing import run, venv_update_script
 
 
 def get_installed():
-    out, err, _ = venv_update_script('''\
+    out, err = venv_update_script('''\
 import venv_update as v
 for p in sorted(v.reqnames(v.pip_get_installed())):
     print(p)''', venv='myvenv')

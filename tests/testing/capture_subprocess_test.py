@@ -46,19 +46,12 @@ def test_capture_subprocess(tmpdir):
     make_outputter()
 
     cmd = ('python', 'outputter.py')
-    stdout, stderr, combined = capture_subprocess(cmd)
+    stdout, stderr = capture_subprocess(cmd)
 
     stderr = coverage_warnings_regex.sub('', stderr)
-    combined = coverage_warnings_regex.sub('', combined)
 
     assert stdout.count('\n') == 3207
     assert stderr.count('\n') == 793
-    assert combined.count('\n') == 4000
 
     assert stdout.strip('.\n') == ''
     assert stderr.strip('%\n') == ''
-
-    # I'd like to also assert that the two streams are interleaved strictly by line,
-    # but I haven't been able to produce such output reliably =/
-
-    assert sorted(stdout + stderr) == sorted(combined)
