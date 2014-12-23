@@ -114,7 +114,7 @@ chroniker
     return ratio
 
 
-@pytest.mark.flaky(reruns=5)
+@pytest.mark.flaky(reruns=2)
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
@@ -128,7 +128,7 @@ def test_noop_install_faster(tmpdir):
     assert 5 < install_twice(tmpdir, between=do_nothing) < 14
 
 
-@pytest.mark.flaky(reruns=5)
+@pytest.mark.flaky(reruns=2)
 def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')
@@ -247,7 +247,7 @@ def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
 
-    venv_update('virtualenv_run', *reqs)
+    venv_update('--python=python', 'virtualenv_run', *reqs)
 
     assert firstreq.mtime() < Path('virtualenv_run').mtime()
 
