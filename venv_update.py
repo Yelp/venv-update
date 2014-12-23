@@ -200,7 +200,14 @@ def dist_to_req(dist):
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     """
-    from pip.util import dist_is_local
+    if True:
+        # pragma:no cover:pylint:disable=no-name-in-module,import-error
+        try:
+            from pip.utils import dist_is_local
+        except ImportError:
+            # pip < 6.0
+            from pip.util import dist_is_local
+
     return tuple(
         dist_to_req(dist)
         for dist in fresh_working_set()
@@ -307,13 +314,13 @@ def trace_requirements(requirements):
             #       astroid should still be installed after
             dist = conflict.args[0]
             if req.name not in seen_warnings:
-                logger.warn("Warning: version conflict: %s <-> %s" % (dist, req))
+                logger.warn("Warning: version conflict: %s <-> %s", dist, req)
                 seen_warnings.add(req.name)
 
         if dist is None:
             # TODO: test case, eg: install pylint, uninstall astroid, update
             #       -> Unmet dependency: astroid>=1.3.2 (from pylint (from -r faster.txt (line 4)))
-            logger.error('Unmet dependency: %s' % req)
+            logger.error('Unmet dependency: %s', req)
             exit(1)
 
         result.append(dist_to_req(dist))
@@ -339,15 +346,16 @@ def path_is_within(path, within):
 def venv(venv_path, venv_args):
     """Ensure we have a virtualenv."""
     from sys import executable
-    if path_is_within(executable, venv_path):
-        # to avoid the "text file busy" issue, we must move our executable away before virtualenv runs
-        # we also copy it back, for consistency's sake
-        tmpexe = venv_path + '/bin/.python.tmp'
-        run(('mv', executable, tmpexe))
-        run(('cp', tmpexe, executable))
+    virtualenv = (executable, '-m', 'virtualenv', venv_path)
 
-    virtualenv = ('virtualenv', venv_path)
-    run(virtualenv + venv_args)
+    from os.path import exists, join
+    if exists(join(venv_path, 'bin', 'python')):
+        # already done!
+        # TODO: keep a hash of venv_args, to make this reliable
+        #   on hash diff, rm -rf (worst case: -p pypy -> -p py34)
+        pass
+    else:
+        run(virtualenv + venv_args)
 
     yield
 
@@ -411,7 +419,7 @@ def do_install(reqs):
         reqnames(previously_installed) -
         reqnames(required_with_deps) -
         reqnames(recently_installed) -
-        set(['pip', 'setuptools'])
+        set(['pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
     )
 
     # 2) Uninstall any extraneous packages.

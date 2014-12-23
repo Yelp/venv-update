@@ -15,5 +15,5 @@ tox:
 
 .PHONY: clean
 clean:
-	find -name '*.pyc' -print0 | xargs -0 rm
 	rm -rf .tox
+	find -name '*.pyc' -print0 | xargs -0 -r -P4 rm
