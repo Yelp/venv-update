@@ -199,13 +199,13 @@ def pip_freeze():
 
 def test_update_while_active(tmpdir):
     tmpdir.chdir()
-    requirements('')
+    requirements('virtualenv<2')
 
     venv_update()
     assert 'mccabe' not in pip_freeze()
 
     # An arbitrary small package: mccabe
-    requirements('mccabe')
+    requirements('virtualenv<2\nmccabe')
 
     venv_update_symlink_pwd()
     run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')

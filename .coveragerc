@@ -7,7 +7,7 @@ source =
 [report]
 exclude_lines =
     # Have to re-enable the standard pragma
-    \#\s*pragma: no cover
+    \#\s*pragma:\s*no\s*cover
 
     # Don't complain if tests don't hit defensive assertion code:
     ^\s*raise AssertionError\b
