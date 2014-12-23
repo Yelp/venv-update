@@ -199,13 +199,13 @@ def pip_freeze():
 
 def test_update_while_active(tmpdir):
     tmpdir.chdir()
-    requirements('virtualenv<2')
+    requirements('virtualenv>=12')
 
     venv_update()
     assert 'mccabe' not in pip_freeze()
 
     # An arbitrary small package: mccabe
-    requirements('virtualenv<2\nmccabe')
+    requirements('virtualenv>=12\nmccabe')
 
     venv_update_symlink_pwd()
     run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
@@ -291,7 +291,7 @@ def pipe_output(read, write):
     assert uncolored.startswith('> ')
     assert uncolored.endswith('''\
 virtualenv virtualenv_run --version
-1.11.6
+12.0.1
 ''')
 
     return result, uncolored

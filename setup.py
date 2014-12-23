@@ -22,7 +22,7 @@ def main():
         py_modules=['venv_update'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
-            'virtualenv>=1.11.5,<2.0',
+            'virtualenv>=12,<13',
         ],
         entry_points={
             'console_scripts': [

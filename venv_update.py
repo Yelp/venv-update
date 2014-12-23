@@ -29,7 +29,7 @@ from contextlib import contextmanager
 # TODO: provide a way for projects to pin their own versions of wheel, argparse
 #       probably ./requirements.d/venv-update.txt
 BOOTSTRAP_VERSIONS = (
-    'argparse==1.2.1',
+    'argparse==1.2.1',  # this version ships with py27
     'wheel==0.24.0',
 )
 
@@ -166,18 +166,14 @@ def faster_pip_packagefinder():
 
 def pip(args):
     """Run pip, in-process."""
-    import pip as pipmodule
-
-    # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
-    pipmodule.logger.consumers = []
-
     from sys import stdout
     stdout.write(colorize(('pip',) + args))
     stdout.write('\n')
     stdout.flush()
 
     with faster_pip_packagefinder():
-        result = pipmodule.main(list(args))
+        from pip import main as pipmain
+        result = pipmain(list(args))
 
     if result != 0:
         # pip exited with failure, then we should too
@@ -200,13 +196,7 @@ def dist_to_req(dist):
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     """
-    if True:
-        # pragma:no cover:pylint:disable=no-name-in-module,import-error
-        try:
-            from pip.utils import dist_is_local
-        except ImportError:
-            # pip < 6.0
-            from pip.util import dist_is_local
+    from pip.utils import dist_is_local
 
     return tuple(
         dist_to_req(dist)
@@ -217,11 +207,12 @@ def pip_get_installed():
 
 def pip_parse_requirements(requirement_files):
     from pip.req import parse_requirements
+    from pip.download import PipSession
 
     # ordering matters =/
     required = []
     for reqfile in requirement_files:
-        for req in parse_requirements(reqfile):
+        for req in parse_requirements(reqfile, session=PipSession()):
             required.append(req)
     return required
 
@@ -389,7 +380,6 @@ def do_install(reqs):
     )
 
     cache_opts = (
-        '--download-cache=' + pip_download_cache,
         '--find-links=file://' + pip_wheels,
     )
 
