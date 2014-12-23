@@ -7,7 +7,7 @@ This should maybe be a package in its own right, someday.
 from __future__ import print_function
 
 import os
-from subprocess import Popen
+from subprocess import Popen, CalledProcessError
 
 
 # posix standard file descriptors
@@ -50,10 +50,24 @@ class Pipe(object):
         fdclosed(self.write)
 
 
+def pty_normalize_newlines(fd):
+    r"""
+    Twiddle the tty flags such that \n won't get munged to \r\n.
+    Details:
+        https://docs.python.org/2/library/termios.html
+        http://ftp.gnu.org/old-gnu/Manuals/glibc-2.2.3/html_chapter/libc_17.html#SEC362
+    """
+    import termios as T
+    attrs = T.tcgetattr(fd)
+    attrs[1] &= ~(T.ONLCR | T.OPOST)
+    T.tcsetattr(fd, T.TCSANOW, attrs)
+
+
 class Pty(Pipe):
     """Represent a pty as a pipe"""
     def __init__(self):  # pylint:disable=super-init-not-called
         self.read, self.write = os.openpty()
+        pty_normalize_newlines(self.read)
 
 
 def tee(read_fd, write_fd, *other_fds):
@@ -150,9 +164,14 @@ def capture_subprocess(cmd, **popen_kwargs):
     result = _communicate_with_select((stdout_teed.read, stderr_teed.read, combined.read))
 
     # clean up left-over processes and pipes:
-    outputter.wait()
+    exit_code = outputter.wait()
     stdout_teed.closed()
     stderr_teed.closed()
     combined.closed()
 
-    return result
+    if exit_code == 0:
+        return result
+    else:
+        error = CalledProcessError(exit_code, cmd)
+        error.result = result
+        raise error

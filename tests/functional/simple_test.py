@@ -4,11 +4,12 @@ from py._path.local import LocalPath as Path
 import pytest
 
 from testing import (
+    TOP,
     requirements,
     run,
+    uncolor,
     venv_update,
     venv_update_symlink_pwd,
-    TOP,
 )
 
 from sys import version_info
@@ -147,12 +148,6 @@ def test_cached_clean_install_faster(tmpdir):
     # 2014-12-10: osx, py34: 4.4, 4.6
     # 2014-12-10: travis, py34: 6.5-7.0
     assert 2 < install_twice(tmpdir, between=clean) < 7
-
-
-def uncolor(text):
-    # the colored_tty, uncolored_pipe tests cover this pretty well.
-    from re import sub
-    return sub('\033\\[[^A-z]*[A-z]', '', text)
 
 
 def test_arguments_version(tmpdir):
@@ -344,6 +339,9 @@ def test_colored_tty(tmpdir):
 
     from os import openpty
     read, write = openpty()
+
+    from testing.capture_subprocess import pty_normalize_newlines
+    pty_normalize_newlines(read)
 
     out, uncolored = pipe_output(read, write)
 
