@@ -6,7 +6,6 @@ import pytest
 from testing import (
     requirements,
     run,
-    strip_coverage_warnings,
     venv_update,
     venv_update_symlink_pwd,
     TOP,
@@ -34,7 +33,7 @@ def enable_coverage(tmpdir):
     )
 
 
-def install_twice(tmpdir, capfd, between):
+def install_twice(tmpdir, between):
     """install twice, and the second one should be faster, due to whl caching"""
     tmpdir.chdir()
 
@@ -53,7 +52,7 @@ chroniker
 
     from time import time
     enable_coverage(tmpdir)
-    assert pip_freeze(capfd) == '\n'.join((
+    assert pip_freeze() == '\n'.join((
         'cov-core==1.15.0',
         'coverage==4.0a1',
         ''
@@ -62,7 +61,7 @@ chroniker
     start = time()
     venv_update()
     time1 = time() - start
-    assert pip_freeze(capfd) == '\n'.join((
+    assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
         'Pygments==2.0.1',
         'argparse==1.2.1',
@@ -85,7 +84,7 @@ chroniker
 
     enable_coverage(tmpdir)
     # there may be more or less packages depending on what exactly happened between
-    assert 'cov-core==1.15.0\ncoverage==4.0a1\n' in pip_freeze(capfd)
+    assert 'cov-core==1.15.0\ncoverage==4.0a1\n' in pip_freeze()
 
     start = time()
     # second install should also need no network access
@@ -96,7 +95,7 @@ chroniker
         ftp_proxy='http://500.4.3.2:1',
     )
     time2 = time() - start
-    assert pip_freeze(capfd) == '\n'.join((
+    assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
         'Pygments==2.0.1',
         'argparse==1.2.1',
@@ -122,7 +121,7 @@ chroniker
 
 
 @pytest.mark.flaky(reruns=5)
-def test_noop_install_faster(tmpdir, capfd):
+def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
@@ -130,11 +129,11 @@ def test_noop_install_faster(tmpdir, capfd):
     # 2014-12-10: osx, py27: 4.3, 4.6, 5.0, 5.3
     # 2014-12-10: osx, py34: 8-9
     # 2014-12-10: travis, py34: 11-12
-    assert 4 < install_twice(tmpdir, capfd, between=do_nothing) < 13
+    assert 4 < install_twice(tmpdir, between=do_nothing) < 14
 
 
 @pytest.mark.flaky(reruns=5)
-def test_cached_clean_install_faster(tmpdir, capfd):
+def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')
         assert venv.isdir()
@@ -143,13 +142,20 @@ def test_cached_clean_install_faster(tmpdir, capfd):
 
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
+    # 2014-12-10: osx, py27: 2.1, 2.4
+    # 2014-12-16: travis, py27: 2.8-3.7
     # 2014-12-10: osx, py34: 4.4, 4.6
     # 2014-12-10: travis, py34: 6.5-7.0
-    # 2014-12-16: travis, py27: 2.8-3.7
-    assert 2.75 < install_twice(tmpdir, capfd, between=clean) < 7
+    assert 2 < install_twice(tmpdir, between=clean) < 7
 
 
-def test_arguments_version(tmpdir, capfd):
+def uncolor(text):
+    # the colored_tty, uncolored_pipe tests cover this pretty well.
+    from re import sub
+    return sub('\033\\[[^A-z]*[A-z]', '', text)
+
+
+def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
 
@@ -159,79 +165,74 @@ def test_arguments_version(tmpdir, capfd):
         venv_update('--version')
 
     assert excinfo.value.returncode == 1
-    out, err = capfd.readouterr()
-    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
+    out, err, _ = excinfo.value.result
+    lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr.startswith('virtualenv executable not found: /'), err
     assert lasterr.endswith('/virtualenv_run/bin/python'), err
 
-    lines = out.split('\n')
+    lines = [uncolor(line) for line in out.split('\n')]
     assert len(lines) == 3, lines
-    assert lines[0] == ('> virtualenv virtualenv_run --version'), lines
+    assert lines[0] == ('> virtualenv virtualenv_run --version'), repr(lines[0])
 
 
-def test_arguments_system_packages(tmpdir, capfd):
+def test_arguments_system_packages(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
     requirements('')
 
     venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
-    out, err = capfd.readouterr()  # flush buffers
 
-    run('virtualenv_run/bin/python', '-c', '''\
+    out, err, _ = run('virtualenv_run/bin/python', '-c', '''\
 import sys
 for p in sys.path:
     if p.startswith(sys.real_prefix) and p.endswith("-packages"):
         print(p)
         break
 ''')
-    out, err = capfd.readouterr()
-    assert strip_coverage_warnings(err) == ''
+    assert err == ''
     out = out.rstrip('\n')
     assert out and Path(out).isdir()
 
 
 def pip(*args):
     # because the scripts are made relative, it won't use the venv python without being explicit.
-    run('virtualenv_run/bin/python', 'virtualenv_run/bin/pip', *args)
+    return run('virtualenv_run/bin/python', 'virtualenv_run/bin/pip', *args)
 
 
-def pip_freeze(capfd):
-    out, err = capfd.readouterr()  # flush any previous output
+def pip_freeze():
+    out, err, _ = pip('freeze', '--local')
 
-    pip('freeze', '--local')
-    out, err = capfd.readouterr()
-
-    assert strip_coverage_warnings(err) == ''
+    assert err == ''
     return out
 
 
-def test_update_while_active(tmpdir, capfd):
+def test_update_while_active(tmpdir):
     tmpdir.chdir()
     requirements('')
 
     venv_update()
-    assert 'mccabe' not in pip_freeze(capfd)
+    assert 'mccabe' not in pip_freeze()
 
     # An arbitrary small package: mccabe
     requirements('mccabe')
 
     venv_update_symlink_pwd()
     run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
-    assert 'mccabe' in pip_freeze(capfd)
+    assert 'mccabe' in pip_freeze()
 
 
-def test_eggless_url(tmpdir, capfd):
+def test_eggless_url(tmpdir):
     tmpdir.chdir()
     requirements('')
 
     venv_update()
-    assert 'venv-update' not in pip_freeze(capfd)
+    assert 'venv-update' not in pip_freeze()
 
     # An arbitrary git-url requirement.
     requirements('git+git://github.com/Yelp/venv-update.git')
 
     venv_update()
-    assert 'venv-update' in pip_freeze(capfd)
+    assert 'venv-update' in pip_freeze()
 
 
 def test_scripts_left_behind(tmpdir):
@@ -326,33 +327,35 @@ def pipe_output(read, write):
     result = readall(read)
     close(read)
     vupdate.wait()
-    return result
+
+    # normalize for pty returning \r\n
+    out = result.replace('\r\n', '\n')
+    uncolored = uncolor(out)
+    assert uncolored == '''\
+> virtualenv virtualenv_run --version
+1.11.6
+'''
+
+    return out, uncolored
 
 
-def unprintable(mystring):
-    """return only the unprintable characters of a string"""
-    # TODO: unit-test
-    from string import printable
-    return ''.join(
-        character
-        for character in mystring
-        if character not in printable
-    )
+def test_colored_tty(tmpdir):
+    tmpdir.chdir()
 
-
-def test_colored_tty():
     from os import openpty
     read, write = openpty()
 
-    out = pipe_output(read, write)
+    out, uncolored = pipe_output(read, write)
 
-    assert unprintable(out), out
+    assert out != uncolored
 
 
-def test_uncolored_pipe():
+def test_uncolored_pipe(tmpdir):
+    tmpdir.chdir()
+
     from os import pipe
     read, write = pipe()
 
-    out = pipe_output(read, write)
+    out, uncolored = pipe_output(read, write)
 
-    assert not unprintable(out), out
+    assert out == uncolored
