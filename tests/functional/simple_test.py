@@ -143,7 +143,9 @@ def test_cached_clean_install_faster(tmpdir):
     #   2014-12-22 travis py27: 3.2-5.5
     #   2014-12-22 travis py34: 3.7-6
     #   2014-12-22 travis pypy: 3.5-4
-    assert 3.5 < install_twice(tmpdir, between=clean) < 7
+    #   2014-12-24 travis pypy: 2.9-3.5
+    #   2014-12-24 osx pypy: 3.9
+    assert 2.5 < install_twice(tmpdir, between=clean) < 7
 
 
 def test_arguments_version(tmpdir):
