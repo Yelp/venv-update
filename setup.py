@@ -15,14 +15,14 @@ def main():
         author_email='buck@yelp.com',
         platforms='all',
         classifiers=[
-            'License :: Public Domain',
+            'License :: MIT',
             'Programming Language :: Python :: 2.6',
             'Programming Language :: Python :: 2.7',
         ],
         py_modules=['venv_update'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
-            'virtualenv>=1.11.5',
+            'virtualenv>=1.11.5,<2.0',
         ],
         entry_points={
             'console_scripts': [

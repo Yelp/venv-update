@@ -255,16 +255,3 @@ def test_wait_for_all_subprocesses(monkeypatch):
 
     assert _nonlocal.wait == 0
     assert _nonlocal.thrown is True
-
-
-def test_unprintable():
-    from functional.simple_test import unprintable
-    import string
-    assert unprintable(string.printable) == ''
-
-    _ascii = ''.join(chr(i) for i in range(0x80))
-    assert unprintable(_ascii) == (
-        '\x00\x01\x02\x03\x04\x05\x06\x07\x08\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x7f'
-    )
-
-    assert set(_ascii) - set(unprintable(_ascii)) == set(string.printable)

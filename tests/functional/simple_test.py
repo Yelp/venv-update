@@ -4,12 +4,13 @@ from py._path.local import LocalPath as Path
 import pytest
 
 from testing import (
+    TOP,
     requirements,
     run,
     strip_coverage_warnings,
+    uncolor,
     venv_update,
     venv_update_symlink_pwd,
-    TOP,
 )
 
 from sys import version_info
@@ -40,24 +41,49 @@ def install_twice(tmpdir, between):
 
     # Arbitrary packages that takes a bit of time to install:
     # Should I make a fixture c-extention to remove these dependencies?
+    # NOTE: Avoid projects that use 2to3 (urwid). It makes the runtime vary too widely.
     requirements('''\
-pudb==2014.1
-urwid==1.3.0
 simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
-pytest
+pytest==2.6.4
+unittest2==0.8.0
+chroniker
 ''')
 
     from time import time
     enable_coverage(tmpdir)
+    assert pip_freeze() == '\n'.join((
+        'cov-core==1.15.0',
+        'coverage==4.0a1',
+        ''
+    ))
+
     start = time()
     venv_update()
     time1 = time() - start
+    assert pip_freeze() == '\n'.join((
+        'PyYAML==3.11',
+        'argparse==1.2.1',
+        'astroid==1.3.2',
+        'chroniker==0.0.0',
+        'logilab-common==0.63.2',
+        'py==1.4.26',
+        'pylint==1.4.0',
+        'pytest==2.6.4',
+        'simplejson==3.6.5',
+        'six==1.8.0',
+        'unittest2==0.8.0',
+        'wheel==0.24.0',
+        ''
+    ))
 
     between()
 
     enable_coverage(tmpdir)
+    # there may be more or less packages depending on what exactly happened between
+    assert 'cov-core==1.15.0\ncoverage==4.0a1\n' in pip_freeze()
+
     start = time()
     # second install should also need no network access
     # these are arbitrary invalid IP's
@@ -67,6 +93,21 @@ pytest
         ftp_proxy='http://500.4.3.2:1',
     )
     time2 = time() - start
+    assert pip_freeze() == '\n'.join((
+        'PyYAML==3.11',
+        'argparse==1.2.1',
+        'astroid==1.3.2',
+        'chroniker==0.0.0',
+        'logilab-common==0.63.2',
+        'py==1.4.26',
+        'pylint==1.4.0',
+        'pytest==2.6.4',
+        'simplejson==3.6.5',
+        'six==1.8.0',
+        'unittest2==0.8.0',
+        'wheel==0.24.0',
+        ''
+    ))
 
     # second install should be at least twice as fast
     ratio = time1 / time2
@@ -74,16 +115,21 @@ pytest
     return ratio
 
 
-@pytest.mark.flaky(reruns=10)
+@pytest.mark.flaky(reruns=2)
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
     # constrain both ends, to show that we know what's going on
-    assert 4 < install_twice(tmpdir, between=do_nothing) < 6
+    # performance log: (clear when numbers become invalidated)
+    #   2014-12-22 travis py26: 9.4-12
+    #   2014-12-22 travis py27: 10-13
+    #   2014-12-22 travis py34: 6-14
+    #   2014-12-22 travis pypy: 5.5-7.5
+    assert 5 < install_twice(tmpdir, between=do_nothing) < 14
 
 
-@pytest.mark.flaky(reruns=10)
+@pytest.mark.flaky(reruns=2)
 def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')
@@ -93,10 +139,17 @@ def test_cached_clean_install_faster(tmpdir):
 
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
-    assert 2 < install_twice(tmpdir, between=clean) < 5
+    # performance log: (clear when numbers become invalidated)
+    #   2014-12-22 travis py26: 4-6
+    #   2014-12-22 travis py27: 3.2-5.5
+    #   2014-12-22 travis py34: 3.7-6
+    #   2014-12-22 travis pypy: 3.5-4
+    #   2014-12-24 travis pypy: 2.9-3.5
+    #   2014-12-24 osx pypy: 3.9
+    assert 2.5 < install_twice(tmpdir, between=clean) < 7
 
 
-def test_arguments_version(tmpdir, capfd):
+def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
 
@@ -106,66 +159,74 @@ def test_arguments_version(tmpdir, capfd):
         venv_update('--version')
 
     assert excinfo.value.returncode == 1
-    out, err = capfd.readouterr()
-    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
-    errname = 'FileNotFoundError' if PY33 else 'OSError'
-    assert lasterr.startswith(errname + ': [Errno 2] No such file or directory'), err
+    out, err = excinfo.value.result
+    lasterr = err.rsplit('\n', 2)[-2]
+    assert lasterr.startswith('virtualenv executable not found: /'), err
+    assert lasterr.endswith('/virtualenv_run/bin/python'), err
 
-    lines = out.split('\n')
-    assert lines[-4] == ('> virtualenv virtualenv_run --version'), out
-    assert lines[-2].startswith('> /'), out
-    assert lines[-2].endswith('venv_update.py --stage2 virtualenv_run requirements.txt --version'), out
+    lines = [uncolor(line) for line in out.split('\n')]
+    assert len(lines) == 3, lines
+    assert lines[0].endswith(' -m virtualenv virtualenv_run --version'), repr(lines[0])
 
 
-def test_arguments_system_packages(tmpdir, capfd):
+def test_arguments_system_packages(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
     requirements('')
 
     venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
-    out, err = capfd.readouterr()  # flush buffers
 
-    run('virtualenv_run/bin/python', '-c', '''\
+    out, err = run('virtualenv_run/bin/python', '-c', '''\
 import sys
 for p in sys.path:
     if p.startswith(sys.real_prefix) and p.endswith("-packages"):
         print(p)
         break
 ''')
-    out, err = capfd.readouterr()
-    assert strip_coverage_warnings(err) == ''
+    assert err == ''
     out = out.rstrip('\n')
     assert out and Path(out).isdir()
 
 
 def pip(*args):
     # because the scripts are made relative, it won't use the venv python without being explicit.
-    run('virtualenv_run/bin/python', 'virtualenv_run/bin/pip', *args)
+    return run('virtualenv_run/bin/python', 'virtualenv_run/bin/pip', *args)
 
 
-def pip_freeze(capfd):
-    out, err = capfd.readouterr()  # flush any previous output
+def pip_freeze():
+    out, err = pip('freeze', '--local')
 
-    pip('freeze')
-    out, err = capfd.readouterr()
-
-    assert strip_coverage_warnings(err) == ''
+    assert err == ''
     return out
 
 
-def test_update_while_active(tmpdir, capfd):
+def test_update_while_active(tmpdir):
+    tmpdir.chdir()
+    requirements('virtualenv<2')
+
+    venv_update()
+    assert 'mccabe' not in pip_freeze()
+
+    # An arbitrary small package: mccabe
+    requirements('virtualenv<2\nmccabe')
+
+    venv_update_symlink_pwd()
+    run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
+    assert 'mccabe' in pip_freeze()
+
+
+def test_eggless_url(tmpdir):
     tmpdir.chdir()
     requirements('')
 
     venv_update()
-    assert 'mccabe' not in pip_freeze(capfd)
+    assert 'venv-update' not in pip_freeze()
 
-    # An arbitrary small package: mccabe
-    requirements('mccabe')
+    # An arbitrary git-url requirement.
+    requirements('git+git://github.com/Yelp/venv-update.git')
 
-    venv_update_symlink_pwd()
-    run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
-    assert 'mccabe' in pip_freeze(capfd)
+    venv_update()
+    assert 'venv-update' in pip_freeze()
 
 
 def test_scripts_left_behind(tmpdir):
@@ -189,7 +250,7 @@ def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
 
-    venv_update('virtualenv_run', *reqs)
+    venv_update('--python=python', 'virtualenv_run', *reqs)
 
     assert firstreq.mtime() < Path('virtualenv_run').mtime()
 
@@ -223,25 +284,6 @@ def test_timestamps_multiple(tmpdir):
     assert_timestamps('requirements.txt', 'requirements2.txt')
 
 
-def readall(fd):
-    """My own read loop, bc the one in python3.4 is derpy atm:
-    http://bugs.python.org/issue21090#msg231093
-    """
-    from os import read
-    result = []
-    lastread = None
-    while lastread != b'':
-        try:
-            lastread = read(fd, 4 * 1024)
-        except OSError as error:
-            if error.errno == 5:  # pty end-of-file  -.-
-                break
-            else:
-                raise
-        result.append(lastread)
-    return b''.join(result).decode('US-ASCII')
-
-
 def pipe_output(read, write):
     from os import environ
     environ = environ.copy()
@@ -256,42 +298,48 @@ def pipe_output(read, write):
     )
 
     from os import close
+    from testing.capture_subprocess import read_all
     close(write)
-    result = readall(read)
-    close(read)
+    result = read_all(read)
     vupdate.wait()
-    return result
+
+    result = result.decode('US-ASCII')
+    uncolored = uncolor(result)
+    assert uncolored.startswith('> ')
+    assert uncolored.endswith('''\
+virtualenv virtualenv_run --version
+1.11.6
+''')
+
+    return result, uncolored
 
 
-def unprintable(mystring):
-    """return only the unprintable characters of a string"""
-    from string import printable
-    return ''.join(
-        character
-        for character in mystring
-        if character not in printable
-    )
+def test_colored_tty(tmpdir):
+    tmpdir.chdir()
 
-
-def test_colored_tty():
     from os import openpty
     read, write = openpty()
 
-    out = pipe_output(read, write)
+    from testing.capture_subprocess import pty_normalize_newlines
+    pty_normalize_newlines(read)
 
-    assert unprintable(out), out
+    out, uncolored = pipe_output(read, write)
+
+    assert out != uncolored
 
 
-def test_uncolored_pipe():
+def test_uncolored_pipe(tmpdir):
+    tmpdir.chdir()
+
     from os import pipe
     read, write = pipe()
 
-    out = pipe_output(read, write)
+    out, uncolored = pipe_output(read, write)
 
-    assert not unprintable(out), out
+    assert out == uncolored
 
 
-def test_args_backward(tmpdir, capfd):
+def test_args_backward(tmpdir):
     tmpdir.chdir()
     requirements('')
 
@@ -300,9 +348,7 @@ def test_args_backward(tmpdir, capfd):
         venv_update('requirements.txt', 'myvenv')
 
     assert excinfo.value.returncode == 1
-    out, err = capfd.readouterr()
-    print('OUT:', out)
-    print('ERR:', err)
+    _, err = excinfo.value.result
     lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
     errname = 'NotADirectoryError' if PY33 else 'OSError'
     assert lasterr.startswith(errname + ': [Errno 20] Not a directory'), err

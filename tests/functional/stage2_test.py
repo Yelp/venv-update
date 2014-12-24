@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import pytest
 
-from testing import requirements, run, strip_coverage_warnings, TOP
+from testing import TOP, requirements, run, uncolor
 import venv_update
 
 
@@ -37,7 +37,7 @@ def test_trivial(tmpdir):
     stage2('myvenv/bin/python', tmpdir)
 
 
-def test_error_with_wrong_python(tmpdir, capfd):
+def test_error_with_wrong_python(tmpdir):
     from sys import executable
 
     tmpdir.chdir()
@@ -47,14 +47,14 @@ def test_error_with_wrong_python(tmpdir, capfd):
         stage2(executable, tmpdir)
 
     assert excinfo.value.returncode == 1
-    out, err = capfd.readouterr()
-    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
+    out, err = excinfo.value.result
+    lasterr = err.rsplit('\n', 2)[-2]
 
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
     assert out == ''
 
 
-def test_touch_on_error(tmpdir, capfd):
+def test_touch_on_error(tmpdir):
     from sys import executable
 
     tmpdir.chdir()
@@ -68,8 +68,11 @@ def test_touch_on_error(tmpdir, capfd):
         stage2(executable, tmpdir)
 
     assert excinfo.value.returncode == 1
-    out, err = capfd.readouterr()
-    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
+    out, err = excinfo.value.result
 
+    lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
-    assert out.startswith('> touch myvenv ')
+
+    out = uncolor(out)
+    assert out.startswith('\nSomething went wrong! ')
+    assert out.count('\n> touch myvenv ') == 1

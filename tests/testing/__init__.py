@@ -1,6 +1,7 @@
+# NOTE WELL: No side-effects are allowed in __init__ files. This means you!
 from py._path.local import LocalPath as Path
 
-TOP = Path(__file__) / '../..'
+TOP = Path(__file__) / '../../..'
 
 
 def requirements(reqs):
@@ -9,8 +10,6 @@ def requirements(reqs):
 
 
 def run(*cmd, **env):
-    from subprocess import check_call
-
     if env:
         from os import environ
         tmp = env
@@ -19,12 +18,17 @@ def run(*cmd, **env):
     else:
         env = None
 
-    check_call(cmd, env=env)
+    from .capture_subprocess import capture_subprocess
+    from venv_update import colorize
+    capture_subprocess(('echo', '\nTEST>', colorize(cmd)))
+    out, err = capture_subprocess(cmd, env=env)
+    err = strip_coverage_warnings(err)
+    return out, err
 
 
 def venv_update(*args, **env):
     # we get coverage for free via the (patched) pytest-cov plugin
-    run(
+    return run(
         'venv-update',
         *args,
         HOME=str(Path('.').realpath()),
@@ -55,7 +59,7 @@ def venv_update_script(pyscript, venv='virtualenv_run'):
     # write it to a file so we get more-reasonable stack traces
     testscript = Path('testscript.py')
     testscript.write(pyscript)
-    run('%s/bin/python' % venv, testscript.strpath)
+    return run('%s/bin/python' % venv, testscript.strpath)
 
 
 # coverage.py adds some helpful warnings to stderr, with no way to quiet them.
@@ -68,3 +72,9 @@ coverage_warnings_regex = Regex(
 
 def strip_coverage_warnings(stderr):
     return coverage_warnings_regex.sub('', stderr)
+
+
+def uncolor(text):
+    # the colored_tty, uncolored_pipe tests cover this pretty well.
+    from re import sub
+    return sub('\033\\[[^A-z]*[A-z]', '', text)
