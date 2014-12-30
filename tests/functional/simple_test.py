@@ -347,7 +347,9 @@ def test_args_backward(tmpdir):
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('requirements.txt', 'myvenv')
 
-    assert excinfo.value.returncode == 1
+    # py26 doesn't have a consistent exit code:
+    #   http://bugs.python.org/issue15033
+    assert excinfo.value.returncode != 0
     _, err = excinfo.value.result
     lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
     errname = 'NotADirectoryError' if PY33 else 'OSError'
