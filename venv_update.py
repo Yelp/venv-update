@@ -35,11 +35,11 @@ BOOTSTRAP_VERSIONS = (
 
 
 def parseargs(args):
-    # TODO: unit test
     if set(args) & set(('-h', '--help')):
         print(__doc__, end='')
         exit(0)
 
+    args = list(args)
     stage = 1
     while '--stage2' in args:
         stage = 2
@@ -76,7 +76,6 @@ def timid_relpath(arg):
 
 
 def shellescape(args):
-    # TODO: unit test
     from pipes import quote
     return ' '.join(quote(timid_relpath(arg)) for arg in args)
 
@@ -99,7 +98,6 @@ def run(cmd):
 
 
 def req_is_absolute(requirement):
-    # TODO: unit-test
     if not requirement:
         # url-style requirement
         return False
@@ -430,7 +428,6 @@ def do_install(reqs):
 
 
 def wait_for_all_subprocesses():
-    # TODO: unit-test
     from os import wait
     try:
         while True:

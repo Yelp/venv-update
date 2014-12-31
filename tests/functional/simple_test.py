@@ -7,6 +7,7 @@ from testing import (
     TOP,
     requirements,
     run,
+    strip_coverage_warnings,
     uncolor,
     venv_update,
     venv_update_symlink_pwd,
@@ -336,3 +337,24 @@ def test_uncolored_pipe(tmpdir):
     out, uncolored = pipe_output(read, write)
 
     assert out == uncolored
+
+
+def test_args_backward(tmpdir):
+    tmpdir.chdir()
+    requirements('')
+
+    from subprocess import CalledProcessError
+    with pytest.raises(CalledProcessError) as excinfo:
+        venv_update('requirements.txt', 'myvenv')
+
+    # py26 doesn't have a consistent exit code:
+    #   http://bugs.python.org/issue15033
+    assert excinfo.value.returncode != 0
+    _, err = excinfo.value.result
+    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
+    errname = 'NotADirectoryError' if PY33 else 'OSError'
+    assert lasterr.startswith(errname + ': [Errno 20] Not a directory'), err
+
+    assert Path('requirements.txt').isfile()
+    assert Path('requirements.txt').read() == ''
+    assert not Path('myvenv').exists()

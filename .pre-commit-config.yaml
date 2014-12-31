@@ -18,6 +18,6 @@
     hooks:
     -   id: system
         name: PyLint
-        entry: python -m pylint
+        entry: python -m pylint.__main__
         language: system
         files: \.py$
