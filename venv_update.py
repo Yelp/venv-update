@@ -66,8 +66,8 @@ def parseargs(args):
 
 
 def timid_relpath(arg):
-    from os.path import exists, isabs, relpath
-    if isabs(arg) and exists(arg):
+    from os.path import isabs, relpath
+    if isabs(arg):
         result = relpath(arg)
         if len(result) < len(arg):
             return result
@@ -95,6 +95,12 @@ def run(cmd):
     from subprocess import check_call
     check_call(('echo', colorize(cmd)))
     check_call(cmd)
+
+
+def info(msg):
+    # use a subprocess to ensure correct output interleaving.
+    from subprocess import check_call
+    check_call(('echo', msg))
 
 
 def req_is_absolute(requirement):
@@ -341,27 +347,53 @@ def path_is_within(path, within):
 
 
 @contextmanager
-def venv(venv_path, venv_args):
+def validated_venv(venv_path, venv_args):
     """Ensure we have a virtualenv."""
-    from sys import executable
-    virtualenv = (executable, '-m', 'virtualenv', venv_path)
+    import json
+    from sys import executable, version
+    from virtualenv import __version__ as virtualenv_version
+    # we count any existing virtualenv invalidated if any of these relevant values changes
+    validation = (
+        version,  # includes e.g. pypy version
+        virtualenv_version,
+        venv_args,
+    )
+    # normalize types, via json round-trip
+    validation = json.loads(json.dumps(validation))
 
-    from os.path import exists, join
-    if exists(join(venv_path, 'bin', 'python')):
-        # already done!
-        # TODO: keep a hash of venv_args, to make this reliable
-        #   on hash diff, rm -rf (worst case: -p pypy -> -p py34)
-        pass
-    else:
-        run(virtualenv + venv_args)
+    from os.path import join, abspath
+    venv_path = abspath(venv_path)  # this removes trailing slashes as well
+    state_path = join(venv_path, '.venv-update.state')
+
+    from os.path import isdir
+    if isdir(venv_path):
+        try:
+            with open(state_path) as state:
+                previous_state = json.load(state)
+        except IOError:
+            previous_state = {}
+
+        if previous_state.get('validation') == validation:
+            info('Keeping virtualenv from previous run.')
+            yield
+            return
+        else:
+            info('Removing invalidated virtualenv.')
+            run(('rm', '-rf', venv_path))
+
+            # run virtualenv using the same executable as last time
+            # this avoids running virtualenv against its own container
+            executable = previous_state.get('executable', executable)
+
+    run((executable, '-m', 'virtualenv', venv_path) + venv_args)
 
     yield
 
-    # Postprocess: Make our venv relocatable, since we do plan to relocate it, sometimes.
-    run(
-        virtualenv +
-        ('--relocatable', '--python={0}/bin/python'.format(venv_path))
-    )
+    with open(state_path, 'w') as state:
+        json.dump(
+            dict(executable=executable, validation=validation),
+            state,
+        )
 
 
 def do_install(reqs):
@@ -440,15 +472,16 @@ def wait_for_all_subprocesses():
 
 
 def mark_venv_invalid(venv_path, reqs):
-    from os.path import isdir
-    if isdir(venv_path):
-        print()
-        print("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
-        print("Waiting for all subprocesses to finish...", end=' ')
+    # LBYL, to attempt to avoid any exception during exception handling
+    from os.path import isdir, exists
+    if isdir(venv_path) and exists(reqs[0]):
+        info('')
+        info("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
+        info("Waiting for all subprocesses to finish...")
         wait_for_all_subprocesses()
-        print("DONE")
+        info("DONE")
         run(('touch', venv_path, '--reference', reqs[0], '--date', '1 day ago'))
-        print()
+        info('')
 
 
 def dotpy(filename):
@@ -458,34 +491,41 @@ def dotpy(filename):
         return filename
 
 
-def stage1(venv_python, reqs, venv_path):
+def venv_python(venv_path):
+    from os.path import join
+    return join(venv_path, 'bin', 'python')
+
+
+def stage1(venv_path, reqs):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 
     make a fresh venv at the right spot, and use it to perform stage 2
     """
     from os.path import exists
-    if not exists(venv_python):
-        exit('virtualenv executable not found: %s' % venv_python)
+    python = venv_python(venv_path)
+    if not exists(python):
+        exit('virtualenv executable not found: %s' % python)
 
-    run((venv_python, dotpy(__file__), '--stage2', venv_path) + reqs)
+    run((python, dotpy(__file__), '--stage2', venv_path) + reqs)
 
 
-def stage2(venv_python, reqs):
+def stage2(venv_path, reqs):
     """we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
     """
+    python = venv_python(venv_path)
     import sys
-    assert sys.executable == venv_python, "Executable not in venv: %s != %s" % (sys.executable, venv_python)
+    assert sys.executable == python, "Executable not in venv: %s != %s" % (sys.executable, python)
     return do_install(reqs)
 
 
 def venv_update(stage, venv_path, reqs, venv_args):
-    from os.path import join, abspath
-    venv_python = abspath(join(venv_path, 'bin', 'python'))
+    from os.path import abspath
+    venv_path = abspath(venv_path)
     if stage == 1:
-        with venv(venv_path, venv_args):
-            stage1(venv_python, reqs, venv_path)
+        with validated_venv(venv_path, venv_args):
+            stage1(venv_path, reqs)
     elif stage == 2:
-        stage2(venv_python, reqs)
+        stage2(venv_path, reqs)
     else:
         raise AssertionError('impossible stage value: %r' % stage)
 

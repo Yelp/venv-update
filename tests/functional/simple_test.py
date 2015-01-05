@@ -48,6 +48,7 @@ pyyaml==3.11
 pylint==1.4.0
 pytest==2.6.4
 unittest2==0.8.0
+six<=1.8.0
 chroniker
 ''')
 
@@ -211,7 +212,28 @@ def test_update_while_active(tmpdir):
     requirements('virtualenv<2\nmccabe')
 
     venv_update_symlink_pwd()
-    run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
+    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
+
+    assert err == ''
+    assert out.startswith('Keeping virtualenv from previous run.\n')
+    assert 'mccabe' in pip_freeze()
+
+
+def test_update_invalidated_while_active(tmpdir):
+    tmpdir.chdir()
+    requirements('virtualenv<2')
+
+    venv_update()
+    assert 'mccabe' not in pip_freeze()
+
+    # An arbitrary small package: mccabe
+    requirements('virtualenv<2\nmccabe')
+
+    venv_update_symlink_pwd()
+    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py --system-site-packages')
+
+    assert err == ''
+    assert out.startswith('Removing invalidated virtualenv.\n')
     assert 'mccabe' in pip_freeze()
 
 
@@ -307,7 +329,7 @@ def pipe_output(read, write):
     uncolored = uncolor(result)
     assert uncolored.startswith('> ')
     assert uncolored.endswith('''\
-virtualenv virtualenv_run --version
+/python -m virtualenv virtualenv_run --version
 1.11.6
 ''')
 
