@@ -178,30 +178,16 @@ def test_shellescape(args, expected):
     ),
 ])
 def test_shellescape_relpath(path, expected, tmpdir):
-    tmpdir = tmpdir.join('subdir')
-    tmpdir.mkdir()
     tmpdir.chdir()
     tmpfile = tmpdir.join(path)
-    tmpfile.write('')
     args = (tmpfile.strpath,)
     assert venv_update.shellescape(args) == expected
     assert expected != tmpfile.strpath
 
 
-def test_shellescape_relpath_nonexistant(tmpdir):
-    path = '../foo'
-    tmpdir = tmpdir.join('subdir')
-    tmpdir.mkdir()
-    tmpdir.chdir()
-    tmpfile = tmpdir.join(path)
-    args = (tmpfile.strpath,)
-    assert venv_update.shellescape(args) == tmpfile.strpath
-
-
 def test_shellescape_relpath_longer(tmpdir):
     tmpdir.chdir()
-    path = Path('/etc/passwd')
-    assert path.exists()
+    path = Path('/a/b')
     args = (path.strpath,)
     assert venv_update.shellescape(args) == path.strpath
 
