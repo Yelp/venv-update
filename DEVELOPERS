@@ -1,0 +1,25 @@
+Workarounds that i'll forget:
+----------------------------
+
+getting full output from a test: 
+    run:
+        py.test -k thattest -vs -n0
+    or:
+        make test ARGS='-k thattest -vs -n0'
+    or even:
+        tox -e py27-test --  -k 'specific' -n0 -vvs
+
+pip crashes with ValueError: list.remove(x): x not in list
+    add an elif at $VIRTUAL_ENV/lib/python2.6/site-packages/pip/req.py:388
+    this is fixed in v1.6
+
+make a fresh virtualenv
+    deactivate
+    rmvirtualenv venv-update
+    mkvirtualenv venv-update -a $PWD -p $(which python2.7)
+    vim $VIRTUAL_ENV/lib/python2.6/site-packages/pip/req.py # (do above pip fix)
+    pip install -r requirements.d/dev.txt
+
+coverage throws `AssertionError: Unexpected third case:`
+    # This is due to a hackitty workaround in virtualenv to a bug that no longer exists...
+    rm -rf $VIRTUAL_ENV/local
