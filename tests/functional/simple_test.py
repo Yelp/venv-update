@@ -65,7 +65,6 @@ chroniker
     time1 = time() - start
     assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
-        'argparse==1.2.1',
         'astroid==1.3.2',
         'chroniker==0.0.0',
         'logilab-common==0.63.2',
@@ -87,16 +86,15 @@ chroniker
 
     start = time()
     # second install should also need no network access
-    # these are arbitrary invalid IP's
+    # these are arbitrary invalid addresses
     venv_update(
-        http_proxy='http://300.10.20.30:40',
-        https_proxy='http://400.11.22.33:44',
-        ftp_proxy='http://500.4.3.2:1',
+        http_proxy='foo-proxy',
+        https_proxy='bar-proxy',
+        ftp_proxy='quux-proxy',
     )
     time2 = time() - start
     assert pip_freeze() == '\n'.join((
         'PyYAML==3.11',
-        'argparse==1.2.1',
         'astroid==1.3.2',
         'chroniker==0.0.0',
         'logilab-common==0.63.2',
@@ -189,13 +187,15 @@ for p in sys.path:
     assert out and Path(out).isdir()
 
 
-def pip(*args):
-    # because the scripts are made relative, it won't use the venv python without being explicit.
-    return run('virtualenv_run/bin/python', 'virtualenv_run/bin/pip', *args)
-
-
 def pip_freeze():
-    out, err = pip('freeze', '--local')
+    out, err = run('./virtualenv_run/bin/pip', 'freeze', '--local')
+
+    # Most python distributions which have argparse in the stdlib fail to
+    # expose it to setuptools as an installed package (it seems all but ubuntu
+    # do this). This results in argparse sometimes being installed locally,
+    # sometimes not, even for a specific version of python.
+    # We normalize by never looking at argparse =/
+    out = out.replace('argparse==1.2.1\n', '', 1)
 
     assert err == ''
     return out
@@ -261,7 +261,7 @@ def test_scripts_left_behind(tmpdir):
     script_path = Path('virtualenv_run/bin/pep8')
     assert not script_path.exists()
 
-    pip('install', 'pep8')
+    run('virtualenv_run/bin/pip', 'install', 'pep8')
     assert script_path.exists()
 
     venv_update()
