@@ -12,9 +12,9 @@ def test_is_relocatable(tmpdir):
 
     Path('virtualenv_run').rename('relocated')
 
-    pip = 'relocated/bin/pip'
-    assert Path(pip).exists()
-    run(pip, '--version')
+    python = 'relocated/bin/python'
+    assert Path(python).exists()
+    run(python, '-m', 'pip.__main__', '--version')
 
 
 def test_is_relocatable_different_python_version(tmpdir):
