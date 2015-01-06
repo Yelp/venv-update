@@ -20,6 +20,14 @@ make a fresh virtualenv
     vim $VIRTUAL_ENV/lib/python2.6/site-packages/pip/req.py # (do above pip fix)
     pip install -r requirements.d/dev.txt
 
+
+Bizarre failure modes:
+----------------------
+
+inexplicable "sh: not found" errors during test
+    linux can only handle 128-bytes shebangs
+    shorten the test name or something :(
+
 coverage throws `AssertionError: Unexpected third case:`
     # This is due to a hackitty workaround in virtualenv to a bug that no longer exists...
     rm -rf $VIRTUAL_ENV/local

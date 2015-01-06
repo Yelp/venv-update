@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from testing import Path, requirements, run, venv_update
 
 
-def test_is_relocatable(tmpdir):
+def test_relocatable(tmpdir):
     tmpdir.chdir()
     requirements('')
     venv_update('--python=python')  # this makes pypy work right. derp.
@@ -17,7 +17,7 @@ def test_is_relocatable(tmpdir):
     run(python, '-m', 'pip.__main__', '--version')
 
 
-def test_is_relocatable_different_python_version(tmpdir):
+def test_python_versions(tmpdir):
     tmpdir.chdir()
     requirements('doge==3.5.0')
 
