@@ -301,6 +301,7 @@ def trace_requirements(requirements):
     working_set = fresh_working_set()
 
     # breadth-first traversal:
+    errors = False
     queue = deque(requirements)
     result = []
     seen_warnings = set()
@@ -313,25 +314,25 @@ def trace_requirements(requirements):
         try:
             dist = working_set.find(req.req)
         except pkg_resources.VersionConflict as conflict:
-            # TODO: This should really be an error, but throw a warning for now, while we integrate.
-            # TODO: test case, eg: install pylint, install old astroid, update
-            #       astroid should still be installed after
             dist = conflict.args[0]
             if req.name not in seen_warnings:
-                logger.warn("Warning: version conflict: %s <-> %s", dist, req)
+                logger.error("Error: version conflict: %s <-> %s" % (dist, req))
+                errors = True
                 seen_warnings.add(req.name)
 
         if dist is None:
-            # TODO: test case, eg: install pylint, uninstall astroid, update
-            #       -> Unmet dependency: astroid>=1.3.2 (from pylint (from -r faster.txt (line 4)))
-            logger.error('Unmet dependency: %s', req)
-            exit(1)
+            logger.error('Error: unmet dependency: %s' % req)
+            errors = True
+            continue
 
         result.append(dist_to_req(dist))
 
         for dist_req in dist.requires():  # should we support extras?
             # there really shouldn't be any circular dependencies...
             queue.append(InstallRequirement(dist_req, str(req)))
+
+    if errors:
+        exit(1)
 
     return result
 
