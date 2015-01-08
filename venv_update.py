@@ -327,7 +327,7 @@ def trace_requirements(requirements):
 
         result.append(dist_to_req(dist))
 
-        for dist_req in dist.requires():  # should we support extras?
+        for dist_req in sorted(dist.requires(), key=lambda req: req.key):
             # there really shouldn't be any circular dependencies...
             queue.append(InstallRequirement(dist_req, str(req)))
 
