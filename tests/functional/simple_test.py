@@ -125,7 +125,8 @@ def test_noop_install_faster(tmpdir):
     #   2014-12-22 travis py27: 10-13
     #   2014-12-22 travis py34: 6-14
     #   2014-12-22 travis pypy: 5.5-7.5
-    assert 5 < install_twice(tmpdir, between=do_nothing) < 14
+    #   2015-01-07 linux py27: 17-34
+    assert 10 < install_twice(tmpdir, between=do_nothing) < 40
 
 
 @pytest.mark.flaky(reruns=2)
@@ -328,8 +329,9 @@ def pipe_output(read, write):
     result = result.decode('US-ASCII')
     uncolored = uncolor(result)
     assert uncolored.startswith('> ')
+    # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
     assert uncolored.endswith('''\
-/python -m virtualenv virtualenv_run --version
+ -m virtualenv virtualenv_run --version
 1.11.6
 ''')
 
