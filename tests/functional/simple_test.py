@@ -40,7 +40,7 @@ def install_twice(tmpdir, between):
     tmpdir.chdir()
 
     # Arbitrary packages that takes a bit of time to install:
-    # Should I make a fixture c-extention to remove these dependencies?
+    # Should I make a fixture c-extension to remove these dependencies?
     # NOTE: Avoid projects that use 2to3 (urwid). It makes the runtime vary too widely.
     requirements('''\
 simplejson==3.6.5
@@ -382,3 +382,16 @@ def test_args_backward(tmpdir):
     assert Path('requirements.txt').isfile()
     assert Path('requirements.txt').read() == ''
     assert not Path('myvenv').exists()
+
+
+def test_wrong_wheel(tmpdir):
+    tmpdir.chdir()
+
+    requirements('')
+    venv_update('venv1', 'requirements.txt', '-ppython2.7')
+    # A different python
+    # Before fixing, this would install argparse using the `py2-none-any`
+    # wheel, even on py3
+    ret2out, _ = venv_update('venv2', 'requirements.txt', '-ppython3.3')
+
+    assert 'py2-none-any' not in ret2out
