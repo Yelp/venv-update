@@ -142,7 +142,7 @@ def faster_find_requirement(self, req, upgrade):
             for link in glob(join(findlink, reqname + '-*.whl')):
                 link = Link('file://' + link)
                 wheel = Wheel(link.filename)
-                if wheel.version in req.req:
+                if wheel.version in req.req and wheel.supported():
                     return link
 
     # otherwise, do the full network search
