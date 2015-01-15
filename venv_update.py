@@ -498,8 +498,10 @@ def exec_(argv):
     """
     info(colorize(argv))
 
-    from sys import exitfunc
-    exitfunc()
+    # in python3, sys.exitfunc has gone away, and atexit._run_exitfuncs seems to be the only pubic-ish interface
+    #   https://hg.python.org/cpython/file/3.4/Modules/atexitmodule.c#l289
+    import atexit
+    atexit._run_exitfuncs()  # pylint:disable=protected-access
 
     from os import execv
     execv(argv[0], argv)  # never returns
