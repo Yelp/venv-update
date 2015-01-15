@@ -6,10 +6,6 @@ NOW: Should probably do before it hits users
 * acceptance tests:
    * upgrading from A==1.0 to A==2.0 works
    * downgrading "
-   * updating while active:
-      shutil.Error: `/nail/home/buck/pg/2/virtualenv_run/bin/python` and `virtualenv_run/bin/python` are the same file
-   * conflict error message
-   * all requirements already satisfied -> "must specify at least one requirement" error
 
 
 LATER: Things that I want to do, but would put me past my deadline:
@@ -54,3 +50,6 @@ LATER: Things that I want to do, but would put me past my deadline:
 * dogfood venv-update during travis, tox
 
 * test against older/newer pip/virtualenv
+
+* pytest-timeout is causing flakiness:
+   https://bitbucket.org/flub/pytest-timeout/issue/8/internalerror-valueerror-signal-only-works 
