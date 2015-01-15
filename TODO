@@ -1,15 +1,17 @@
-NOW: Should probably do before it hits users
---------------------------------------------
+NOW: Should probably do before v1.0
+-----------------------------------
 
-* ctrl-c during stage2 does the 'somthing went wrong!' flow twice
+* dogfood venv-update during travis, tox
 
-* acceptance tests:
-   * upgrading from A==1.0 to A==2.0 works
-   * downgrading "
-   * updating while active:
-      shutil.Error: `/nail/home/buck/pg/2/virtualenv_run/bin/python` and `virtualenv_run/bin/python` are the same file
-   * conflict error message
-   * all requirements already satisfied -> "must specify at least one requirement" error
+* pip6 support
+
+* test against select older virtualenv(pip) versions
+
+* change host-python requirement to simply virtualenv, any version
+    * necessitates an intermediate stage2, stage3 being the final product
+
+* speed up the (git|hg)+ case. `pip install` is currently much faster.
+
 
 
 LATER: Things that I want to do, but would put me past my deadline:
@@ -34,7 +36,6 @@ LATER: Things that I want to do, but would put me past my deadline:
 
 * pytest-timeout won't actually time-out with floating-point, zero, or negative input
 
-
 * Make doubly sure these test scenarios are covered:
    * each of these should behave similarly whether caused by the user
      (mucking between venv-updates) or the requirements file:
@@ -51,6 +52,5 @@ LATER: Things that I want to do, but would put me past my deadline:
 
 * make a fixture containing the necessary wheels for the enable_coverage function
 
-* dogfood venv-update during travis, tox
-
-* test against older/newer pip/virtualenv
+* pytest-timeout is causing flakiness:
+   https://bitbucket.org/flub/pytest-timeout/issue/8/internalerror-valueerror-signal-only-works 

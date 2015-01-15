@@ -395,3 +395,57 @@ def test_wrong_wheel(tmpdir):
     ret2out, _ = venv_update('venv2', 'requirements.txt', '-ppython3.3')
 
     assert 'py2-none-any' not in ret2out
+
+
+def flake8_older():
+    requirements('''\
+flake8==2.0
+# last pyflakes release before 0.8 was 0.7.3
+pyflakes<0.8
+
+# simply to prevent these from drifting:
+mccabe<=0.3
+pep8<=1.5.7
+''')
+    venv_update()
+    assert pip_freeze() == '\n'.join((
+        'flake8==2.0',
+        'mccabe==0.3',
+        'pep8==1.5.7',
+        'pyflakes==0.7.3',
+        'wheel==0.24.0',
+        ''
+    ))
+
+
+def flake8_newer():
+    requirements('''\
+flake8==2.2.5
+# we expect 0.8.1
+pyflakes<=0.8.1
+
+# simply to prevent these from drifting:
+mccabe<=0.3
+pep8<=1.5.7
+''')
+    venv_update()
+    assert pip_freeze() == '\n'.join((
+        'flake8==2.2.5',
+        'mccabe==0.3',
+        'pep8==1.5.7',
+        'pyflakes==0.8.1',
+        'wheel==0.24.0',
+        ''
+    ))
+
+
+def test_upgrade(tmpdir):
+    tmpdir.chdir()
+    flake8_older()
+    flake8_newer()
+
+
+def test_downgrade(tmpdir):
+    tmpdir.chdir()
+    flake8_newer()
+    flake8_older()

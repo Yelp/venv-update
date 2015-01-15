@@ -347,9 +347,8 @@ def path_is_within(path, within):
     return not relpath(path, within).startswith('..')
 
 
-@contextmanager
-def validated_venv(venv_path, venv_args):
-    """Ensure we have a virtualenv."""
+def validate_venv(venv_path, venv_args):
+    """Ensure we have a valid virtualenv."""
     import json
     from sys import executable, version
     from virtualenv import __version__ as virtualenv_version
@@ -376,7 +375,6 @@ def validated_venv(venv_path, venv_args):
 
         if previous_state.get('validation') == validation:
             info('Keeping virtualenv from previous run.')
-            yield
             return
         else:
             info('Removing invalidated virtualenv.')
@@ -388,13 +386,12 @@ def validated_venv(venv_path, venv_args):
 
     run((executable, '-m', 'virtualenv', venv_path) + venv_args)
 
-    yield
-
-    with open(state_path, 'w') as state:
-        json.dump(
-            dict(executable=executable, validation=validation),
-            state,
-        )
+    if isdir(venv_path):
+        with open(state_path, 'w') as state:
+            json.dump(
+                dict(executable=executable, validation=validation),
+                state,
+            )
 
 
 def do_install(reqs):
@@ -457,8 +454,6 @@ def do_install(reqs):
     if extraneous:
         pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 
-    return 0  # posix:success!
-
 
 def wait_for_all_subprocesses():
     from os import wait
@@ -497,6 +492,21 @@ def venv_python(venv_path):
     return join(venv_path, 'bin', 'python')
 
 
+def exec_(argv):
+    """Wrapper to os.execv which shows the command and runs any atexit handlers (for coverage's sake).
+    Like os.execv, this function never returns.
+    """
+    info(colorize(argv))
+
+    # in python3, sys.exitfunc has gone away, and atexit._run_exitfuncs seems to be the only pubic-ish interface
+    #   https://hg.python.org/cpython/file/3.4/Modules/atexitmodule.c#l289
+    import atexit
+    atexit._run_exitfuncs()  # pylint:disable=protected-access
+
+    from os import execv
+    execv(argv[0], argv)  # never returns
+
+
 def stage1(venv_path, reqs):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 
@@ -505,9 +515,9 @@ def stage1(venv_path, reqs):
     from os.path import exists
     python = venv_python(venv_path)
     if not exists(python):
-        exit('virtualenv executable not found: %s' % python)
+        return 'virtualenv executable not found: %s' % python
 
-    run((python, dotpy(__file__), '--stage2', venv_path) + reqs)
+    exec_((python, dotpy(__file__), '--stage2', venv_path) + reqs)  # never returns
 
 
 def stage2(venv_path, reqs):
@@ -523,10 +533,10 @@ def venv_update(stage, venv_path, reqs, venv_args):
     from os.path import abspath
     venv_path = abspath(venv_path)
     if stage == 1:
-        with validated_venv(venv_path, venv_args):
-            stage1(venv_path, reqs)
+        validate_venv(venv_path, venv_args)
+        return stage1(venv_path, reqs)
     elif stage == 2:
-        stage2(venv_path, reqs)
+        return stage2(venv_path, reqs)
     else:
         raise AssertionError('impossible stage value: %r' % stage)
 
