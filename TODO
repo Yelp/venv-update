@@ -3,10 +3,6 @@ NOW: Should probably do before it hits users
 
 * ctrl-c during stage2 does the 'somthing went wrong!' flow twice
 
-* acceptance tests:
-   * upgrading from A==1.0 to A==2.0 works
-   * downgrading "
-
 
 LATER: Things that I want to do, but would put me past my deadline:
 ------------------------------------------------------------
