@@ -477,7 +477,7 @@ def mark_venv_invalid(venv_path, reqs):
     from os.path import isdir, exists
     if isdir(venv_path) and exists(reqs[0]):
         info('')
-        info("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % venv_path)
+        info("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % timid_relpath(venv_path))
         info("Waiting for all subprocesses to finish...")
         wait_for_all_subprocesses()
         info("DONE")
