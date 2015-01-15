@@ -86,11 +86,11 @@ chroniker
 
     start = time()
     # second install should also need no network access
-    # these are arbitrary invalid addresses
+    # these are localhost addresses with arbitrary invalid ports
     venv_update(
-        http_proxy='foo-proxy',
-        https_proxy='bar-proxy',
-        ftp_proxy='quux-proxy',
+        http_proxy='http://127.0.0.1:111111',
+        https_proxy='https://127.0.0.1:222222',
+        ftp_proxy='ftp://127.0.0.1:333333',
     )
     time2 = time() - start
     assert pip_freeze() == '\n'.join((
