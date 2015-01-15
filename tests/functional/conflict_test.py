@@ -26,7 +26,6 @@ mccabe==0.2
 
     out = T.uncolor(out)
     assert '''
-Successfully installed flake8 mccabe pyflakes pep8 setuptools
 Cleaning up...
 Error: version conflict: mccabe 0.2 <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 
@@ -58,7 +57,6 @@ pep8==1.0
 
     out = T.uncolor(out)
     assert '''
-Successfully installed mccabe pep8 setuptools
 Cleaning up...
 Error: version conflict: mccabe 0.2 <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 Error: version conflict: pep8 1.0 <-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
