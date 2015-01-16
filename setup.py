@@ -14,6 +14,7 @@ def main():
         author='Buck Golemon',
         author_email='buck@yelp.com',
         platforms='all',
+        license='MIT',
         classifiers=[
             'License :: MIT',
             'Programming Language :: Python :: 2.6',
