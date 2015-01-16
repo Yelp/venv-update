@@ -12,6 +12,8 @@ NOW: Should probably do before v1.0
 
 * speed up the (git|hg)+ case. `pip install` is currently much faster.
 
+* new requirement: move the venv, still be able to us `./bin/thatscript` and `source activate && thatscript`
+
 
 
 LATER: Things that I want to do, but would put me past my deadline:
