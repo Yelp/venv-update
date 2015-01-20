@@ -46,6 +46,7 @@ def install_twice(tmpdir, between):
 simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
+astroid<1.3.3
 pytest==2.6.4
 unittest2==0.8.0
 six<=1.8.0
