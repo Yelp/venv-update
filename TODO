@@ -56,3 +56,8 @@ LATER: Things that I want to do, but would put me past my deadline:
 
 * pytest-timeout is causing flakiness:
    https://bitbucket.org/flub/pytest-timeout/issue/8/internalerror-valueerror-signal-only-works 
+
+* get README.md working as the long_description on pypi
+
+* try out pbr (?)
+    http://docs.openstack.org/developer/pbr/#usage
