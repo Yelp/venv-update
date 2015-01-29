@@ -467,6 +467,17 @@ def wait_for_all_subprocesses():
             raise
 
 
+def backintime(reference, filename):
+    info(colorize(('touch', filename, '--reference', reference, '--date', '1 day ago')))
+    from os.path import getmtime
+    mtime = getmtime(reference)
+
+    timestamp = mtime - 24 * 60 * 60
+
+    from os import utime
+    utime(filename, (timestamp, timestamp))
+
+
 def mark_venv_invalid(venv_path, reqs):
     # LBYL, to attempt to avoid any exception during exception handling
     from os.path import isdir, exists
@@ -476,7 +487,7 @@ def mark_venv_invalid(venv_path, reqs):
         info("Waiting for all subprocesses to finish...")
         wait_for_all_subprocesses()
         info("DONE")
-        run(('touch', venv_path, '--reference', reqs[0], '--date', '1 day ago'))
+        backintime(reqs[0], venv_path)
         info('')
 
 
