@@ -8,7 +8,7 @@ from setuptools import setup
 def main():
     setup(
         name='venv-update',
-        version='0.1.1dev0',
+        version='0.1.1',
         description="Quickly and exactly synchronize a virtualenv with a requirements.txt",
         url='https://github.com/Yelp/venv-update',
         author='Buck Golemon',
@@ -16,9 +16,17 @@ def main():
         platforms='all',
         license='MIT',
         classifiers=[
-            'License :: MIT',
+            'License :: OSI Approved :: MIT License',
             'Programming Language :: Python :: 2.6',
             'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: Implementation :: PyPy',
+            'Topic :: System :: Archiving :: Packaging',
+            'Operating System :: Unix',
+            'Intended Audience :: Developers',
+            'Development Status :: 4 - Beta',
+            'Environment :: Console',
         ],
         py_modules=['venv_update'],
         packages=find_packages('.', exclude=('tests*',)),
@@ -30,6 +38,7 @@ def main():
                 'venv-update = venv_update:main',
             ],
         },
+        keywords=['pip', 'virtualenv'],
     )  # pragma: no cover: covered by tox
 
 if __name__ == '__main__':
