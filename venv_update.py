@@ -519,7 +519,7 @@ def stage1(venv_path, reqs):
 
     # ensure that a compatible version of pip is installed
     run(('pip', '--version'))
-    run((python, '-m', 'pip', 'install', 'pip==1.5.6'))
+    run((python, '-m', 'pip.__main__', 'install', 'pip>=1.5.0,<6.0.0'))
 
     exec_((python, dotpy(__file__), '--stage2', venv_path) + reqs)  # never returns
 
