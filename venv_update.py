@@ -119,7 +119,7 @@ def faster_find_requirement(self, req, upgrade):
     from pip.index import BestVersionAlreadyInstalled
     if req_is_absolute(req.req):
         # if the version is pinned-down by a ==
-        # first try to use any installed packge that satisfies the req
+        # first try to use any installed package that satisfies the req
         if req.satisfied_by:
             if upgrade:
                 # as a matter of api, find_requirement() only raises during upgrade -- shrug
