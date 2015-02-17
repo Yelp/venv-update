@@ -1,5 +1,6 @@
 from __future__ import print_function
 from __future__ import unicode_literals
+import re
 from py._path.local import LocalPath as Path
 import pytest
 
@@ -197,7 +198,7 @@ def pip_freeze():
     # do this). This results in argparse sometimes being installed locally,
     # sometimes not, even for a specific version of python.
     # We normalize by never looking at argparse =/
-    out = out.replace('argparse==1.2.1\n', '', 1)
+    out = re.sub(r'argparse==[\d.]+\n', '', out, count=1)
 
     assert err == ''
     return out
