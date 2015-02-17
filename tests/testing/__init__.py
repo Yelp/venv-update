@@ -1,5 +1,6 @@
 # NOTE WELL: No side-effects are allowed in __init__ files. This means you!
 from py._path.local import LocalPath as Path
+from re import compile as Regex, MULTILINE
 
 TOP = Path(__file__) / '../../..'
 
@@ -63,7 +64,6 @@ def venv_update_script(pyscript, venv='virtualenv_run'):
 
 
 # coverage.py adds some helpful warnings to stderr, with no way to quiet them.
-from re import compile as Regex, MULTILINE
 coverage_warnings_regex = Regex(
     r'^Coverage.py warning: (Module .* was never imported\.|No data was collected\.)\n',
     flags=MULTILINE,
