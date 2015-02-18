@@ -14,7 +14,8 @@ else
 fi
 
 if $PYPY; then
-    py.test -n $NCPU \
+    # Having issues with memory, let's try reducing CPUs by half
+    py.test -n $((NCPU / 2)) \
         "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
 else
     coverage erase
