@@ -260,7 +260,7 @@ def pip_install(args):
     # A poor man's dependency injection: monkeypatch :(
     InstallCommand.run = install
     try:
-        pip(('install',) + args)
+        pip(('install', '--exists-action=w') + args)
     finally:
         InstallCommand.run = orig_installcommand['run']
 
