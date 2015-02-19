@@ -26,10 +26,9 @@ from __future__ import unicode_literals
 #   stdlib>=2.6 and virtualenv>1.11
 from contextlib import contextmanager
 
-# TODO: provide a way for projects to pin their own versions of wheel, argparse
+# TODO: provide a way for projects to pin their own versions of wheel
 #       probably ./requirements.d/venv-update.txt
 BOOTSTRAP_VERSIONS = (
-    'argparse==1.2.1',
     'wheel==0.24.0',
 )
 

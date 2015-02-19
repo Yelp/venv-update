@@ -18,7 +18,8 @@ if hasattr(os, 'set_inheritable'):
     # os.set_inheritable only exists in py3  pylint:disable=no-member
     set_inheritable = os.set_inheritable
 else:
-    set_inheritable = lambda *args: None
+    def set_inheritable(*_):
+        pass
 
 
 def fdclosed(fd):
