@@ -44,6 +44,11 @@ def parseargs(args):
         stage = 2
         args.remove('--stage2')
 
+    pip_this = False
+    while '--pip-this' in args:
+        pip_this = True
+        args.remove('--pip-this')
+
     virtualenv_dir = None
     requirements = []
     remaining = []
@@ -61,7 +66,7 @@ def parseargs(args):
     if not requirements:
         requirements = ['requirements.txt']
 
-    return stage, virtualenv_dir, tuple(requirements), tuple(remaining)
+    return pip_this, stage, virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
 def timid_relpath(arg):
@@ -278,6 +283,7 @@ def fresh_working_set():
     from pip._vendor import pkg_resources
 
     class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
+
         def add_entry(self, entry):
             """Same as the original .add_entry, but sets only=False, so that egg-links are honored."""
             self.entry_keys.setdefault(entry, [])
@@ -509,7 +515,7 @@ def exec_(argv):
     info(colorize(argv))
 
     # in python3, sys.exitfunc has gone away, and atexit._run_exitfuncs seems to be the only pubic-ish interface
-    #   https://hg.python.org/cpython/file/3.4/Modules/atexitmodule.c#l289
+    # https://hg.python.org/cpython/file/3.4/Modules/atexitmodule.c#l289
     import atexit
     atexit._run_exitfuncs()  # pylint:disable=protected-access
 
@@ -517,7 +523,7 @@ def exec_(argv):
     execv(argv[0], argv)  # never returns
 
 
-def stage1(venv_path, reqs):
+def stage1(pip_this, venv_path, reqs):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 
     make a fresh venv at the right spot, and use it to perform stage 2
@@ -531,7 +537,11 @@ def stage1(venv_path, reqs):
     run(('pip', '--version'))
     run((python, '-m', 'pip.__main__', 'install', 'pip>=1.5.0,<6.0.0'))
 
-    exec_((python, dotpy(__file__), '--stage2', venv_path) + reqs)  # never returns
+    if pip_this:
+        pip_install(('venv_update',))
+        exec_((python, '-m', 'venv_update', '--stage2', venv_path) + reqs)  # never returns
+    else:
+        exec_((python, dotpy(__file__), '--stage2', venv_path) + reqs)  # never returns
 
 
 def stage2(venv_path, reqs):
@@ -543,12 +553,12 @@ def stage2(venv_path, reqs):
     return do_install(reqs)
 
 
-def venv_update(stage, venv_path, reqs, venv_args):
+def venv_update(pip_this, stage, venv_path, reqs, venv_args):
     from os.path import abspath
     venv_path = abspath(venv_path)
     if stage == 1:
         validate_venv(venv_path, venv_args)
-        return stage1(venv_path, reqs)
+        return stage1(pip_this, venv_path, reqs)
     elif stage == 2:
         return stage2(venv_path, reqs)
     else:
@@ -558,11 +568,11 @@ def venv_update(stage, venv_path, reqs, venv_args):
 def main():
     from sys import argv, path
     del path[:1]  # we don't (want to) import anything from pwd or the script's directory
-    stage, venv_path, reqs, venv_args = parseargs(argv[1:])
+    pip_this, stage, venv_path, reqs, venv_args = parseargs(argv[1:])
 
     from subprocess import CalledProcessError
     try:
-        return venv_update(stage, venv_path, reqs, venv_args)
+        return venv_update(pip_this, stage, venv_path, reqs, venv_args)
     except SystemExit as error:
         exit_code = error.code
     except CalledProcessError as error:
