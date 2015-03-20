@@ -163,6 +163,7 @@ def test_arguments_version(tmpdir):
 
     assert excinfo.value.returncode == 1
     out, err = excinfo.value.result
+    err = strip_coverage_warnings(err)
     lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr.startswith('virtualenv executable not found: /'), err
     assert lasterr.endswith('/virtualenv_run/bin/python'), err

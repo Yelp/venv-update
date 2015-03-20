@@ -2,4 +2,4 @@
 -e .
 -r test.txt
 -r _lint.txt
-tox
+tox>=1.9

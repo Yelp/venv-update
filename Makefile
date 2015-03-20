@@ -13,6 +13,10 @@ test tests:
 tox:
 	tox -e lint,test
 
+.PHONY: venv
+venv:
+	tox -e venv
+
 .PHONY: clean
 clean:
 	rm -rf .tox

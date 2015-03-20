@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 import pytest
 
-from testing import TOP, requirements, run, uncolor
+from testing import TOP, requirements, run, strip_coverage_warnings, uncolor
 import venv_update
 
 
@@ -48,9 +48,11 @@ def test_error_with_wrong_python(tmpdir):
 
     assert excinfo.value.returncode == 1
     out, err = excinfo.value.result
-    lasterr = err.rsplit('\n', 2)[-2]
 
+    err = strip_coverage_warnings(err)
+    lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
+
     assert out == ''
 
 
@@ -70,6 +72,7 @@ def test_touch_on_error(tmpdir):
     assert excinfo.value.returncode == 1
     out, err = excinfo.value.result
 
+    err = strip_coverage_warnings(err)
     lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
 

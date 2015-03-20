@@ -316,7 +316,11 @@ def trace_requirements(requirements):
             dist = conflict.args[0]
             if req.name not in seen_warnings:
                 # TODO-TEST: conflict with an egg in a directory install via -e ...
-                logger.error("Error: version conflict: %r <-> %s" % (dist, req))
+                if dist.location:
+                    location = ' (%s)' % timid_relpath(dist.location)
+                else:
+                    location = ''
+                logger.error("Error: version conflict: %s%s <-> %s" % (dist, location, req))
                 errors = True
                 seen_warnings.add(req.name)
 

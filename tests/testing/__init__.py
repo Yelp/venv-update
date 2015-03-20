@@ -65,7 +65,11 @@ def venv_update_script(pyscript, venv='virtualenv_run'):
 
 # coverage.py adds some helpful warnings to stderr, with no way to quiet them.
 coverage_warnings_regex = Regex(
-    r'^Coverage.py warning: (Module .* was never imported\.|No data was collected\.)\n',
+    r'^Coverage.py warning: (%s)\n' % '|'.join((
+        r'Module .* was never imported\.',
+        r'No data was collected\.',
+        r'Module venv_update was previously imported, but not measured\.',
+    )),
     flags=MULTILINE,
 )
 
