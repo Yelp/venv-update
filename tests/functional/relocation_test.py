@@ -46,10 +46,11 @@ def test_virtualenv_moved(tmpdir):
 
     tmpdir.mkdir(original_path).chdir()
     requirements("flake8==2.4.0\n")
+    Path('run.py').write("")
     venv_update()
 
     tmpdir.chdir()
     Path(original_path).rename(new_path)
     tmpdir.join(new_path).chdir()
     venv_update()
-    run('virtualenv_run/bin/flake8')
+    run('virtualenv_run/bin/flake8', 'run.py')
