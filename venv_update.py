@@ -356,6 +356,7 @@ def validate_venv(venv_path, venv_args):
         version,  # includes e.g. pypy version
         virtualenv_version,
         venv_args,
+        venv_path,
     )
     # normalize types, via json round-trip
     validation = json.loads(json.dumps(validation))

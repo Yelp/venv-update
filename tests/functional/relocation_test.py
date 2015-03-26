@@ -38,3 +38,19 @@ def test_python_versions(tmpdir):
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
     assert out == ''
     assert err.startswith('Python 2.6')
+
+
+def test_virtualenv_moved(tmpdir):
+    original_path = 'original'
+    new_path = 'new_dir'
+
+    tmpdir.mkdir(original_path).chdir()
+    requirements("flake8==2.4.0\n")
+    Path('run.py').write("")
+    venv_update()
+
+    tmpdir.chdir()
+    Path(original_path).rename(new_path)
+    tmpdir.join(new_path).chdir()
+    venv_update()
+    run('virtualenv_run/bin/flake8', 'run.py')
