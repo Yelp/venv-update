@@ -15,7 +15,7 @@ fi
 
 if $PYPY; then
     # Having issues with memory, let's try reducing CPUs by half
-    py.test -n $((NCPU / 2)) \
+    py.test -n $((NCPU / 3)) \
         "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
 else
     coverage erase
