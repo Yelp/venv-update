@@ -1,5 +1,5 @@
 -   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: v0.3.0
+    sha: 15b678e9c67c42765c3d579e40672a332f4366d7
     hooks:
     -   id: trailing-whitespace
         files: \.(md|py|txt|sh)$
@@ -12,9 +12,8 @@
         exclude: tests/testing.*\.py$
     -   id: flake8
         files: \.py$
-
 -   repo: git://github.com/bukzor/pre-commit-system-hook.git
-    sha: v0.0
+    sha: 64a3e3f0d11f74ccd0498ea3149c8e177dd9989c
     hooks:
     -   id: system
         name: PyLint
