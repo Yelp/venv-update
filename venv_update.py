@@ -301,11 +301,13 @@ def trace_requirements(requirements):
 
     # breadth-first traversal:
     errors = False
-    queue = deque(requirements)
+    req_queue = deque(requirements)
+    processed_reqs = set()
     result = []
     seen_warnings = set()
-    while queue:
-        req = queue.popleft()
+    while req_queue:
+        req = req_queue.popleft()
+        processed_reqs.add(req.name)
         if req.req is None:
             # a file:/// requirement
             continue
@@ -328,7 +330,9 @@ def trace_requirements(requirements):
 
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
             # there really shouldn't be any circular dependencies...
-            queue.append(InstallRequirement(dist_req, str(req)))
+            new_req = InstallRequirement(dist_req, str(req))
+            if new_req.name not in processed_reqs:
+                req_queue.append(new_req)
 
     if errors:
         exit(1)
