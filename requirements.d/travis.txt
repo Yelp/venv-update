@@ -1,4 +1,4 @@
 # minimal set of packages for travis to run our test suites
-tox>=1.9
+tox>=1.9<2
 coverage
 coveralls

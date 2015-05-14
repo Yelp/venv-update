@@ -15,7 +15,7 @@ tox:
 
 .PHONY: venv
 venv:
-	tox -e venv
+	tox -ve venv
 
 .PHONY: clean
 clean:
