@@ -1,5 +1,5 @@
 -   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: c9b6161fab48f76913ec31006ea233571f927b67
+    sha: master
     hooks:
     -   id: trailing-whitespace
         files: \.(md|py|txt|sh)$

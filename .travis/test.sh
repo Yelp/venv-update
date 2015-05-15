@@ -6,14 +6,14 @@ export PROJECT=venv_update
 NCPU=$(getconf _NPROCESSORS_CONF)
 
 if python -c 'import platform; exit(not(platform.python_implementation() == "PyPy"))'; then
-    # coverage under pypy takes too dang long:
-    #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182
     PYPY=true
 else
     PYPY=false
 fi
 
 if $PYPY; then
+    # coverage under pypy takes too dang long:
+    #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182
     # Having issues with memory, let's try reducing CPUs by half
     py.test -n $((NCPU / 2)) \
         "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py

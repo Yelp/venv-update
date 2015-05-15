@@ -25,12 +25,15 @@ mccabe==0.2
     assert err == ''
 
     out = T.uncolor(out)
-    assert '''
+    assert (
+        '''
 Cleaning up...
-Error: version conflict: mccabe 0.2 (virtualenv_run/lib/python2.7/site-packages) <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: mccabe 0.2 (virtualenv_run/lib/python2.7/site-packages)'''
+        ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-''' in out
+'''
+    ) in out
 
 
 def test_multiple_issues(tmpdir):
@@ -56,11 +59,15 @@ pep8==1.0
     assert err == ''
 
     out = T.uncolor(out)
-    assert '''
+    assert (
+        '''
 Cleaning up...
-Error: version conflict: mccabe 0.2 (virtualenv_run/lib/python2.7/site-packages) <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
-Error: version conflict: pep8 1.0 (virtualenv_run/lib/python2.7/site-packages) <-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: mccabe 0.2 (virtualenv_run/lib/python2.7/site-packages)'''
+        ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: pep8 1.0 (virtualenv_run/lib/python2.7/site-packages) '''
+        '''<-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 Error: unmet dependency: pyflakes>=0.8.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-''' in out
+'''
+    )in out

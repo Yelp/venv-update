@@ -16,6 +16,8 @@ tox:
 .PHONY: venv
 venv:
 	tox -ve venv
+	# see: https://bitbucket.org/ned/coveragepy/issue/340/keyerror-subpy#comment-13671053
+	rm -rf venv-venv_update/local/
 
 .PHONY: clean
 clean:
