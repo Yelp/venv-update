@@ -3,3 +3,4 @@
 -r prod.txt
 pytest
 pip<2
+six
