@@ -1,7 +1,10 @@
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import pytest
+from testing import coverage_warnings_regex
 
 from .capture_subprocess import capture_subprocess
-from testing import coverage_warnings_regex
 
 
 def make_outputter():

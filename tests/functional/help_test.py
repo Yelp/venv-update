@@ -1,4 +1,9 @@
-from testing import strip_coverage_warnings, venv_update
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
+from testing import strip_coverage_warnings
+from testing import venv_update
+
 from venv_update import __doc__ as HELP_OUTPUT
 
 

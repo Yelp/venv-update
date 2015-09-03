@@ -1,20 +1,19 @@
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
+
 import re
-from py._path.local import LocalPath as Path
-import pytest
-
-from testing import (
-    TOP,
-    requirements,
-    run,
-    strip_coverage_warnings,
-    uncolor,
-    venv_update,
-    venv_update_symlink_pwd,
-)
-
 from sys import version_info
+
+import pytest
+from py._path.local import LocalPath as Path
+from testing import requirements
+from testing import run
+from testing import strip_coverage_warnings
+from testing import TOP
+from testing import uncolor
+from testing import venv_update
+from testing import venv_update_symlink_pwd
 PY33 = (version_info >= (3, 3))
 
 

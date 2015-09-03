@@ -1,6 +1,11 @@
 # NOTE WELL: No side-effects are allowed in __init__ files. This means you!
+from __future__ import absolute_import
+from __future__ import unicode_literals
+
+from re import compile as Regex
+from re import MULTILINE
+
 from py._path.local import LocalPath as Path
-from re import compile as Regex, MULTILINE
 
 TOP = Path(__file__) / '../../..'
 

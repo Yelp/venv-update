@@ -2,11 +2,17 @@
 We need to test "stage 2" independently for coverage measurements.
 The coverage tool loses track of it because it's run via os.exec().
 """
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
-import pytest
 
-from testing import TOP, requirements, run, strip_coverage_warnings, uncolor
+import pytest
+from testing import requirements
+from testing import run
+from testing import strip_coverage_warnings
+from testing import TOP
+from testing import uncolor
+
 import venv_update
 
 
@@ -31,7 +37,7 @@ def test_trivial(tmpdir):
     run(
         'myvenv/bin/pip',
         'install',
-        '-r', (TOP/'requirements.d/coverage.txt').strpath
+        '-r', (TOP / 'requirements.d/coverage.txt').strpath
     )
 
     stage2('myvenv/bin/python', tmpdir)

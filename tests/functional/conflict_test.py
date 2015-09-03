@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from subprocess import CalledProcessError
 
 import pytest
-
 import testing as T
 
 

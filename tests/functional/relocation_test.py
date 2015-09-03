@@ -2,7 +2,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from testing import Path, requirements, run, venv_update
+from testing import Path
+from testing import requirements
+from testing import run
+from testing import venv_update
 
 
 def test_relocatable(tmpdir):
@@ -45,15 +48,15 @@ def test_virtualenv_moved(tmpdir):
     new_path = 'new_dir'
 
     tmpdir.mkdir(original_path).chdir()
-    Path('run.py').write("")
-    requirements("flake8==2.4.0\n")
+    Path('run.py').write('')
+    requirements('flake8==2.4.0\n')
     venv_update()
     run('virtualenv_run/bin/flake8', 'run.py')
 
     tmpdir.chdir()
     Path(original_path).rename(new_path)
     tmpdir.join(new_path).chdir()
-    Path('run.py').write("")
+    Path('run.py').write('')
     venv_update()
 
     # this throws "no such file"

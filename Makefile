@@ -3,7 +3,7 @@ all: lint test
 
 .PHONY: lint
 lint:
-	pre-commit run --all
+	pre-commit run --all-files
 
 .PHONY: test tests
 test tests:

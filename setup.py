@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-
+from __future__ import absolute_import
 from __future__ import unicode_literals
+
 from setuptools import find_packages
 from setuptools import setup
 
@@ -9,7 +10,7 @@ def main():
     setup(
         name='venv-update',
         version='0.1.2dev0',
-        description="Quickly and exactly synchronize a virtualenv with a requirements.txt",
+        description='Quickly and exactly synchronize a virtualenv with a requirements.txt',
         url='https://github.com/Yelp/venv-update',
         author='Buck Golemon',
         author_email='buck@yelp.com',
