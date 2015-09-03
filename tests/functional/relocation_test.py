@@ -38,3 +38,32 @@ def test_python_versions(tmpdir):
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
     assert out == ''
     assert err.startswith('Python 2.6')
+
+
+def test_virtualenv_moved(tmpdir):
+    original_path = 'original'
+    new_path = 'new_dir'
+
+    tmpdir.mkdir(original_path).chdir()
+    Path('run.py').write("")
+    requirements("flake8==2.4.0\n")
+    venv_update()
+    run('virtualenv_run/bin/flake8', 'run.py')
+
+    tmpdir.chdir()
+    Path(original_path).rename(new_path)
+    tmpdir.join(new_path).chdir()
+    Path('run.py').write("")
+    venv_update()
+
+    # this throws "no such file"
+    try:
+        run('virtualenv_run/bin/flake8', 'run.py')
+        error = None
+    except OSError, error:
+        pass
+    assert error
+    assert error.errno == 2
+
+    # this still works tho
+    run('virtualenv_run/bin/python', 'run.py')

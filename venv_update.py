@@ -202,6 +202,7 @@ def dist_to_req(dist):
 
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
+    FIXME: does not list anything installed via -e
     """
     if True:
         # pragma:no cover:pylint:disable=no-name-in-module,import-error

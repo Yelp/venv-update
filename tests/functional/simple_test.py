@@ -47,6 +47,7 @@ def install_twice(tmpdir, between):
 simplejson==3.6.5
 pyyaml==3.11
 pylint==1.4.0
+logilab-common==0.63.2
 astroid<1.3.3
 py==1.4.26
 pytest==2.6.4

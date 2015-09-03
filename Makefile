@@ -7,7 +7,7 @@ lint:
 
 .PHONY: test tests
 test tests:
-	./.travis/test.sh $(ARGS)
+	./test $(ARGS)
 
 .PHONY: tox
 tox:
