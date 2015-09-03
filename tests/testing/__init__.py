@@ -1,5 +1,6 @@
 # NOTE WELL: No side-effects are allowed in __init__ files. This means you!
 from __future__ import absolute_import
+from __future__ import print_function
 from __future__ import unicode_literals
 
 from re import compile as Regex

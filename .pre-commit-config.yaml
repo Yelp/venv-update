@@ -22,6 +22,8 @@
         - --add-import
         - from __future__ import absolute_import
         - --add-import
+        - from __future__ import print_function
+        - --add-import
         - from __future__ import unicode_literals
 -   repo: local
     hooks:
