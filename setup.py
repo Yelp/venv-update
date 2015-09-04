@@ -13,7 +13,7 @@ def main():
         version='0.1.2dev0',
         description='Quickly and exactly synchronize a virtualenv with a requirements.txt',
         url='https://github.com/Yelp/venv-update',
-        author='Buck Golemon',
+        author='Buck Evan',
         author_email='buck@yelp.com',
         platforms='all',
         license='MIT',
