@@ -1,14 +1,25 @@
-NOW: Should probably do before v1.0
------------------------------------
+v1.0: tox support
+-----------------
+
+rename project to "pip-faster"
+"venv-update" is an auxiliary, vendorable script that depends on the rest of it
+pip-faster closely implements the pip interface, with an additional --prune option
 
 * dogfood venv-update during travis, tox
+
+* recommended tox config: install_command=pip-faster --prune {opts} {packages}
+
+* change host-python requirement to simply virtualenv, any version
+
+* STRETCH GOAL: pip6 support
+
+
+v2.0: stuff we really want
+--------------------------
 
 * pip6 support
 
 * test against select older virtualenv(pip) versions
-
-* change host-python requirement to simply virtualenv, any version
-    * necessitates an intermediate stage2, stage3 being the final product
 
 * speed up the (git|hg)+ case. `pip install` is currently much faster.
 
