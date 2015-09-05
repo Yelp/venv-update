@@ -83,10 +83,6 @@ chroniker
 
     between()
 
-    enable_coverage(tmpdir)
-    # there may be more or less packages depending on what exactly happened between
-    assert 'cov-core==1.15.0\ncoverage==4.0a1\n' in pip_freeze()
-
     start = time()
     # second install should also need no network access
     # these are localhost addresses with arbitrary invalid ports
