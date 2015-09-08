@@ -19,12 +19,13 @@ optional arguments:
 
 Version control at: https://github.com/yelp/venv-update
 '''
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from contextlib import contextmanager
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
-from contextlib import contextmanager
 
 # TODO: provide a way for projects to pin their own versions of wheel
 #       probably ./requirements.d/venv-update.txt
@@ -202,6 +203,7 @@ def dist_to_req(dist):
 
 def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
+    FIXME: does not list anything installed via -e
     """
     if True:
         # pragma:no cover:pylint:disable=no-name-in-module,import-error
@@ -278,6 +280,7 @@ def fresh_working_set():
     from pip._vendor import pkg_resources
 
     class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
+
         def add_entry(self, entry):
             """Same as the original .add_entry, but sets only=False, so that egg-links are honored."""
             self.entry_keys.setdefault(entry, [])
@@ -315,7 +318,12 @@ def trace_requirements(requirements):
         except pkg_resources.VersionConflict as conflict:
             dist = conflict.args[0]
             if req.name not in seen_warnings:
-                logger.error("Error: version conflict: %s <-> %s" % (dist, req))
+                # TODO-TEST: conflict with an egg in a directory install via -e ...
+                if dist.location:
+                    location = ' (%s)' % timid_relpath(dist.location)
+                else:
+                    location = ''
+                logger.error('Error: version conflict: %s%s <-> %s' % (dist, location, req))
                 errors = True
                 seen_warnings.add(req.name)
 
@@ -484,9 +492,9 @@ def mark_venv_invalid(venv_path, reqs):
     if isdir(venv_path) and exists(reqs[0]):
         info('')
         info("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % timid_relpath(venv_path))
-        info("Waiting for all subprocesses to finish...")
+        info('Waiting for all subprocesses to finish...')
         wait_for_all_subprocesses()
-        info("DONE")
+        info('DONE')
         backintime(reqs[0], venv_path)
         info('')
 
@@ -540,7 +548,7 @@ def stage2(venv_path, reqs):
     """
     python = venv_python(venv_path)
     import sys
-    assert sys.executable == python, "Executable not in venv: %s != %s" % (sys.executable, python)
+    assert sys.executable == python, 'Executable not in venv: %s != %s' % (sys.executable, python)
     return do_install(reqs)
 
 

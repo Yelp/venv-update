@@ -2,11 +2,17 @@
 We need to test "stage 2" independently for coverage measurements.
 The coverage tool loses track of it because it's run via os.exec().
 """
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
-import pytest
 
-from testing import TOP, requirements, run, uncolor
+import pytest
+from testing import requirements
+from testing import run
+from testing import strip_coverage_warnings
+from testing import TOP
+from testing import uncolor
+
 import venv_update
 
 
@@ -31,7 +37,7 @@ def test_trivial(tmpdir):
     run(
         'myvenv/bin/pip',
         'install',
-        '-r', (TOP/'requirements.d/coverage.txt').strpath
+        '-r', (TOP / 'requirements.d/coverage.txt').strpath
     )
 
     stage2('myvenv/bin/python', tmpdir)
@@ -48,9 +54,11 @@ def test_error_with_wrong_python(tmpdir):
 
     assert excinfo.value.returncode == 1
     out, err = excinfo.value.result
-    lasterr = err.rsplit('\n', 2)[-2]
 
+    err = strip_coverage_warnings(err)
+    lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
+
     assert out == ''
 
 
@@ -70,6 +78,7 @@ def test_touch_on_error(tmpdir):
     assert excinfo.value.returncode == 1
     out, err = excinfo.value.result
 
+    err = strip_coverage_warnings(err)
     lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr == 'AssertionError: Executable not in venv: %s != %s/myvenv/bin/python' % (executable, tmpdir.strpath)
 

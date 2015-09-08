@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
@@ -59,7 +60,10 @@ pep8''')
 
 def test_pip_get_installed():
     installed = venv_update.pip_get_installed()
-    assert 'venv-update' in venv_update.reqnames(installed)
+    installed = venv_update.reqnames(installed)
+    installed = sorted(installed)
+    print(installed)
+    assert 'pip' in installed
 
 
 @pytest.mark.parametrize('filename,expected', [

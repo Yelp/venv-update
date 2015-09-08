@@ -1,11 +1,12 @@
 from __future__ import absolute_import
+from __future__ import print_function
 from __future__ import unicode_literals
 
 from subprocess import CalledProcessError
 
 import pytest
-
 import testing as T
+from testing.python_lib import PYTHON_LIB
 
 
 def test_conflicting_reqs(tmpdir):
@@ -25,12 +26,15 @@ mccabe==0.2
     assert err == ''
 
     out = T.uncolor(out)
-    assert '''
+    assert (
+        '''
 Cleaning up...
-Error: version conflict: mccabe 0.2 <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: mccabe 0.2 (virtualenv_run/%s)'''
+        ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-''' in out
+''' % PYTHON_LIB
+    ) in out
 
 
 def test_multiple_issues(tmpdir):
@@ -56,11 +60,15 @@ pep8==1.0
     assert err == ''
 
     out = T.uncolor(out)
-    assert '''
+    assert (
+        '''
 Cleaning up...
-Error: version conflict: mccabe 0.2 <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
-Error: version conflict: pep8 1.0 <-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: mccabe 0.2 (virtualenv_run/%s)'''
+        ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: pep8 1.0 (virtualenv_run/%s) '''
+        '''<-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 Error: unmet dependency: pyflakes>=0.8.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-''' in out
+''' % (PYTHON_LIB, PYTHON_LIB)
+    ) in out

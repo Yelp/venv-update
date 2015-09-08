@@ -3,7 +3,7 @@ env:
     # putting this ahead of the `python` directive
     #   means we start all lints before any tests
     - TOXENV=lint
-    - TOXENV=test
+    - TOXENV=python
 python:
     # in order of most-valuable tests first
     - "3.4"

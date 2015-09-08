@@ -3,15 +3,21 @@ all: lint test
 
 .PHONY: lint
 lint:
-	pre-commit run --all
+	pre-commit run --all-files
 
 .PHONY: test tests
 test tests:
-	./.travis/test.sh $(ARGS)
+	./test $(ARGS)
 
 .PHONY: tox
 tox:
 	tox -e lint,test
+
+.PHONY: venv
+venv:
+	tox -ve venv
+	# see: https://bitbucket.org/ned/coveragepy/issue/340/keyerror-subpy#comment-13671053
+	rm -rf venv-venv_update/local/
 
 .PHONY: clean
 clean:

@@ -4,10 +4,13 @@ without deadlocking or temporary files.
 
 This should maybe be a package in its own right, someday.
 """
+from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
-from subprocess import Popen, CalledProcessError
+from subprocess import CalledProcessError
+from subprocess import Popen
 
 
 # posix standard file descriptors
@@ -35,6 +38,7 @@ def fdclosed(fd):
 
 class Pipe(object):
     """a convenience object, wrapping os.pipe()"""
+
     def __init__(self):
         self.read, self.write = os.pipe()
         # emulate old, inheritable os.pipe in py34
@@ -66,6 +70,7 @@ def pty_normalize_newlines(fd):
 
 class Pty(Pipe):
     """Represent a pty as a pipe"""
+
     def __init__(self):  # pylint:disable=super-init-not-called
         self.read, self.write = os.openpty()
         pty_normalize_newlines(self.read)
@@ -106,6 +111,7 @@ class Tee(object):
     """send output from read_fd to each of write_fds
     call .join() to get a complete copy of output
     """
+
     def __init__(self, read_fd, *write_fds):
         self.read = read_fd
         self.write = write_fds

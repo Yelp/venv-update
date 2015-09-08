@@ -26,6 +26,9 @@ max-line-length=131
 [TYPECHECK]
 ignored-classes=pytest,LocalPath
 
+[SIMILARITIES]
+ignore-imports=yes
+
 [DESIGN]
 min-public-methods=0
 

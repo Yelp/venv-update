@@ -1,19 +1,31 @@
 -   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: 15b678e9c67c42765c3d579e40672a332f4366d7
+    sha: 616c1ebd1898c91de9a0548866a59cbd9f4547f6
     hooks:
-    -   id: trailing-whitespace
-        files: \.(md|py|txt|sh)$
-    -   id: end-of-file-fixer
-        files: \.(md|py|txt|sh)$
+    -   id: autopep8-wrapper
+    -   id: check-added-large-files
+    -   id: check-case-conflict
+    -   id: check-docstring-first
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-xml
+    -   id: check-yaml
     -   id: debug-statements
-        files: \.py$
-    -   id: name-tests-test
-        files: tests/.+\.py$
-        exclude: tests/testing.*\.py$
+    -   id: detect-private-key
+    -   id: double-quote-string-fixer
+    -   id: end-of-file-fixer
     -   id: flake8
-        files: \.py$
--   repo: git://github.com/bukzor/pre-commit-system-hook.git
-    sha: 64a3e3f0d11f74ccd0498ea3149c8e177dd9989c
+-   repo: git://github.com/asottile/reorder_python_imports
+    sha: 3d86483455ab5bd06cc1069fdd5ac57be5463f10
+    hooks:
+    -   id: reorder-python-imports
+        args:
+        - --add-import
+        - from __future__ import absolute_import
+        - --add-import
+        - from __future__ import print_function
+        - --add-import
+        - from __future__ import unicode_literals
+-   repo: local
     hooks:
     -   id: system
         name: PyLint
