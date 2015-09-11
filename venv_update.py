@@ -424,9 +424,6 @@ def do_install(reqs):
         PIP_DOWNLOAD_CACHE=pip_download_cache,
     )
 
-    # Remove stale values from the cache that have not been accessed in a week.
-    run(['tmpwatch', '7d', pip_download_cache])
-
     cache_opts = (
         '--download-cache=' + pip_download_cache,
         '--find-links=file://' + pip_wheels,
@@ -464,6 +461,9 @@ def do_install(reqs):
     # 2) Uninstall any extraneous packages.
     if extraneous:
         pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
+
+    # Cleanup: remove stale values from the cache that have not been accessed in a week.
+    run(['tmpwatch', '7d', pip_download_cache])
 
 
 def wait_for_all_subprocesses():
