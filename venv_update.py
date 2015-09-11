@@ -425,7 +425,7 @@ def do_install(reqs):
     )
 
     # Remove stale values from the cache that have not been accessed in a week.
-    run(["tmpwatch", "7d", pip_download_cache])
+    run(['tmpwatch', '7d', pip_download_cache])
 
     cache_opts = (
         '--download-cache=' + pip_download_cache,
