@@ -499,11 +499,11 @@ def test_remove_stale_cache_values(tmpdir):
     venv_update()
 
     # Assert that we can no longer access the stale package/wheel
-    # because tmpwatch has removed them.
+    # that have been removed.
     assert not os.access(stale_cached_package, os.F_OK)
     assert not os.access(stale_cached_wheel, os.F_OK)
 
     # Assert that we can still access the fresh package/wheel,
-    # tmpwatch should not have removed them.
+    # they should not have been removed.
     assert os.access(fresh_cached_package, os.F_OK)
     assert os.access(fresh_cached_wheel, os.F_OK)

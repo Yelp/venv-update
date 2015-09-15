@@ -463,7 +463,7 @@ def do_install(reqs):
         pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 
     # Cleanup: remove stale values from the cache and wheelhouse that have not been accessed in a week.
-    run(['tmpwatch', '7d', pip_download_cache, pip_wheels])
+    run(['find', pip_download_cache, pip_wheels, '-not', '-atime', '-7', '-exec', 'rm', '-rf', '{}', '+'])
 
 
 def wait_for_all_subprocesses():
