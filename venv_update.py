@@ -462,8 +462,8 @@ def do_install(reqs):
     if extraneous:
         pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
 
-    # Cleanup: remove stale values from the cache that have not been accessed in a week.
-    run(['tmpwatch', '7d', pip_download_cache])
+    # Cleanup: remove stale values from the cache and wheelhouse that have not been accessed in a week.
+    run(['tmpwatch', '7d', pip_download_cache, pip_wheels])
 
 
 def wait_for_all_subprocesses():
