@@ -2,6 +2,7 @@
 branch = True
 source =
     venv_update
+    pip_faster
     $TOP/tests
 
 [report]

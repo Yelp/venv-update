@@ -11,3 +11,5 @@ coverage-html
 dist
 *.tmp
 tmp/
+venv-venv_update
+.cache
