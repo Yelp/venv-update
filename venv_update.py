@@ -469,6 +469,7 @@ def do_install(reqs):
     except CalledProcessError:  # Ignore errors due to concurrent file access race conditions.
         pass
 
+
 def wait_for_all_subprocesses():
     from os import wait
     try:
