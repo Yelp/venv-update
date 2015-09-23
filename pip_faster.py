@@ -360,7 +360,7 @@ def do_install(reqs):
 def main():
     from sys import argv, path
     del path[:1]  # we don't (want to) import anything from pwd or the script's directory
-    # TODO: Don't use venv-update's parseargs, instead conform to pip's args
+    # TODO(Yelp/#58): Don't use venv-update's parseargs, instead conform to pip's args
     _, _, reqs, _ = parseargs(argv[1:])
 
     try:
@@ -369,8 +369,6 @@ def main():
         exit_code = error.code
     except KeyboardInterrupt:
         exit_code = 1
-    except Exception:
-        raise
 
     return exit_code
 

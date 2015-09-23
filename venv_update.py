@@ -233,7 +233,7 @@ def stage2(venv_path, reqs):
 
     import subprocess
     import os
-    # TODO: Don't rely on pip_faster.py being vendored alongside this script
+    # TODO(Yelp/#70): Don't rely on pip_faster.py being vendored alongside this script
     pip_faster = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pip_faster.py')
     return subprocess.check_call((python, pip_faster) + reqs)
 
