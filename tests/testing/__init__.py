@@ -48,15 +48,17 @@ def venv_update_symlink_pwd():
     # surely there's a better way -.-
     # NOTE: `pip install TOP` causes an infinite copyfiles loop, under tox >.<
     from venv_update import __file__ as venv_update_path, dotpy
-    from pip_faster import __file__ as pip_faster_path
 
     # symlink so that we get coverage, where possible
     venv_update_path = Path(dotpy(venv_update_path))
-    pip_faster_path = Path(dotpy(pip_faster_path))
     local_vu = Path(venv_update_path.basename)
     if local_vu.exists():
         local_vu.remove()
     local_vu.mksymlinkto(venv_update_path)
+
+    # TODO(Yelp/#70): remove this -- we shouldn't need to vendor pip-faster
+    from pip_faster import __file__ as pip_faster_path
+    pip_faster_path = Path(dotpy(pip_faster_path))
     local_pf = Path(pip_faster_path.basename)
     if local_pf.exists():
         local_pf.remove()
