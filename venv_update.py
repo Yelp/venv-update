@@ -277,7 +277,11 @@ def pip_install(args):
 
 def fresh_working_set():
     """return a pkg_resources "working set", representing the *currently* installed pacakges"""
-    from pip._vendor import pkg_resources
+    try:
+        from pip._vendor import pkg_resources
+    except ImportError:  # pragma: no cover
+        # Debian de-vendorizes the version of pip it ships
+        import pkg_resources
 
     class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
 
@@ -298,7 +302,11 @@ def trace_requirements(requirements):
     from collections import deque
     from pip import logger
     from pip.req import InstallRequirement
-    from pip._vendor import pkg_resources
+    try:
+        from pip._vendor import pkg_resources
+    except ImportError:  # pragma: no cover
+        # Debian de-vendorizes the version of pip it ships
+        import pkg_resources
 
     working_set = fresh_working_set()
 
