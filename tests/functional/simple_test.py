@@ -453,57 +453,62 @@ def test_downgrade(tmpdir):
     flake8_older()
 
 
+def utime(path, time):
+    """set both mtime and atime of a py.path object"""
+    from os import utime
+    utime(path.strpath, (time, time))
+
+
 def test_remove_stale_cache_values(tmpdir):
     """Tests that we remove stale (older than a week) cached packages
     and wheels, while still keeping everything created within the past week.
     """
-    import os
     import time
 
     tmpdir.chdir()
-    home_path = str(Path('.').realpath())
+    home_path = Path()
 
-    pip_path = home_path + '/.pip'
-    cache_path = pip_path + '/cache'
-    wheelhouse_path = pip_path + '/wheelhouse'
+    pip_path = home_path / '.pip'
+    cache_path = pip_path / 'cache'
+    wheelhouse_path = pip_path / 'wheelhouse'
 
-    stale_cached_package = cache_path + '/stale_package'
-    fresh_cached_package = cache_path + '/new_package'
+    stale_cached_package = cache_path / 'stale_package'
+    fresh_cached_package = cache_path / 'new_package'
 
-    stale_cached_wheel = wheelhouse_path + '/stale_wheel'
-    fresh_cached_wheel = wheelhouse_path + '/new_wheel'
+    stale_cached_wheel = wheelhouse_path / 'stale_wheel'
+    fresh_cached_wheel = wheelhouse_path / 'new_wheel'
 
     # Creates a cached package and wheel in their respective
     # .pip/cache/ and .pip/wheelhouse directories.
-    os.makedirs(stale_cached_package)
-    os.makedirs(fresh_cached_package)
-    os.makedirs(stale_cached_wheel)
-    os.makedirs(fresh_cached_wheel)
+    stale_cached_package.ensure(dir=True)
+    fresh_cached_package.ensure(dir=True)
+    stale_cached_wheel.ensure()
+    fresh_cached_wheel.ensure()
 
     # Create some rough times for testing. These represent, in
     # seconds since epoch, a time from today, this week, and last month
     seconds_in_day = 86400
-    today_time = int(time.time())
-    this_week_time = int(time.time()) - seconds_in_day * 3
-    last_month_time = int(time.time()) - seconds_in_day * 40
+    now = time.time()
+    this_week = now - seconds_in_day * 3
+    last_month = now - seconds_in_day * 40
 
     # Set access times of stale package/wheel to be older than a week.
-    os.utime(stale_cached_package, (0, 0))  # Jan 1, 1970
-    os.utime(stale_cached_wheel, (last_month_time, last_month_time))
+    utime(stale_cached_package, 0)  # Jan 1, 1970
+    utime(stale_cached_wheel, last_month)
 
     # Set access times of fresh package/wheel to be within the past week.
-    os.utime(fresh_cached_package, (today_time, today_time))
-    os.utime(fresh_cached_wheel, (this_week_time, this_week_time))
+    utime(fresh_cached_package, now)
+    utime(fresh_cached_wheel, this_week)
 
     requirements('')
     venv_update()
 
     # Assert that we can no longer access the stale package/wheel
     # that have been removed.
-    assert not os.access(stale_cached_package, os.F_OK)
-    assert not os.access(stale_cached_wheel, os.F_OK)
+    assert not stale_cached_package.exists()
+    assert not stale_cached_wheel.exists()
 
     # Assert that we can still access the fresh package/wheel,
     # they should not have been removed.
-    assert os.access(fresh_cached_package, os.F_OK)
-    assert os.access(fresh_cached_wheel, os.F_OK)
+    assert fresh_cached_package.exists()
+    assert fresh_cached_wheel.exists()
