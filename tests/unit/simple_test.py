@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 from testing import Path
 
+import pip_faster
 import venv_update
 
 
@@ -41,7 +42,7 @@ file:///my/random/project
 pep8''')
 
     # show that ordering is preserved in the parse
-    parsed = venv_update.pip_parse_requirements(('reqs.txt',))
+    parsed = pip_faster.pip_parse_requirements(('reqs.txt',))
     assert [
         (req.name, req.url)
         for req in parsed
@@ -59,8 +60,8 @@ pep8''')
 
 
 def test_pip_get_installed():
-    installed = venv_update.pip_get_installed()
-    installed = venv_update.reqnames(installed)
+    installed = pip_faster.pip_get_installed()
+    installed = pip_faster.reqnames(installed)
     installed = sorted(installed)
     print(installed)
     assert 'pip' in installed
@@ -77,30 +78,6 @@ def test_pip_get_installed():
 ])
 def test_dotpy(filename, expected):
     assert venv_update.dotpy(filename) == expected
-
-
-@pytest.mark.parametrize('path,within,expected', [
-    ('foo.py', '', True),
-    ('foo.py', '.', True),
-    ('foo.py', '..', True),
-    ('foo.py', 'a', False),
-    ('a/foo.py', '', True),
-    ('a/foo.py', '.', True),
-    ('a/foo.py', '..', True),
-    ('a/foo.py', 'a', True),
-    ('a/foo.py', 'b', False),
-    ('/a/b', '/a/b', True),
-    ('/a/b/', '/a/b', True),
-    ('/a/b/', '/a/b', True),
-    ('/a/b/c', '/a/b', True),
-    ('/a/e', '/a/b', False),
-    ('', '/a/b', False),
-    ('.', '/a/b', False),
-    ('/e/b', '/a/b', False),
-    ('b', '/a/b', False),
-])
-def test_path_is_within(path, within, expected):
-    assert venv_update.path_is_within(path, within) == expected
 
 
 @pytest.mark.parametrize('args,expected', [
@@ -220,11 +197,11 @@ def test_shellescape_relpath_longer(tmpdir):
 def test_req_is_absolute(req, expected):
     from pkg_resources import Requirement
     req = Requirement.parse(req)
-    assert venv_update.req_is_absolute(req) is expected
+    assert pip_faster.req_is_absolute(req) is expected
 
 
 def test_req_is_absolute_null():
-    assert venv_update.req_is_absolute(None) is False
+    assert pip_faster.req_is_absolute(None) is False
 
 
 def test_wait_for_all_subprocesses(monkeypatch):

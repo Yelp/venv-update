@@ -8,8 +8,8 @@ from testing import venv_update_script
 
 def get_installed():
     out, err = venv_update_script('''\
-import venv_update as v
-for p in sorted(v.reqnames(v.pip_get_installed())):
+import pip_faster as p
+for p in sorted(p.reqnames(p.pip_get_installed())):
     print(p)''', venv='myvenv')
 
     assert err == ''

@@ -10,7 +10,7 @@ from setuptools import setup
 def main():
     setup(
         name='venv-update',
-        version='0.1.2dev0',
+        version='0.1.2dev2',
         description='Quickly and exactly synchronize a virtualenv with a requirements.txt',
         url='https://github.com/Yelp/venv-update',
         author='Buck Evan',
@@ -30,7 +30,7 @@ def main():
             'Development Status :: 4 - Beta',
             'Environment :: Console',
         ],
-        py_modules=['venv_update'],
+        py_modules=['venv_update', 'pip_faster'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
             'virtualenv>=1.11.5,<2.0',
@@ -38,6 +38,7 @@ def main():
         entry_points={
             'console_scripts': [
                 'venv-update = venv_update:main',
+                'pip-faster = pip_faster:main',
             ],
         },
         keywords=['pip', 'virtualenv'],

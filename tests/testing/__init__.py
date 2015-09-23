@@ -56,6 +56,14 @@ def venv_update_symlink_pwd():
         local_vu.remove()
     local_vu.mksymlinkto(venv_update_path)
 
+    # TODO(Yelp/#70): remove this -- we shouldn't need to vendor pip-faster
+    from pip_faster import __file__ as pip_faster_path
+    pip_faster_path = Path(dotpy(pip_faster_path))
+    local_pf = Path(pip_faster_path.basename)
+    if local_pf.exists():
+        local_pf.remove()
+    local_pf.mksymlinkto(pip_faster_path)
+
 
 def venv_update_script(pyscript, venv='virtualenv_run'):
     """Run a python script that imports venv_update"""
