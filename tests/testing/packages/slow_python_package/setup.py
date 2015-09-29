@@ -1,9 +1,15 @@
 # pylint:disable=import-error,invalid-name,no-init
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+
 from distutils.command.build import build as _build
+
 from setuptools import setup
 
 
 class build(_build):
+
     def run(self):
         # Simulate a slow package
         import time
@@ -13,8 +19,8 @@ class build(_build):
 
 
 setup(
-    name='slow_python_package',
+    name=str('slow_python_package'),
     version='0.1.0',
-    py_modules=['slow_python_package'],
+    py_modules=[str('slow_python_package')],
     cmdclass={'build': build},
 )

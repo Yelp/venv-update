@@ -6,7 +6,7 @@ output-format=colorized
 reports=no
 
 [BASIC]
-good-names=fd
+good-names=fd,ip
 
 #const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
 const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
@@ -25,7 +25,7 @@ max-line-length=131
 
 [TYPECHECK]
 ignored-classes=pytest,LocalPath
-ignored-modules=distutils
+ignored-modules=distutils,py
 
 [SIMILARITIES]
 ignore-imports=yes

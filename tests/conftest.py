@@ -3,16 +3,18 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import pytest
-import shutil
+import socket
 import subprocess
 import sys
 import tempfile
 import time
-import socket
 from errno import ECONNREFUSED
 
+import py.path  # pylint:disable=import-error
+import pytest
 import six
+from testing import TOP
+from testing.ephemeral_port_reserve import reserve
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -33,30 +35,40 @@ def no_pythonpath_environment_var():
 def pypi_server():
     # Need to use tempfile.mkdtemp because we're session scoped
     # (otherwise I'd use the `tmpdir` fixture)
-    tmpdir = tempfile.mkdtemp()
-    for package in os.listdir('tests/testing/packages'):
-        pkg_dir = os.path.join(tmpdir, package)
-        os.makedirs(pkg_dir)
-        subprocess.check_call(
-            (sys.executable, 'setup.py', 'sdist', '--dist-dir', pkg_dir),
-            cwd='tests/testing/packages/' + package,
-        )
+    packages = py.path.local(tempfile.mkdtemp('packages'))
+    orig_packages = TOP.join('tests/testing/packages')
 
-    port = 9001
-    proc = subprocess.Popen(
-        (sys.executable, '-m', six.moves.SimpleHTTPServer.__name__, str(port)),
-        cwd=tmpdir,
-    )
+    # setuptools explodes if you try to run multiple instances simultaneously
+    # in the same directory, so we need to make a copy for each thread.
+    orig_packages.copy(packages)
+    for package in packages.listdir():
+        with package.as_cwd():
+            subprocess.check_call((sys.executable, 'setup.py', 'sdist'))
 
-    while not service_up(port):
-        time.sleep(.1)
+    port = str(reserve())
+    cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port, packages.strpath)
+    proc = subprocess.Popen(cmd, close_fds=True)
+    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + port
+
+    limit = 10
+    poll = .1
+    while True:
+        if proc.poll() is not None:
+            raise AssertionError('pypi ended! (code %i)' % proc.returncode)
+        elif service_up(port):
+            break
+        elif limit > 0:
+            time.sleep(poll)
+            limit -= poll
+        else:
+            raise AssertionError('pypi server never became ready!')
 
     try:
         yield
     finally:
         proc.terminate()
         proc.wait()
-        shutil.rmtree(tmpdir)
+        packages.remove()
 
 
 def service_up(port):
@@ -73,7 +85,7 @@ def service_up(port):
         elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
             errno = error.args[0].errno
         else:
-            raise ValueError("Could not find error number: %r" % error)
+            raise ValueError('Could not find error number: %r' % error)
 
         if errno == ECONNREFUSED:
             return False

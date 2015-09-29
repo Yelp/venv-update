@@ -14,10 +14,14 @@ tox:
 	tox -e lint,test
 
 .PHONY: venv
-venv:
-	tox -ve venv
-	# see: https://bitbucket.org/ned/coveragepy/issue/340/keyerror-subpy#comment-13671053
-	rm -rf venv-venv_update/local/
+venv: venv-venv_update
+venv-venv_update: setup.py requirements.d/* Makefile
+	rm -rf venv-venv_update
+	virtualenv --python=python2.7 venv-venv_update
+	rm -rf venv-venv_update/local
+	# TODO use pip-faster
+	venv-venv_update/bin/pip install -r requirements.d/dev.txt
+
 
 .PHONY: clean
 clean:
