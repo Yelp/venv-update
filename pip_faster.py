@@ -29,10 +29,13 @@ from venv_update import parseargs
 from venv_update import run
 from venv_update import timid_relpath
 
+__version__ = '0.1.4-dev0'
+
 # TODO: provide a way for projects to pin their own versions of wheel
 #       probably ./requirements.d/venv-update.txt
 BOOTSTRAP_VERSIONS = (
-    'wheel==0.24.0',
+    'wheel==0.25.0',
+    'venv-update==' + __version__,
 )
 
 

@@ -7,10 +7,31 @@ from setuptools import find_packages
 from setuptools import setup
 
 
+## https://github.com/pypa/python-packaging-user-guide/blob/master/source/single_source_version.rst
+def read(*names, **kwargs):
+    import io
+    import os
+    with io.open(
+        os.path.join(os.path.dirname(__file__), *names),
+        encoding=kwargs.get("encoding", "utf8")
+    ) as fp:
+        return fp.read()
+
+def find_version(*file_paths):
+    import re
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
+
+
 def main():
     setup(
         name='venv-update',
-        version='0.1.3',
+        version=find_version('pip_faster.py'),
         description='Quickly and exactly synchronize a virtualenv with a requirements.txt',
         url='https://github.com/Yelp/venv-update',
         author='Buck Evan',
