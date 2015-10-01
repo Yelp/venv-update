@@ -6,6 +6,8 @@ pytest-xdist
 pytest-timeout
 pytest-rerunfailures
 
+pypiserver
+
 
 # pytest-cov ## pending pull requests:
 #   * https://github.com/schlamar/pytest-cov/pull/21
