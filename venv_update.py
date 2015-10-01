@@ -17,11 +17,13 @@ positional arguments:
 optional arguments:
   -h, --help      show this help message and exit
 
-Version control at: https://github.com/yelp/venv-update
+Version control at: https://github.com/yelp/pip-faster
 '''
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
+
+__version__ = '0.1.4.2'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
@@ -187,9 +189,13 @@ def dotpy(filename):
         return filename
 
 
-def venv_python(venv_path):
+def venv_executable(venv_path, executable):
     from os.path import join
-    return join(venv_path, 'bin', 'python')
+    return join(venv_path, 'bin', executable)
+
+
+def venv_python(venv_path):
+    return venv_executable(venv_path, 'python')
 
 
 def exec_(argv):
@@ -219,8 +225,20 @@ def stage1(venv_path, reqs):
 
     # ensure that a compatible version of pip is installed
     run((python, '-m', 'pip.__main__', '--version'))
-    run((python, '-m', 'pip.__main__', 'install', 'pip>=1.5.0,<6.0.0'))
 
+    from os import environ
+    pipdir = environ['HOME'] + '/.pip'
+    # We could combine these caches to one directory, but pip would search everything twice, going slower.
+    pip_wheels = pipdir + '/wheelhouse'
+
+    run((
+        python, '-m', 'pip.__main__', 'install',
+        '--find-links=file://' + pip_wheels,
+        'pip>=1.5.0,<6.0.0',
+        'pip-faster==' + __version__
+    ))
+
+    # TODO: re-examine directly exec'ing pip-faster as stage2
     exec_((python, dotpy(__file__), '--stage2', venv_path) + reqs)  # never returns
 
 
@@ -232,10 +250,8 @@ def stage2(venv_path, reqs):
     assert sys.executable == python, 'Executable not in venv: %s != %s' % (sys.executable, python)
 
     import subprocess
-    import os
-    # TODO(Yelp/#70): Don't rely on pip_faster.py being vendored alongside this script
-    pip_faster = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pip_faster.py')
-    return subprocess.check_call((python, pip_faster) + reqs)
+    pip_faster = venv_executable(venv_path, 'pip-faster')
+    subprocess.check_call((pip_faster, 'herp') + reqs)
 
 
 def venv_update(stage, venv_path, reqs, venv_args):

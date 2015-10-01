@@ -66,20 +66,23 @@ chroniker
     start = time()
     venv_update()
     time1 = time() - start
-    assert pip_freeze() == '\n'.join((
+    expected = '\n'.join((
         'PyYAML==3.11',
         'astroid==1.3.2',
         'chroniker==0.0.0',
         'logilab-common==0.63.2',
+        'pip-faster==0.1.4.2',
         'py==1.4.26',
         'pylint==1.4.0',
         'pytest==2.6.4',
         'simplejson==3.6.5',
         'six==1.8.0',
         'unittest2==0.8.0',
+        'virtualenv==1.11.6',
         'wheel==0.24.0',
         ''
     ))
+    assert pip_freeze() == expected
 
     between()
 
@@ -92,20 +95,7 @@ chroniker
         ftp_proxy='ftp://127.0.0.1:333333',
     )
     time2 = time() - start
-    assert pip_freeze() == '\n'.join((
-        'PyYAML==3.11',
-        'astroid==1.3.2',
-        'chroniker==0.0.0',
-        'logilab-common==0.63.2',
-        'py==1.4.26',
-        'pylint==1.4.0',
-        'pytest==2.6.4',
-        'simplejson==3.6.5',
-        'six==1.8.0',
-        'unittest2==0.8.0',
-        'wheel==0.24.0',
-        ''
-    ))
+    assert pip_freeze() == expected
 
     # second install should be at least twice as fast
     ratio = time1 / time2
@@ -113,7 +103,8 @@ chroniker
     return ratio
 
 
-@pytest.mark.flaky(reruns=2)
+#TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
+#@pytest.mark.flaky(reruns=2)
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
@@ -129,7 +120,8 @@ def test_noop_install_faster(tmpdir):
     assert 6 < install_twice(tmpdir, between=do_nothing) < 40
 
 
-@pytest.mark.flaky(reruns=2)
+#TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
+#@pytest.mark.flaky(reruns=2)
 def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')
@@ -245,13 +237,13 @@ def test_eggless_url(tmpdir):
     requirements('')
 
     venv_update()
-    assert 'venv-update' not in pip_freeze()
+    assert 'pure-python-package' not in pip_freeze()
 
-    # An arbitrary git-url requirement.
-    requirements('git+git://github.com/Yelp/venv-update.git')
+    # An arbitrary url requirement.
+    requirements('file://' + str(TOP / 'tests/testing/packages/pure_python_package'))
 
     venv_update()
-    assert 'venv-update' in pip_freeze()
+    assert 'pure-python-package' in pip_freeze()
 
 
 def test_scripts_left_behind(tmpdir):
@@ -414,7 +406,9 @@ pep8<=1.5.7
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
+        'pip-faster==0.1.4.2',
         'pyflakes==0.7.3',
+        'virtualenv==1.11.6',
         'wheel==0.24.0',
         ''
     ))
@@ -435,7 +429,9 @@ pep8<=1.5.7
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
+        'pip-faster==0.1.4.2',
         'pyflakes==0.8.1',
+        'virtualenv==1.11.6',
         'wheel==0.24.0',
         ''
     ))
