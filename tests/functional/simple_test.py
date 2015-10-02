@@ -103,8 +103,8 @@ chroniker
     return ratio
 
 
-#TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
-#@pytest.mark.flaky(reruns=2)
+# TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
+@pytest.mark.flaky(reruns=2)
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
@@ -120,8 +120,8 @@ def test_noop_install_faster(tmpdir):
     assert 6 < install_twice(tmpdir, between=do_nothing) < 40
 
 
-#TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
-#@pytest.mark.flaky(reruns=2)
+# TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
+@pytest.mark.flaky(reruns=2)
 def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')

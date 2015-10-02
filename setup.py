@@ -7,15 +7,16 @@ from setuptools import find_packages
 from setuptools import setup
 
 
-## https://github.com/pypa/python-packaging-user-guide/blob/master/source/single_source_version.rst
+# https://github.com/pypa/python-packaging-user-guide/blob/master/source/single_source_version.rst
 def read(*names, **kwargs):
     import io
     import os
     with io.open(
         os.path.join(os.path.dirname(__file__), *names),
-        encoding=kwargs.get("encoding", "utf8")
+        encoding=kwargs.get('encoding', 'utf8')
     ) as fp:
         return fp.read()
+
 
 def find_version(*file_paths):
     import re
@@ -24,8 +25,7 @@ def find_version(*file_paths):
                               version_file, re.M)
     if version_match:
         return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
+    raise RuntimeError('Unable to find version string.')
 
 
 def main():

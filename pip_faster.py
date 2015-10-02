@@ -24,11 +24,11 @@ from __future__ import unicode_literals
 
 from contextlib import contextmanager
 
+from venv_update import __version__
 from venv_update import colorize
 from venv_update import parseargs
 from venv_update import run
 from venv_update import timid_relpath
-from venv_update import __version__
 
 # TODO: provide a way for projects to pin their own versions of wheel
 #       probably ./requirements.d/venv-update.txt
