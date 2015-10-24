@@ -361,7 +361,9 @@ def main():
     from sys import argv, path
     del path[:1]  # we don't (want to) import anything from pwd or the script's directory
     # TODO(Yelp/#58): Don't use venv-update's parseargs, instead conform to pip's args
-    _, _, reqs, _ = parseargs(argv[1:])
+    # We pass a fake virtualenv path as the first argument to parseargs since
+    # we don't need (or know) the actual path, but parseargs will expect it.
+    _, _, reqs, _ = parseargs(['fake_venv_path'] + argv[1:])
 
     try:
         return do_install(reqs)
