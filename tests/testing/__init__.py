@@ -11,9 +11,9 @@ from py._path.local import LocalPath as Path
 TOP = Path(__file__) / '../../..'
 
 
-def requirements(reqs):
+def requirements(reqs, path='requirements.txt'):
     """Write a requirements.txt file to the current working directory."""
-    Path('requirements.txt').write(reqs)
+    Path(path).write(reqs)
 
 
 def run(*cmd, **env):

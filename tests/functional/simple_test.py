@@ -150,6 +150,22 @@ def test_cached_clean_install_faster(tmpdir):
     assert 1.75 < install_twice(tmpdir, between=clean) < 7
 
 
+def test_install_custom_path_and_requirements(tmpdir):
+    """Show that we can install to a custom directory with a custom
+    requirements file."""
+    tmpdir.chdir()
+    requirements(
+        'six==1.8.0\n',
+        path='requirements2.txt',
+    )
+    venv_update('venv', 'requirements2.txt')
+    assert pip_freeze('venv') == '\n'.join((
+        'six==1.8.0',
+        'wheel==0.24.0',
+        ''
+    ))
+
+
 def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
@@ -190,8 +206,9 @@ for p in sys.path:
     assert out and Path(out).isdir()
 
 
-def pip_freeze():
-    out, err = run('./virtualenv_run/bin/pip', 'freeze', '--local')
+def pip_freeze(venv='virtualenv_run'):
+    from os.path import join
+    out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local')
 
     # Most python distributions which have argparse in the stdlib fail to
     # expose it to setuptools as an installed package (it seems all but ubuntu
