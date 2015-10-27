@@ -11,6 +11,9 @@ pip-faster closely implements the pip interface, with an additional --prune opti
 
 * change host-python requirement to simply virtualenv, any version
 
+* missing tests
+   * non-default requirements file(s)
+
 * STRETCH GOAL: pip6 support
 
 

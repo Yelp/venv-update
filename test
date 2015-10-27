@@ -23,5 +23,6 @@ else
         --cov --cov-config=$TOP/.coveragerc --cov-report='' \
         "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
     coverage combine
+    python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
     coverage report --rcfile=$TOP/.coveragerc --fail-under 94  # FIXME: should be 100
 fi

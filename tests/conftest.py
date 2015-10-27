@@ -16,6 +16,8 @@ import six
 from testing import TOP
 from testing.ephemeral_port_reserve import reserve
 
+from venv_update import colorize
+
 
 @pytest.fixture(scope='session', autouse=True)
 def no_pip_environment_vars():
@@ -45,10 +47,19 @@ def pypi_server():
         with package.as_cwd():
             subprocess.check_call((sys.executable, 'setup.py', 'sdist'))
 
+    # We want pip-faster to be installable too, so copy it into the fixtured packages directory as well.
+    tmp_top = py.path.local(tempfile.mktemp('pip-faster'))
+    TOP.copy(tmp_top)
+    subprocess.check_call(
+        (sys.executable, str(tmp_top / 'setup.py'), 'sdist', '--dist-dir', str(packages / 'pip-faster')),
+        cwd=str(tmp_top),
+    )
+
     port = str(reserve())
     cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port, packages.strpath)
+    print(colorize(cmd))
     proc = subprocess.Popen(cmd, close_fds=True)
-    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + port
+    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + port + '/simple'
 
     limit = 10
     poll = .1
@@ -69,6 +80,7 @@ def pypi_server():
         proc.terminate()
         proc.wait()
         packages.remove()
+        tmp_top.remove()
 
 
 def service_up(port):

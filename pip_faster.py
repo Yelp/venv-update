@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''\
-usage: pip-faster [-h] [requirements [requirements ...]]
+usage: pip-faster [-h] [virtualenv_dir(ignored)] [requirements [requirements ...]]
 
 Update the current environment using a requirements.txt listing
 When this script completes, the environment should have the same packages as if it were
@@ -16,7 +16,7 @@ positional arguments:
 optional arguments:
   -h, --help      show this help message and exit
 
-Version control at: https://github.com/yelp/venv-update
+Version control at: https://github.com/yelp/pip-faster
 '''
 from __future__ import absolute_import
 from __future__ import print_function
@@ -24,6 +24,7 @@ from __future__ import unicode_literals
 
 from contextlib import contextmanager
 
+from venv_update import __version__
 from venv_update import colorize
 from venv_update import parseargs
 from venv_update import run
@@ -33,6 +34,7 @@ from venv_update import timid_relpath
 #       probably ./requirements.d/venv-update.txt
 BOOTSTRAP_VERSIONS = (
     'wheel==0.24.0',
+    'pip-faster==' + __version__,
 )
 
 
@@ -342,7 +344,7 @@ def do_install(reqs):
         reqnames(previously_installed) -
         reqnames(required_with_deps) -
         reqnames(recently_installed) -
-        set(['pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
+        set(['pip-faster', 'virtualenv', 'pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
     )
 
     # 2) Uninstall any extraneous packages.

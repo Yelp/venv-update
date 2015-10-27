@@ -1,7 +1,9 @@
 # minimal set of requirements to import (but not run) test code
 # this is used by the lint environment.
+-r coverage.txt
 -r prod.txt
 pytest
 
+mock
 pip<2
 six

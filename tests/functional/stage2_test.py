@@ -40,6 +40,12 @@ def test_trivial(tmpdir):
         '-r', (TOP / 'requirements.d/coverage.txt').strpath
     )
 
+    run(
+        'myvenv/bin/pip',
+        'install',
+        'pip-faster',
+    )
+
     stage2('myvenv/bin/python', tmpdir)
 
 
