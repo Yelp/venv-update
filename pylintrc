@@ -1,5 +1,11 @@
 [MESSAGES CONTROL]
-disable=locally-disabled,missing-docstring,fixme,star-args,redefined-outer-name
+disable=
+    locally-disabled,
+    missing-docstring,
+    fixme,
+    star-args,
+    redefined-outer-name,
+    too-many-public-methods
 
 [REPORTS]
 output-format=colorized

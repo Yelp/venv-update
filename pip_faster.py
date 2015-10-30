@@ -26,7 +26,6 @@ from contextlib import contextmanager
 
 from venv_update import __version__
 from venv_update import colorize
-from venv_update import parseargs
 from venv_update import run
 from venv_update import timid_relpath
 
@@ -359,20 +358,64 @@ def do_install(reqs):
         pass
 
 
-def main():
-    from sys import argv, path
-    del path[:1]  # we don't (want to) import anything from pwd or the script's directory
-    # TODO(Yelp/#58): Don't use venv-update's parseargs, instead conform to pip's args
-    # We pass a fake virtualenv path as the first argument to parseargs since
-    # we don't need (or know) the actual path, but parseargs will expect it.
-    _, _, reqs, _ = parseargs(['fake_venv_path'] + argv[1:])
+class Sentinel(str):
+    def __repr__(self):
+        return '<Sentinel: %s>' % str(self)
 
-    try:
-        return do_install(reqs)
-    except SystemExit as error:
-        exit_code = error.code
-    except KeyboardInterrupt:
-        exit_code = 1
+
+def do_patch(attrs, updates):
+    orig = {}
+    for attr, value in updates:
+        orig[attr] = attrs.get(attr, patch.DELETE)
+        if value is patch.DELETE:
+            del attrs[attr]
+        else:
+            attrs[attr] = value
+    return orig
+
+
+@contextmanager
+def patch(attrs, updates):
+    orig = do_patch(attrs, updates.items())
+    yield orig
+    do_patch(attrs, orig.items())
+patch.DELETE = Sentinel('patch.DELETE')
+
+
+def main():
+    from sys import path
+    del path[:1]  # we don't (want to) import anything from pwd or the script's directory
+
+    import pip
+    from pip.commands.install import InstallCommand as orig_InstallCommand
+
+    class InstallCommand(orig_InstallCommand):
+        def __init__(self, *args, **kw):
+            super(InstallCommand, self).__init__(*args, **kw)
+
+            cmd_opts = self.cmd_opts
+            cmd_opts.add_option(
+                "--prune",
+                action="store_true",
+                dest="prune",
+                default=True,
+                help="Uninstall any non-required packages.",
+            )
+
+            cmd_opts.add_option(
+                "--no-prune",
+                action="store_false",
+                dest="prune",
+                help="Do not uninstall any non-required packages.",
+            )
+
+    with patch(pip.commands, {InstallCommand.name: InstallCommand}):
+        try:
+            exit_code = pip.main()
+        except SystemExit as error:
+            exit_code = error.code
+        except KeyboardInterrupt:
+            exit_code = 1
 
     return exit_code
 
