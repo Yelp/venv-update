@@ -76,28 +76,10 @@ def req_is_absolute(requirement):
 class FasterPackageFinder(PackageFinder):
 
     def find_requirement(self, req, upgrade):
-        """see pipfaster_packagefinder"""
-        try:
-            result = self.__find_requirement(req, upgrade)
-        except BestVersionAlreadyInstalled:
-            req.best_installed = True
-            raise
-
-        if result is None:
-            if not upgrade:
-                req.best_installed = True
-            else:
-                raise AssertionError('this should not happen')
-        else:
-            req.best_installed = False
-        return result
-
-    def __find_requirement(self, req, upgrade):
         if req_is_absolute(req.req):
             # if the version is pinned-down by a ==
             # first try to use any installed package that satisfies the req
             if req.satisfied_by:
-                req.best = True
                 if upgrade:
                     # as a matter of api, find_requirement() only raises during upgrade -- shrug
                     raise BestVersionAlreadyInstalled
@@ -112,6 +94,7 @@ class FasterPackageFinder(PackageFinder):
         # otherwise, do the full network search, per usual
         print('FULL SEARCH FOR', req)
         return super(FasterPackageFinder, self).find_requirement(req, upgrade)
+        # TODO: optimization -- do optimisitic wheel search even for unpinned reqs
 
 
 class FasterWheelBuilder(WheelBuilder):
@@ -120,14 +103,16 @@ class FasterWheelBuilder(WheelBuilder):
         return self._build_one(req)
 
     def build(self):
-        """Build wheels."""
-        # stolen in whole from pip.wheel
+        """This is copy-pasta of pip.wheel.Wheelbuilder.build except in the two noted spots"""
+        # TODO-TEST: `pip-faster wheel` works at all
+        # FASTER: the slower wheelbuilder did self.requirement_set.prepare_files() here
 
         reqset = self.requirement_set.requirements.values()
 
         buildset = [
             req for req in reqset
-            if not req.is_wheel and not req.best_installed
+            # FASTER: don't wheel things that have no source available
+            if not req.is_wheel and req.source_dir
         ]
 
         if not buildset:
@@ -243,17 +228,6 @@ def importlib_invalidate_caches():
     invalidate_caches()
 
 
-def pip_install(args):
-    """Run pip install, and return the set of packages installed.
-    """
-    pip(('install',) + args)
-
-    # make sure the just-installed stuff is visible to this process.
-    importlib_invalidate_caches()
-
-    return _nonlocal.successfully_installed
-
-
 def fresh_working_set():
     """return a pkg_resources "working set", representing the *currently* installed pacakges"""
     try:
@@ -353,12 +327,6 @@ class CacheOpts(object):
 
 
 class FasterRequirementSet(RequirementSet):
-    if False:
-        def __init__(self, *args, **kwargs):
-            super(FasterRequirementSet, self).__init__(*args, **kwargs)
-            assert self.wheel_download_dir is None, self.wheel_download_dir
-            self.wheel_download_dir = CacheOpts().pip_wheels
-
     def prepare_files(self, finder, **kwargs):
         super(FasterRequirementSet, self).prepare_files(finder, **kwargs)
 
@@ -374,7 +342,7 @@ class FasterRequirementSet(RequirementSet):
         wb.build()
 
         for req in self.requirements.values():
-            if req.is_wheel or req.best_installed:
+            if req.is_wheel or req.source_dir is None:
                 continue
 
             link = optimistic_wheel_search(req, finder.find_links)
@@ -382,16 +350,11 @@ class FasterRequirementSet(RequirementSet):
                 print('WHEEL MISS!')
                 continue
 
+
             from pip.util import rmtree, unzip_file
             rmtree(req.source_dir)
             unzip_file(link.path, req.source_dir, flatten=False)
             req.url = link.url
-
-    def as_args(self):
-        return tuple(
-            str(r) for r in self.requirements.values()
-        )
-
 
 # patch >>>
 class Sentinel(str):
