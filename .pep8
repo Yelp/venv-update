@@ -6,3 +6,4 @@ exclude=.tox,*.tmp,tmp/
 max-line-length=131
 exclude=.tox,*.tmp,tmp/
 max-complexity=12
+ignore=E266

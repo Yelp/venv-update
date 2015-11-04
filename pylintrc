@@ -24,13 +24,13 @@ function-rgx=[a-z_][a-z0-9_]{2,60}$
 method-rgx=(%(function-rgx)s|%(const-rgx)s)
 
 #variable-rgx=[a-z_][a-z0-9_]{2,30}$
-variable-rgx=[a-z_][a-z0-9_]{0,30}$
+variable-rgx=%(method-rgx)s
 
 [FORMAT]
 max-line-length=131
 
 [TYPECHECK]
-ignored-classes=pytest,LocalPath
+ignored-classes=pytest,LocalPath,RootLogger
 ignored-modules=distutils,py
 
 [SIMILARITIES]

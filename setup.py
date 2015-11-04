@@ -55,6 +55,7 @@ def main():
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
             'virtualenv>=1.11.5,<2.0',
+            'wheel',
         ],
         entry_points={
             'console_scripts': [

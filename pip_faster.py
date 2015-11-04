@@ -24,17 +24,42 @@ from __future__ import unicode_literals
 
 from contextlib import contextmanager
 
-from venv_update import __version__
+import pip as pipmodule
+from pip import logger
+from pip.commands.install import InstallCommand
+from pip.commands.install import RequirementSet
+from pip.index import BestVersionAlreadyInstalled
+from pip.index import PackageFinder
+from pip.wheel import WheelBuilder
+
 from venv_update import colorize
-from venv_update import run
 from venv_update import timid_relpath
 
-# TODO: provide a way for projects to pin their own versions of wheel
-#       probably ./requirements.d/venv-update.txt
-BOOTSTRAP_VERSIONS = (
-    'wheel==0.24.0',
-    'pip-faster==' + __version__,
-)
+
+def optimistic_wheel_search(req, find_links):
+    from os.path import join
+    from glob import glob
+    from pip.wheel import Wheel
+    from pip.index import Link
+    for findlink in find_links:
+        if findlink.startswith('file://'):
+            findlink = findlink[7:]
+        else:
+            continue
+        # this matches the name-munging done in pip.wheel:
+        reqname = req.name.replace('-', '_')
+
+        def either(char):
+            if char.isalpha():
+                return '[%s%s]' % (char.lower(), char.upper())
+            else:
+                return char
+        reqname = ''.join([either(c) for c in reqname])
+        for link in glob(join(findlink, reqname + '-*.whl')):
+            link = Link('file://' + link)
+            wheel = Wheel(link.filename)
+            if wheel.version in req.req and wheel.supported():
+                return link
 
 
 def req_is_absolute(requirement):
@@ -48,64 +73,106 @@ def req_is_absolute(requirement):
     return False
 
 
-def faster_find_requirement(self, req, upgrade):
-    """see faster_pip_packagefinder"""
-    from pip.index import BestVersionAlreadyInstalled
-    if req_is_absolute(req.req):
-        # if the version is pinned-down by a ==
-        # first try to use any installed package that satisfies the req
-        if req.satisfied_by:
-            if upgrade:
-                # as a matter of api, find_requirement() only raises during upgrade -- shrug
-                raise BestVersionAlreadyInstalled
+class FasterPackageFinder(PackageFinder):
+
+    def find_requirement(self, req, upgrade):
+        """see pipfaster_packagefinder"""
+        try:
+            result = self.__find_requirement(req, upgrade)
+        except BestVersionAlreadyInstalled:
+            req.best_installed = True
+            raise
+
+        if result is None:
+            if not upgrade:
+                req.best_installed = True
             else:
-                return None
+                raise AssertionError('this should not happen')
+        else:
+            req.best_installed = False
+        return result
 
-        # then try an optimistic search for a .whl file:
-        from os.path import join
-        from glob import glob
-        from pip.wheel import Wheel
-        from pip.index import Link
-        for findlink in self.find_links:
-            if findlink.startswith('file://'):
-                findlink = findlink[7:]
+    def __find_requirement(self, req, upgrade):
+        if req_is_absolute(req.req):
+            # if the version is pinned-down by a ==
+            # first try to use any installed package that satisfies the req
+            if req.satisfied_by:
+                req.best = True
+                if upgrade:
+                    # as a matter of api, find_requirement() only raises during upgrade -- shrug
+                    raise BestVersionAlreadyInstalled
+                else:
+                    return None
+
+            # then try an optimistic search for a .whl file:
+            link = optimistic_wheel_search(req, self.find_links)
+            if link is not None:
+                return link
+
+        # otherwise, do the full network search, per usual
+        print('FULL SEARCH FOR', req)
+        return super(FasterPackageFinder, self).find_requirement(req, upgrade)
+
+
+class FasterWheelBuilder(WheelBuilder):
+
+    def build_one(self, req):
+        return self._build_one(req)
+
+    def build(self):
+        """Build wheels."""
+        # stolen in whole from pip.wheel
+
+        reqset = self.requirement_set.requirements.values()
+
+        buildset = [
+            req for req in reqset
+            if not req.is_wheel and not req.best_installed
+        ]
+
+        if not buildset:
+            return
+
+        # build the wheels
+        logger.notify(
+            'Building wheels for collected packages: %s' %
+            ','.join([req.name for req in buildset])
+        )
+        logger.indent += 2
+        build_success, build_failure = [], []
+        for req in buildset:
+            if self._build_one(req):
+                build_success.append(req)
             else:
-                continue
-            # this matches the name-munging done in pip.wheel:
-            reqname = req.name.replace('-', '_')
-            for link in glob(join(findlink, reqname + '-*.whl')):
-                link = Link('file://' + link)
-                wheel = Wheel(link.filename)
-                if wheel.version in req.req and wheel.supported():
-                    return link
+                build_failure.append(req)
+        logger.indent -= 2
 
-    # otherwise, do the full network search
-    return self.unpatched['find_requirement'](self, req, upgrade)
+        # notify sucess/failure
+        if build_success:
+            logger.notify('Successfully built %s' % ' '.join([req.name for req in build_success]))
+        if build_failure:
+            logger.notify('Failed to build %s' % ' '.join([req.name for req in build_failure]))
 
 
-@contextmanager
-def faster_pip_packagefinder():
+def pipfaster_packagefinder():
     """Provide a short-circuited search when the requirement is pinned and appears on disk.
 
     Suggested upstream at: https://github.com/pypa/pip/pull/2114
     """
     # A poor man's dependency injection: monkeypatch :(
-    # pylint:disable=protected-access
-    from pip.index import PackageFinder
+    # we need this exact import -- pip clobbers `commands` in their __init__
+    from pip.commands import install
+    return patch(vars(install), {'PackageFinder': FasterPackageFinder})
 
-    PackageFinder.unpatched = vars(PackageFinder).copy()
-    PackageFinder.find_requirement = faster_find_requirement
-    try:
-        yield
-    finally:
-        PackageFinder.find_requirement = PackageFinder.unpatched['find_requirement']
-        del PackageFinder.unpatched
+
+def pipfaster_install():
+    # pip<6 needs this exact import -- they clobber `commands` in __init__
+    from pip.commands import install
+    return patch(vars(install), {'RequirementSet': FasterRequirementSet})
 
 
 def pip(args):
     """Run pip, in-process."""
-    import pip as pipmodule
-
     # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
     pipmodule.logger.consumers = []
 
@@ -114,10 +181,9 @@ def pip(args):
     stdout.write('\n')
     stdout.flush()
 
-    with faster_pip_packagefinder():
-        result = pipmodule.main(list(args))
+    result = pipmodule.main(list(args))
 
-    if result != 0:
+    if result:
         # pip exited with failure, then we should too
         exit(result)
 
@@ -180,33 +246,12 @@ def importlib_invalidate_caches():
 def pip_install(args):
     """Run pip install, and return the set of packages installed.
     """
-    from pip.commands.install import InstallCommand
-
-    orig_installcommand = vars(InstallCommand).copy()
-
-    class _nonlocal(object):
-        successfully_installed = None
-
-    def install(self, options, args):
-        """capture the list of successfully installed packages as they pass through"""
-        result = orig_installcommand['run'](self, options, args)
-        _nonlocal.successfully_installed = result
-        return result
-
-    # A poor man's dependency injection: monkeypatch :(
-    InstallCommand.run = install
-    try:
-        pip(('install',) + args)
-    finally:
-        InstallCommand.run = orig_installcommand['run']
+    pip(('install',) + args)
 
     # make sure the just-installed stuff is visible to this process.
     importlib_invalidate_caches()
 
-    if _nonlocal.successfully_installed is None:
-        return []
-    else:
-        return _nonlocal.successfully_installed.requirements.values()
+    return _nonlocal.successfully_installed
 
 
 def fresh_working_set():
@@ -234,7 +279,6 @@ def trace_requirements(requirements):
     return the set of required packages, given their transitive requirements.
     """
     from collections import deque
-    from pip import logger
     from pip.req import InstallRequirement
     try:
         from pip._vendor import pkg_resources
@@ -265,12 +309,12 @@ def trace_requirements(requirements):
                     location = ' (%s)' % timid_relpath(dist.location)
                 else:
                     location = ''
-                logger.error('Error: version conflict: %s%s <-> %s' % (dist, location, req))
+                logger.error('Error: version conflict: %s%s <-> %s', dist, location, req)
                 errors = True
                 seen_warnings.add(req.name)
 
         if dist is None:
-            logger.error('Error: unmet dependency: %s' % req)
+            logger.error('Error: unmet dependency: %s', req)
             errors = True
             continue
 
@@ -290,80 +334,75 @@ def reqnames(reqs):
     return set(req.name for req in reqs)
 
 
-def do_install(reqs):
-    from os import environ
+class CacheOpts(object):
 
-    previously_installed = pip_get_installed()
-    required = pip_parse_requirements(reqs)
+    def __init__(self):
+        from os import environ
+        # We put the cache in the directory that pip already uses.
+        # This has better security characteristics than a machine-wide cache, and is a
+        #   pattern people can use for open-source projects
+        self.pipdir = environ['HOME'] + '/.pip'
+        # We could combine these caches to one directory, but pip would search everything twice, going slower.
+        self.pip_download_cache = self.pipdir + '/cache'
+        self.pip_wheels = self.pipdir + '/wheelhouse'
 
-    requirements_as_options = tuple(
-        '--requirement={0}'.format(requirement) for requirement in reqs
-    )
-
-    # We put the cache in the directory that pip already uses.
-    # This has better security characteristics than a machine-wide cache, and is a
-    #   pattern people can use for open-source projects
-    pipdir = environ['HOME'] + '/.pip'
-    # We could combine these caches to one directory, but pip would search everything twice, going slower.
-    pip_download_cache = pipdir + '/cache'
-    pip_wheels = pipdir + '/wheelhouse'
-
-    environ.update(
-        PIP_DOWNLOAD_CACHE=pip_download_cache,
-    )
-
-    cache_opts = (
-        '--download-cache=' + pip_download_cache,
-        '--find-links=file://' + pip_wheels,
-    )
-
-    # --use-wheel is somewhat redundant here, but it means we get an error if we have a bad version of pip/setuptools.
-    install_opts = ('--upgrade', '--use-wheel',) + cache_opts
-    recently_installed = []
-
-    # 1) Bootstrap the install system; setuptools and pip are already installed, just need wheel
-    recently_installed += pip_install(install_opts + BOOTSTRAP_VERSIONS)
-
-    # 2) Caching: Make sure everything we want is downloaded, cached, and has a wheel.
-    pip(
-        ('wheel', '--wheel-dir=' + pip_wheels) +
-        BOOTSTRAP_VERSIONS +
-        cache_opts +
-        requirements_as_options
-    )
-
-    # 3) Install: Use our well-populated cache, to do the installations.
-    install_opts += ('--no-index',)  # only use the cache
-    recently_installed += pip_install(install_opts + requirements_as_options)
-
-    required_with_deps = trace_requirements(required)
-
-    # TODO-TEST require A==1 then A==2
-    extraneous = (
-        reqnames(previously_installed) -
-        reqnames(required_with_deps) -
-        reqnames(recently_installed) -
-        set(['pip-faster', 'virtualenv', 'pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
-    )
-
-    # 2) Uninstall any extraneous packages.
-    if extraneous:
-        pip(('uninstall', '--yes') + tuple(sorted(extraneous)))
-
-    # Cleanup: remove stale values from the cache and wheelhouse that have not been accessed in a week.
-    from subprocess import CalledProcessError
-    try:
-        run(['find', pip_download_cache, pip_wheels, '-not', '-atime', '-7', '-delete'])
-    except CalledProcessError:  # Ignore errors due to concurrent file access race conditions.
-        pass
+        self.opts = (
+            '--download-cache=' + self.pip_download_cache,
+            '--find-links=file://' + self.pip_wheels,
+        )
 
 
+class FasterRequirementSet(RequirementSet):
+    if False:
+        def __init__(self, *args, **kwargs):
+            super(FasterRequirementSet, self).__init__(*args, **kwargs)
+            assert self.wheel_download_dir is None, self.wheel_download_dir
+            self.wheel_download_dir = CacheOpts().pip_wheels
+
+    def prepare_files(self, finder, **kwargs):
+        super(FasterRequirementSet, self).prepare_files(finder, **kwargs)
+
+        # build wheels before install.
+        wb = FasterWheelBuilder(
+            self,
+            finder,
+            wheel_dir=CacheOpts().pip_wheels,
+        )
+        # Ignore the result: a failed wheel will be
+        # installed from the sdist/vcs whatever.
+        # TODO-TEST: we only incur the build cost once on uncached install
+        wb.build()
+
+        for req in self.requirements.values():
+            if req.is_wheel or req.best_installed:
+                continue
+
+            link = optimistic_wheel_search(req, finder.find_links)
+            if link is None:
+                print('WHEEL MISS!')
+                continue
+
+            from pip.util import rmtree, unzip_file
+            rmtree(req.source_dir)
+            unzip_file(link.path, req.source_dir, flatten=False)
+            req.url = link.url
+
+    def as_args(self):
+        return tuple(
+            str(r) for r in self.requirements.values()
+        )
+
+
+# patch >>>
 class Sentinel(str):
+    """A named value that only supports the `is` operator."""
+
     def __repr__(self):
         return '<Sentinel: %s>' % str(self)
 
 
 def do_patch(attrs, updates):
+    """Perform a set of updates to a attribute dictionary, return the original values."""
     orig = {}
     for attr, value in updates:
         orig[attr] = attrs.get(attr, patch.DELETE)
@@ -376,46 +415,87 @@ def do_patch(attrs, updates):
 
 @contextmanager
 def patch(attrs, updates):
+    """A context in which some attributes temporarily have a modified value."""
     orig = do_patch(attrs, updates.items())
     yield orig
     do_patch(attrs, orig.items())
 patch.DELETE = Sentinel('patch.DELETE')
+# patch <<<
+
+
+# SMELL: mutable globals -- i'd like a better way to return these values
+class _nonlocal(object):
+    successfully_installed = None
+
+
+class FasterInstallCommand(InstallCommand):
+
+    def __init__(self, *args, **kw):
+        super(FasterInstallCommand, self).__init__(*args, **kw)
+
+        cmd_opts = self.cmd_opts
+        cmd_opts.add_option(
+            '--prune',
+            action='store_true',
+            dest='prune',
+            default=False,
+            help='Uninstall any non-required packages.',
+        )
+
+        cmd_opts.add_option(
+            '--no-prune',
+            action='store_false',
+            dest='prune',
+            help='Do not uninstall any non-required packages.',
+        )
+
+    def run(self, options, args):
+        """update install options with caching values"""
+        cache_opts = CacheOpts()
+        options.find_links.append('file://' + cache_opts.pip_wheels)
+        options.download_cache = cache_opts.pip_download_cache
+        # from pip.commands.install
+        do_install = (not options.no_install and not self.bundle)
+        do_prune = do_install and options.prune
+        if do_prune:
+            previously_installed = pip_get_installed()
+
+        requirement_set = super(FasterInstallCommand, self).run(options, args)
+
+        if not do_prune:
+            return requirement_set
+
+        required = [r for r in requirement_set.requirements.values()]
+        required_with_deps = trace_requirements(required)
+
+        extraneous = (
+            reqnames(previously_installed) -
+            reqnames(required_with_deps) -
+            reqnames(requirement_set.successfully_installed) -
+            set(['pip-faster', 'pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
+        )
+
+        if extraneous:
+            extraneous = sorted(extraneous)
+            pip(('uninstall', '--yes') + tuple(extraneous))
+
+        # TODO: Cleanup: remove stale values from the cache and wheelhouse that have not been accessed in a week.
+
+
+def pipfaster_install_prune_option():
+    return patch(pipmodule.commands, {FasterInstallCommand.name: FasterInstallCommand})
 
 
 def main():
-    from sys import path
-    del path[:1]  # we don't (want to) import anything from pwd or the script's directory
-
-    import pip
-    from pip.commands.install import InstallCommand as orig_InstallCommand
-
-    class InstallCommand(orig_InstallCommand):
-        def __init__(self, *args, **kw):
-            super(InstallCommand, self).__init__(*args, **kw)
-
-            cmd_opts = self.cmd_opts
-            cmd_opts.add_option(
-                "--prune",
-                action="store_true",
-                dest="prune",
-                default=True,
-                help="Uninstall any non-required packages.",
-            )
-
-            cmd_opts.add_option(
-                "--no-prune",
-                action="store_false",
-                dest="prune",
-                help="Do not uninstall any non-required packages.",
-            )
-
-    with patch(pip.commands, {InstallCommand.name: InstallCommand}):
-        try:
-            exit_code = pip.main()
-        except SystemExit as error:
-            exit_code = error.code
-        except KeyboardInterrupt:
-            exit_code = 1
+    with pipfaster_install_prune_option():
+        with pipfaster_packagefinder():
+            with pipfaster_install():
+                try:
+                    exit_code = pipmodule.main()
+                except SystemExit as error:
+                    exit_code = error.code
+                except KeyboardInterrupt:
+                    exit_code = 1
 
     return exit_code
 
