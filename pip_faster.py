@@ -38,9 +38,9 @@ from venv_update import timid_relpath
 
 def optimistic_wheel_search(req, find_links):
     from os.path import join
-    from glob import glob
-    from pip.wheel import Wheel
-    from pip.index import Link
+
+    best_version = None
+    best_link = None
     for findlink in find_links:
         if findlink.startswith('file://'):
             findlink = findlink[7:]
@@ -55,11 +55,29 @@ def optimistic_wheel_search(req, find_links):
             else:
                 return char
         reqname = ''.join([either(c) for c in reqname])
-        for link in glob(join(findlink, reqname + '-*.whl')):
+        pattern = join(findlink, reqname + '-*.whl')
+        print('WHEELSEARCH:', pattern)
+        from glob import glob
+        for link in glob(pattern):
+            from pip.index import Link
             link = Link('file://' + link)
+            from pip.wheel import Wheel
             wheel = Wheel(link.filename)
-            if wheel.version in req.req and wheel.supported():
-                return link
+            print(link.filename)
+            if wheel.version not in req.req:
+                continue
+
+            if not wheel.supported():
+                continue
+
+            from pkg_resources import parse_version
+            version = parse_version(wheel.version)
+            if version > best_version:
+                best_version = version
+                best_link = link
+
+    print('WHEELFOUND:', best_link)
+    return best_link
 
 
 def req_is_absolute(requirement):
