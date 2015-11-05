@@ -34,14 +34,9 @@ pip-faster install:
     * wheel-install can install a prior version
       Fix: terribad code to use the wheel with maximum pkg_resources.parse_version
 
-
-Fixed, Not Tested
-=================
-
-    * Explosion on "Requirement already satisfied" -- `'InstallRequirement' object has no attribute 'best_installed'`
-      Fix: factor out the best_installed attribute entirely
-
-    * install incurs build time twice
+    * Cause: a prior prune uninstalled argparse, but pip-faster depends on it, transitively, via wheel
+      Planned fix: for the purposes of pruning, pip-faster should be added to the list of requirements
+      Stopgap fix: whitelist argparse along with pip-faster, pip, setuptools, and wheel to never be pruned
 
 
 Fixed and Tested

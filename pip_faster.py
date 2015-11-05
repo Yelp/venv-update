@@ -368,7 +368,7 @@ class FasterRequirementSet(RequirementSet):
                 print('WHEEL MISS!')
                 continue
 
-
+            # replace the setup.py "sdist" with the wheel "bdist"
             from pip.util import rmtree, unzip_file
             rmtree(req.source_dir)
             unzip_file(link.path, req.source_dir, flatten=False)
@@ -453,7 +453,8 @@ class FasterInstallCommand(InstallCommand):
             reqnames(previously_installed) -
             reqnames(required_with_deps) -
             reqnames(requirement_set.successfully_installed) -
-            set(['pip-faster', 'pip', 'setuptools', 'wheel'])  # the stage1 bootstrap packages
+            # TODO: instead of this, add `pip-faster` to the `required`
+            set(['pip-faster', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
         )
 
         if extraneous:
