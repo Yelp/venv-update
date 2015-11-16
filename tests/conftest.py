@@ -33,8 +33,8 @@ def no_pythonpath_environment_var():
             del os.environ[var]
 
 
-@pytest.yield_fixture(scope='session', autouse=True)
-def pypi_server():
+@pytest.yield_fixture(scope='session')
+def pypi_server(pypi_fallback=False):
     # Need to use tempfile.mkdtemp because we're session scoped
     # (otherwise I'd use the `tmpdir` fixture)
     packages = py.path.local(tempfile.mkdtemp('packages'))
@@ -56,7 +56,10 @@ def pypi_server():
     )
 
     port = str(reserve())
-    cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port, packages.strpath)
+    cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
+    if not pypi_fallback:
+        cmd += ('--disable-fallback',)
+    cmd += (packages.strpath,)
     print(colorize(cmd))
     proc = subprocess.Popen(cmd, close_fds=True)
     os.environ['PIP_INDEX_URL'] = 'http://localhost:' + port + '/simple'
