@@ -17,6 +17,7 @@ from testing import venv_update_symlink_pwd
 PY33 = (version_info >= (3, 3))
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_trivial(tmpdir):
     tmpdir.chdir()
     requirements('')
@@ -71,15 +72,14 @@ chroniker
         'astroid==1.3.2',
         'chroniker==0.0.0',
         'logilab-common==0.63.2',
-        'pip-faster==0.1.4.2',
+        'pip-faster==0.1.4.4',
         'py==1.4.26',
         'pylint==1.4.0',
         'pytest==2.6.4',
         'simplejson==3.6.5',
         'six==1.8.0',
         'unittest2==0.8.0',
-        'virtualenv==1.11.6',
-        'wheel==0.24.0',
+        'wheel==0.26.0',
         ''
     ))
     assert pip_freeze() == expected
@@ -105,6 +105,7 @@ chroniker
 
 # TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
 @pytest.mark.flaky(reruns=2)
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
@@ -122,6 +123,7 @@ def test_noop_install_faster(tmpdir):
 
 # TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
 @pytest.mark.flaky(reruns=2)
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_cached_clean_install_faster(tmpdir):
     def clean():
         venv = tmpdir.join('virtualenv_run')
@@ -142,6 +144,7 @@ def test_cached_clean_install_faster(tmpdir):
     assert 1.75 < install_twice(tmpdir, between=clean) < 7
 
 
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_install_custom_path_and_requirements(tmpdir):
     """Show that we can install to a custom directory with a custom
     requirements file."""
@@ -152,12 +155,15 @@ def test_install_custom_path_and_requirements(tmpdir):
     )
     venv_update('venv', 'requirements2.txt')
     assert pip_freeze('venv') == '\n'.join((
+        'pip-faster==0.1.4.4',
         'six==1.8.0',
-        'wheel==0.24.0',
+        'virtualenv==1.11.6',
+        'wheel==0.26.0',
         ''
     ))
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
@@ -179,6 +185,7 @@ def test_arguments_version(tmpdir):
     assert lines[0].endswith(' -m virtualenv virtualenv_run --version'), repr(lines[0])
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_arguments_system_packages(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
@@ -213,6 +220,7 @@ def pip_freeze(venv='virtualenv_run'):
     return out
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_update_while_active(tmpdir):
     tmpdir.chdir()
     requirements('virtualenv<2')
@@ -231,6 +239,7 @@ def test_update_while_active(tmpdir):
     assert 'mccabe' in pip_freeze()
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_update_invalidated_while_active(tmpdir):
     tmpdir.chdir()
     requirements('virtualenv<2')
@@ -249,6 +258,7 @@ def test_update_invalidated_while_active(tmpdir):
     assert 'mccabe' in pip_freeze()
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_eggless_url(tmpdir):
     tmpdir.chdir()
     requirements('')
@@ -263,6 +273,7 @@ def test_eggless_url(tmpdir):
     assert 'pure-python-package' in pip_freeze()
 
 
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_scripts_left_behind(tmpdir):
     tmpdir.chdir()
     requirements('')
@@ -295,7 +306,7 @@ def assert_timestamps(*reqs):
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('virtualenv_run', *reqs)
 
-    assert excinfo.value.returncode == 1
+    assert excinfo.value.returncode == 2
     assert firstreq.mtime() > Path('virtualenv_run').mtime()
 
     # blank requirements should succeed
@@ -305,12 +316,14 @@ def assert_timestamps(*reqs):
     assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_timestamps_single(tmpdir):
     tmpdir.chdir()
     requirements('')
     assert_timestamps('requirements.txt')
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_timestamps_multiple(tmpdir):
     tmpdir.chdir()
     requirements('')
@@ -395,6 +408,7 @@ def test_args_backward(tmpdir):
     assert not Path('myvenv').exists()
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_wrong_wheel(tmpdir):
     tmpdir.chdir()
 
@@ -423,10 +437,10 @@ pep8<=1.5.7
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
-        'pip-faster==0.1.4.2',
+        'pip-faster==0.1.4.4',
         'pyflakes==0.7.3',
         'virtualenv==1.11.6',
-        'wheel==0.24.0',
+        'wheel==0.26.0',
         ''
     ))
 
@@ -446,20 +460,22 @@ pep8<=1.5.7
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
-        'pip-faster==0.1.4.2',
+        'pip-faster==0.1.4.4',
         'pyflakes==0.8.1',
         'virtualenv==1.11.6',
-        'wheel==0.24.0',
+        'wheel==0.26.0',
         ''
     ))
 
 
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_upgrade(tmpdir):
     tmpdir.chdir()
     flake8_older()
     flake8_newer()
 
 
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_downgrade(tmpdir):
     tmpdir.chdir()
     flake8_newer()
@@ -472,6 +488,8 @@ def utime(path, time):
     utime(path.strpath, (time, time))
 
 
+@pytest.mark.skipif(True, reason='TODO: cache cleaning')
+@pytest.mark.usefixtures('pypi_server')
 def test_remove_stale_cache_values(tmpdir):
     """Tests that we remove stale (older than a week) cached packages
     and wheels, while still keeping everything created within the past week.

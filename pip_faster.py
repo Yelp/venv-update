@@ -457,7 +457,7 @@ class FasterInstallCommand(InstallCommand):
             reqnames(required) -
             reqnames(successfully_installed) -
             # TODO: instead of this, add `pip-faster` to the `required`, and let trace-requirements do its work
-            set(['pip-faster', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
+            set(['pip-faster', 'virtualenv', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
         )
 
         if extraneous:
