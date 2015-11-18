@@ -9,6 +9,7 @@ import testing as T
 from testing.python_lib import PYTHON_LIB
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_conflicting_reqs(tmpdir):
     tmpdir.chdir()
     T.requirements('''
@@ -31,12 +32,14 @@ mccabe==0.2
 Cleaning up...
 Error: version conflict: mccabe 0.2 (virtualenv_run/%s)'''
         ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Storing debug log for failure in %s/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-''' % PYTHON_LIB
+''' % (PYTHON_LIB, tmpdir)
     ) in out
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_multiple_issues(tmpdir):
     # Make it a bit worse. The output should show all three issues.
     tmpdir.chdir()

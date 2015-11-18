@@ -6,11 +6,9 @@ import os
 import socket
 import subprocess
 import sys
-import tempfile
 import time
 from errno import ECONNREFUSED
 
-import py.path  # pylint:disable=import-error
 import pytest
 import six
 from testing import TOP
@@ -34,41 +32,39 @@ def no_pythonpath_environment_var():
 
 
 @pytest.yield_fixture(scope='session')
-def pypi_server(pypi_fallback=False):
-    # Need to use tempfile.mkdtemp because we're session scoped
-    # (otherwise I'd use the `tmpdir` fixture)
-    packages = py.path.local(tempfile.mkdtemp('packages'))
-    orig_packages = TOP.join('tests/testing/packages')
+def pypi_fallback():
+    """should we fall back to the global python.org servers?"""
+    yield True
 
-    # setuptools explodes if you try to run multiple instances simultaneously
-    # in the same directory, so we need to make a copy for each thread.
-    orig_packages.copy(packages)
-    for package in packages.listdir():
-        with package.as_cwd():
-            subprocess.check_call((sys.executable, 'setup.py', 'sdist'))
 
-    # We want pip-faster to be installable too, so copy it into the fixtured packages directory as well.
-    tmp_top = py.path.local(tempfile.mktemp('pip-faster'))
-    TOP.copy(tmp_top)
+@pytest.yield_fixture(scope='session')
+def pypi_server(pypi_fallback):
+    packages = 'build/packages'
     subprocess.check_call(
-        (sys.executable, str(tmp_top / 'setup.py'), 'sdist', '--dist-dir', str(packages / 'pip-faster')),
-        cwd=str(tmp_top),
+        (
+            sys.executable,
+            'tests/testing/make_sdists.py',
+            'tests/testing/packages',
+            '.',  # we need pip-faster too be installable too
+            packages,
+        ),
+        cwd=str(TOP),
     )
 
     port = str(reserve())
     cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
-    cmd += (packages.strpath,)
+    cmd += (packages,)
     print(colorize(cmd))
-    proc = subprocess.Popen(cmd, close_fds=True)
+    server = subprocess.Popen(cmd, close_fds=True, cwd=str(TOP))
     os.environ['PIP_INDEX_URL'] = 'http://localhost:' + port + '/simple'
 
     limit = 10
     poll = .1
     while True:
-        if proc.poll() is not None:
-            raise AssertionError('pypi ended! (code %i)' % proc.returncode)
+        if server.poll() is not None:
+            raise AssertionError('pypi ended! (code %i)' % server.returncode)
         elif service_up(port):
             break
         elif limit > 0:
@@ -80,10 +76,8 @@ def pypi_server(pypi_fallback=False):
     try:
         yield
     finally:
-        proc.terminate()
-        proc.wait()
-        packages.remove()
-        tmp_top.remove()
+        server.terminate()
+        server.wait()
 
 
 def service_up(port):

@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-__version__ = '0.1.4.2'
+__version__ = '0.1.4.4'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
@@ -35,11 +35,6 @@ def parseargs(args):
         exit(0)
 
     args = list(args)
-    stage = 1
-    while '--stage2' in args:
-        stage = 2
-        args.remove('--stage2')
-
     virtualenv_dir = None
     requirements = []
     remaining = []
@@ -57,7 +52,7 @@ def parseargs(args):
     if not requirements:
         requirements = ['requirements.txt']
 
-    return stage, virtualenv_dir, tuple(requirements), tuple(remaining)
+    return virtualenv_dir, tuple(requirements), tuple(remaining)
 
 
 def timid_relpath(arg):
@@ -198,26 +193,14 @@ def venv_python(venv_path):
     return venv_executable(venv_path, 'python')
 
 
-def exec_(argv):
-    """Wrapper to os.execv which shows the command and runs any atexit handlers (for coverage's sake).
-    Like os.execv, this function never returns.
-    """
-    info(colorize(argv))
-
-    # in python3, sys.exitfunc has gone away, and atexit._run_exitfuncs seems to be the only pubic-ish interface
-    #   https://hg.python.org/cpython/file/3.4/Modules/atexitmodule.c#l289
-    import atexit
-    atexit._run_exitfuncs()  # pylint:disable=protected-access
-
-    from os import execv
-    execv(argv[0], argv)  # never returns
-
-
-def stage1(venv_path, reqs):
+def venv_update(venv_path, reqs, venv_args):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 
-    make a fresh venv at the right spot, and use it to perform stage 2
+    make a fresh venv at the right spot, make sure it has pip-faster, and use it
     """
+    from os.path import abspath
+    venv_path = abspath(venv_path)
+    validate_venv(venv_path, venv_args)
     from os.path import exists
     python = venv_python(venv_path)
     if not exists(python):
@@ -231,56 +214,34 @@ def stage1(venv_path, reqs):
     # We could combine these caches to one directory, but pip would search everything twice, going slower.
     pip_wheels = pipdir + '/wheelhouse'
 
+    # TODO: short-circuit when pip-faster is already there.
     run((
         python, '-m', 'pip.__main__', 'install',
         '--find-links=file://' + pip_wheels,
-        'pip>=1.5.0,<6.0.0',
         'pip-faster==' + __version__
     ))
 
-    # TODO: re-examine directly exec'ing pip-faster as stage2
-    exec_((python, dotpy(__file__), '--stage2', venv_path) + reqs)  # never returns
-
-
-def stage2(venv_path, reqs):
-    """we're activated into the venv we want, and there should be nothing but pip and setuptools installed.
-    """
-    python = venv_python(venv_path)
-    import sys
-    assert sys.executable == python, 'Executable not in venv: %s != %s' % (sys.executable, python)
-
-    import subprocess
-    pip_faster = venv_executable(venv_path, 'pip-faster')
-    subprocess.check_call((pip_faster, 'herp') + reqs)
-
-
-def venv_update(stage, venv_path, reqs, venv_args):
-    from os.path import abspath
-    venv_path = abspath(venv_path)
-    if stage == 1:
-        validate_venv(venv_path, venv_args)
-        return stage1(venv_path, reqs)
-    elif stage == 2:
-        return stage2(venv_path, reqs)
-    else:
-        raise AssertionError('impossible stage value: %r' % stage)
+    run((python, '-m', 'pip_faster', 'install', '--prune') + sum(
+        [('-r', req) for req in reqs],
+        (),
+    ))
 
 
 def main():
     from sys import argv, path
     del path[:1]  # we don't (want to) import anything from pwd or the script's directory
-    stage, venv_path, reqs, venv_args = parseargs(argv[1:])
+    venv_path, reqs, venv_args = parseargs(argv[1:])
 
     from subprocess import CalledProcessError
     try:
-        return venv_update(stage, venv_path, reqs, venv_args)
+        return venv_update(venv_path, reqs, venv_args)
     except SystemExit as error:
         exit_code = error.code
     except CalledProcessError as error:
         exit_code = error.returncode
     except KeyboardInterrupt:
         exit_code = 1
-    except Exception:
+    except Exception as error:
         mark_venv_invalid(venv_path, reqs)
         raise
 

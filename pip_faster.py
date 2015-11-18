@@ -31,6 +31,7 @@ from pip.commands.install import RequirementSet
 from pip.index import BestVersionAlreadyInstalled
 from pip.index import PackageFinder
 from pip.wheel import WheelBuilder
+from pip.exceptions import InstallationError
 
 from venv_update import colorize
 from venv_update import timid_relpath
@@ -281,7 +282,7 @@ def trace_requirements(requirements):
     working_set = fresh_working_set()
 
     # breadth-first traversal:
-    errors = False
+    errors = []
     queue = deque(requirements)
     result = []
     seen_warnings = set()
@@ -301,23 +302,22 @@ def trace_requirements(requirements):
                     location = ' (%s)' % timid_relpath(dist.location)
                 else:
                     location = ''
-                logger.error('Error: version conflict: %s%s <-> %s', dist, location, req)
-                errors = True
+                errors.append('Error: version conflict: %s%s <-> %s' % (dist, location, req))
                 seen_warnings.add(req.name)
 
         if dist is None:
-            logger.error('Error: unmet dependency: %s', req)
-            errors = True
+            errors.append('Error: unmet dependency: %s' % req)
             continue
 
         result.append(dist_to_req(dist))
 
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
             # there really shouldn't be any circular dependencies...
-            queue.append(InstallRequirement(dist_req, str(req)))
+            with patch(vars(req), {'url': None}):
+                queue.append(InstallRequirement(dist_req, str(req)))
 
     if errors:
-        exit(1)
+        raise InstallationError('\n'.join(errors))
 
     return result
 
@@ -404,11 +404,6 @@ patch.DELETE = Sentinel('patch.DELETE')
 # patch <<<
 
 
-# SMELL: mutable globals -- i'd like a better way to return these values
-class _nonlocal(object):
-    successfully_installed = None
-
-
 class FasterInstallCommand(InstallCommand):
 
     def __init__(self, *args, **kw):
@@ -453,7 +448,7 @@ class FasterInstallCommand(InstallCommand):
             reqnames(previously_installed) -
             reqnames(required_with_deps) -
             reqnames(requirement_set.successfully_installed) -
-            # TODO: instead of this, add `pip-faster` to the `required`
+            # TODO: instead of this, add `pip-faster` to the `required`, and let trace-requirements do its work
             set(['pip-faster', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
         )
 

@@ -1,6 +1,7 @@
 import pytest
 from testing import run
 
+from functional.simple_test import pip_freeze
 
 def it_shows_help_for_prune():
     out, err = run('pip-faster', 'install', '--help')
@@ -19,7 +20,17 @@ def it_installs_stuff(tmpdir):
     venv = tmpdir.join('venv')
     run('virtualenv', str(venv))
 
+    assert pip_freeze(str(venv)) == '''\
+'''
+
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster')
 
-    run('pip-faster', 'install', 'pure_python_package')
+    assert [
+        req.split('==')[0]
+        for req in pip_freeze(str(venv)).split()
+    ] == ['pip-faster', 'virtualenv', 'wheel']
+
+    run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
+
+    assert 'pure-python-package==0.1.0' in pip_freeze(str(venv)).split('\n')

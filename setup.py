@@ -54,7 +54,8 @@ def main():
         py_modules=['venv_update', 'pip_faster'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
-            'virtualenv>=1.11.5,<2.0',
+            'virtualenv>=1.11.5,<2.0',  # just for venv-update
+            'pip>=1.5.0,<6.0.0',
             'wheel',
         ],
         entry_points={
