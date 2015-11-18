@@ -6,8 +6,8 @@ lint:
 	pre-commit run --all-files
 
 .PHONY: test tests
-test tests:
-	./test $(ARGS)
+test tests: venv
+	. venv-venv_update/bin/activate && ./test $(ARGS)
 
 .PHONY: tox
 tox:
