@@ -23,24 +23,25 @@ def test_relocatable(tmpdir):
     run(python, '-m', 'pip.__main__', '--version')
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_python_versions(tmpdir):
     tmpdir.chdir()
-    requirements('doge==3.5.0')
+    requirements('pure_python_package')
 
     venv_update('--python=python2.6')
-    run('sh', '-c', '. virtualenv_run/bin/activate && doge --help')
+    run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
     assert out == ''
     assert err.startswith('Python 2.6')
 
     venv_update('--python=python2.7')
-    run('sh', '-c', '. virtualenv_run/bin/activate && doge --help')
+    run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
     assert out == ''
     assert err.startswith('Python 2.7')
 
     venv_update('--python=python2.6')
-    run('sh', '-c', '. virtualenv_run/bin/activate && doge --help')
+    run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
     assert out == ''
     assert err.startswith('Python 2.6')
