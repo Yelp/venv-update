@@ -59,10 +59,17 @@ def flock(path):
 def wheel(src, dst):
     import subprocess
     import sys
+    import os
     print('wheel', src)
+
+    # explicitly enable default PIP_INDEX_URL
+    env = os.environ.copy()
+    env.pop('PIP_INDEX_URL', None)
+
     subprocess.check_call(
         (sys.executable, '-m', 'pip.__main__', 'wheel', '--wheel-dir', str(dst), '.'),
         cwd=str(src),
+        env=env,
     )
 
 
