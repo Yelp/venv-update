@@ -67,8 +67,7 @@ def wheel(src, dst):
     env.pop('PIP_INDEX_URL', None)
 
     subprocess.check_call(
-        (sys.executable, '-m', 'pip.__main__', 'wheel', '--wheel-dir', str(dst), '.'),
-        cwd=str(src),
+        (sys.executable, '-m', 'pip.__main__', 'wheel', '--wheel-dir', str(dst), str(src)),
         env=env,
     )
 
@@ -83,6 +82,7 @@ def make_sdists(sources, destination):
     staging.ensure(dir=True)
 
     build_all(sources, staging)
+    wheel('argparse', staging)
 
     if destination.islink():
         old = destination.readlink()
