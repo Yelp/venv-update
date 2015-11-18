@@ -44,47 +44,53 @@ def install_twice(tmpdir, between):
     # Should I make a fixture c-extension to remove these dependencies?
     # NOTE: Avoid projects that use 2to3 (urwid). It makes the runtime vary too widely.
     requirements('''\
-simplejson==3.6.5
-pyyaml==3.11
-pylint==1.4.0
-logilab-common==0.63.2
-astroid<1.3.3
-py==1.4.26
-pytest==2.6.4
-unittest2==0.8.0
-six<=1.8.0
-chroniker
+project_with_c
+pure_python_package
+slow_python_package
+dependant_package
+many_versions_package>=2,<3
 ''')
 
     from time import time
-    enable_coverage(tmpdir)
-    assert pip_freeze() == '\n'.join((
-        'cov-core==1.15.0',
-        'coverage==4.0a1',
-        ''
-    ))
+    # TODO: re-enable coverage
+    #enable_coverage(tmpdir)
 
     start = time()
     venv_update()
     time1 = time() - start
     expected = '\n'.join((
-        'PyYAML==3.11',
-        'astroid==1.3.2',
-        'chroniker==0.0.0',
-        'logilab-common==0.63.2',
+        'dependant-package==1',
+        'implicit-dependency==1',
+        'many-versions-package==2.1',
         'pip-faster==0.1.4.4',
-        'py==1.4.26',
-        'pylint==1.4.0',
-        'pytest==2.6.4',
-        'simplejson==3.6.5',
-        'six==1.8.0',
-        'unittest2==0.8.0',
+        'project-with-c==0.1.0',
+        'pure-python-package==0.1.0',
+        'slow-python-package==0.1.0',
+        'virtualenv==1.11.6',
         'wheel==0.26.0',
         ''
     ))
     assert pip_freeze() == expected
 
     between()
+
+    # FIXME: pip7 has the behavior we want: wheel anything we install
+    from glob import glob
+
+    for package in (
+            'argparse',
+            'pip',
+            'pip_faster',
+            'virtualenv',
+            'wheel',
+    ):
+        pattern = str(TOP.join('build/packages', package + '-*.whl'))
+        wheel = glob(pattern)
+        assert len(wheel) == 1, (pattern, wheel)
+        wheel = wheel[0]
+
+        from shutil import copy
+        copy(wheel, str(tmpdir.join('.pip/wheelhouse')))
 
     start = time()
     # second install should also need no network access
@@ -103,26 +109,17 @@ chroniker
     return ratio
 
 
-# TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
-@pytest.mark.flaky(reruns=2)
-@pytest.mark.usefixtures('pypi_server_with_fallback')
+@pytest.mark.usefixtures('pypi_server')
 def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2014-12-22 travis py26: 9.4-12
-    #   2014-12-22 travis py27: 10-13
-    #   2014-12-22 travis py34: 6-14
-    #   2014-12-22 travis pypy: 5.5-7.5
-    #   2015-01-07 linux py27: 17-34
-    #   2015-02-17 travis pypy: 5.5-7.5
-    assert 6 < install_twice(tmpdir, between=do_nothing) < 40
+    #   2015-11-19 linux py27: 6-7
+    assert 5 < install_twice(tmpdir, between=do_nothing) < 8
 
 
-# TODO: we should be able to factor these @flaky decorators out, using our new fixtured packages
-@pytest.mark.flaky(reruns=2)
 @pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_cached_clean_install_faster(tmpdir):
     def clean():
@@ -134,14 +131,8 @@ def test_cached_clean_install_faster(tmpdir):
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2014-12-22 travis py26: 4-6
-    #   2014-12-22 travis py27: 3.2-5.5
-    #   2014-12-22 travis py34: 3.7-6
-    #   2014-12-22 travis pypy: 3.5-4
-    #   2014-12-24 travis pypy: 2.9-3.5
-    #   2014-12-24 osx pypy: 3.9
-    #   2015-09-05 travis pypy: 1.8-2.3  ## FIXME!
-    assert 1.75 < install_twice(tmpdir, between=clean) < 7
+    #   2015-11-19 linux py27: 2.06-2.35
+    assert 1.8 < install_twice(tmpdir, between=clean) < 2.7
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
