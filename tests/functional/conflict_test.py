@@ -68,10 +68,11 @@ pep8==1.0
 Cleaning up...
 Error: version conflict: mccabe 0.2 (virtualenv_run/%s)'''
         ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
-Error: version conflict: pep8 1.0 (virtualenv_run/%s) '''
-        '''<-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: pep8 1.0 (virtualenv_run/%s)'''
+        ''' <-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
 Error: unmet dependency: pyflakes>=0.8.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Storing debug log for failure in %s/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-''' % (PYTHON_LIB, PYTHON_LIB)
+''' % (PYTHON_LIB, PYTHON_LIB, tmpdir)
     ) in out

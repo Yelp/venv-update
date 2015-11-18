@@ -313,7 +313,8 @@ def trace_requirements(requirements):
 
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
             # there really shouldn't be any circular dependencies...
-            with patch(vars(req), {'url': None}):
+            # temporarily shorten the str(req)
+            with patch(vars(req), {'url': None, 'satisfied_by': None}):
                 queue.append(InstallRequirement(dist_req, str(req)))
 
     if errors:
