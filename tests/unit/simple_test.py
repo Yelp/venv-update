@@ -83,28 +83,28 @@ def test_dotpy(filename, expected):
 @pytest.mark.parametrize('args,expected', [
     (
         (),
-        (1, 'virtualenv_run', ('requirements.txt',), ()),
+        ('virtualenv_run', ('requirements.txt',), ()),
     ), (
         ('a',),
-        (1, 'a', ('requirements.txt',), ())
+        ('a', ('requirements.txt',), ())
     ), (
         ('a', 'b'),
-        (1, 'a', ('b',), ())
+        ('a', ('b',), ())
     ), (
         ('a', 'b', 'c'),
-        (1, 'a', ('b', 'c'), ())
+        ('a', ('b', 'c'), ())
     ), (
         ('a', 'b', 'c', 'd'),
-        (1, 'a', ('b', 'c', 'd'), ())
+        ('a', ('b', 'c', 'd'), ())
     ), (
         ('a', '--opt', 'optval', 'b', 'c', 'd'),
-        (1, 'a', ('optval', 'b', 'c', 'd'), ('--opt',))
+        ('a', ('optval', 'b', 'c', 'd'), ('--opt',))
     ), (
-        ('a', '--opt', 'optval', 'b', '--stage2', 'c', 'd'),
-        (2, 'a', ('optval', 'b', 'c', 'd'), ('--opt',))
+        ('a', '--opt', 'optval', 'b', '--opt2', 'c', 'd'),
+        ('a', ('optval', 'b', 'c', 'd'), ('--opt', '--opt2'))
     ), (
-        ('--stage2', 'a', '--opt', 'optval', 'b', '--stage2', 'c', 'd'),
-        (2, 'a', ('optval', 'b', 'c', 'd'), ('--opt',))
+        ('--opt2', 'a', '--opt', 'optval', 'b', '--opt2', 'c', 'd'),
+        ('a', ('optval', 'b', 'c', 'd'), ('--opt2', '--opt', '--opt2'))
     ),
 ])
 def test_parseargs(args, expected):
