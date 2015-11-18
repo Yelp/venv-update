@@ -442,13 +442,20 @@ class FasterInstallCommand(InstallCommand):
         if not do_prune:
             return requirement_set
 
-        required = [r for r in requirement_set.requirements.values()]
-        required_with_deps = trace_requirements(required)
+        if requirement_set is None:
+            required = ()
+            successfully_installed = ()
+        else:
+            required = requirement_set.requirements.values()
+            successfully_installed = requirement_set.successfully_installed
+
+        # transitive requirements, previously installed, are also required
+        required = trace_requirements(required)
 
         extraneous = (
             reqnames(previously_installed) -
-            reqnames(required_with_deps) -
-            reqnames(requirement_set.successfully_installed) -
+            reqnames(required) -
+            reqnames(successfully_installed) -
             # TODO: instead of this, add `pip-faster` to the `required`, and let trace-requirements do its work
             set(['pip-faster', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
         )

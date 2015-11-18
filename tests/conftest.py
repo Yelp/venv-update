@@ -22,6 +22,7 @@ def no_pip_environment_vars():
     for var in dict(os.environ):
         if var.startswith('PIP_'):
             del os.environ[var]
+    os.environ['PIP_INDEX_URL'] = '(total garbage)'
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -32,13 +33,7 @@ def no_pythonpath_environment_var():
 
 
 @pytest.yield_fixture(scope='session')
-def pypi_fallback():
-    """should we fall back to the global python.org servers?"""
-    yield True
-
-
-@pytest.yield_fixture(scope='session')
-def pypi_server(pypi_fallback):
+def prepare_pypi_server():
     packages = 'build/packages'
     subprocess.check_call(
         (
@@ -51,14 +46,20 @@ def pypi_server(pypi_fallback):
         cwd=str(TOP),
     )
 
-    port = str(reserve())
+    port = reserve()
+    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + str(port) + '/simple'
+
+    yield packages, port
+
+
+def start_pypi_server(packages, port, pypi_fallback):
+    port = str(port)
     cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
     cmd += (packages,)
     print(colorize(cmd))
     server = subprocess.Popen(cmd, close_fds=True, cwd=str(TOP))
-    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + port + '/simple'
 
     limit = 10
     poll = .1
@@ -78,6 +79,20 @@ def pypi_server(pypi_fallback):
     finally:
         server.terminate()
         server.wait()
+
+
+@pytest.yield_fixture
+def pypi_server(prepare_pypi_server):
+    packages, port = prepare_pypi_server
+    for _ in start_pypi_server(packages, port, False):
+        yield
+
+
+@pytest.yield_fixture
+def pypi_server_with_fallback(prepare_pypi_server):
+    packages, port = prepare_pypi_server
+    for _ in start_pypi_server(packages, port, True):
+        yield
 
 
 def service_up(port):
