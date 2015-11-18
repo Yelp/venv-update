@@ -47,21 +47,28 @@ def test_python_versions(tmpdir):
     assert err.startswith('Python 2.6')
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_virtualenv_moved(tmpdir):
     """if you move the virtualenv and venv-update again, the old will be blown away, and things will work"""
     original_path = 'original'
     new_path = 'new_dir'
 
-    tmpdir.mkdir(original_path).chdir()
-    requirements('flake8==2.4.0\n')
-    Path('run.py').write('')
-    venv_update()
-    run('virtualenv_run/bin/flake8', 'run.py')
-    run('virtualenv_run/bin/python', 'virtualenv_run/bin/flake8', 'run.py')
+    with tmpdir.mkdir(original_path).as_cwd():
+        requirements('pure_python_package')
+        venv_update()
+        run('virtualenv_run/bin/pure-python-script')
+        run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
 
-    tmpdir.chdir()
-    Path(original_path).rename(new_path)
-    tmpdir.join(new_path).chdir()
-    venv_update()
-    run('virtualenv_run/bin/flake8', 'run.py')
-    run('virtualenv_run/bin/python', 'virtualenv_run/bin/flake8', 'run.py')
+    with tmpdir.as_cwd():
+        Path(original_path).rename(new_path)
+
+    with tmpdir.join(new_path).as_cwd():
+        with pytest.raises(OSError) as excinfo:
+            run('virtualenv_run/bin/pure-python-script')
+        assert excinfo.type is OSError
+        assert excinfo.value.args[0] == 2  # no such file
+        run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
+
+        venv_update()
+        run('virtualenv_run/bin/pure-python-script')
+        run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
