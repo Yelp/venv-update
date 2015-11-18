@@ -153,15 +153,24 @@ def wait_for_all_subprocesses():
             raise
 
 
-def backintime(reference, filename):
-    info(colorize(('touch', filename, '--reference', reference, '--date', '1 day ago')))
+def mtime_offset(reference, hours_offset):
     from os.path import getmtime
     mtime = getmtime(reference)
 
-    timestamp = mtime - 24 * 60 * 60
+    return mtime + hours_offset * 60 * 60
+
+
+def touch(filename, timestamp):
+    if timestamp is not None:
+        timestamp = (timestamp, timestamp)  # atime, mtime
 
     from os import utime
-    utime(filename, (timestamp, timestamp))
+    utime(filename, timestamp)
+
+
+def mark_venv_valid(venv_path):
+    wait_for_all_subprocesses()
+    touch(venv_path, None)
 
 
 def mark_venv_invalid(venv_path, reqs):
@@ -173,7 +182,7 @@ def mark_venv_invalid(venv_path, reqs):
         info('Waiting for all subprocesses to finish...')
         wait_for_all_subprocesses()
         info('DONE')
-        backintime(reqs[0], venv_path)
+        touch(venv_path, mtime_offset(reqs[0], -24))
         info('')
 
 
@@ -221,7 +230,7 @@ def venv_update(venv_path, reqs, venv_args):
         'pip-faster==' + __version__
     ))
 
-    run((python, '-m', 'pip_faster', 'install', '--prune') + sum(
+    run((python, '-m', 'pip_faster', 'install', '--prune', '--upgrade') + sum(
         [('-r', req) for req in reqs],
         (),
     ))
@@ -234,7 +243,7 @@ def main():
 
     from subprocess import CalledProcessError
     try:
-        return venv_update(venv_path, reqs, venv_args)
+        exit_code = venv_update(venv_path, reqs, venv_args)
     except SystemExit as error:
         exit_code = error.code
     except CalledProcessError as error:
@@ -245,8 +254,10 @@ def main():
         mark_venv_invalid(venv_path, reqs)
         raise
 
-    if exit_code != 0:
+    if exit_code:
         mark_venv_invalid(venv_path, reqs)
+    else:
+        mark_venv_valid(venv_path)
 
     return exit_code
 
