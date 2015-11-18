@@ -13,7 +13,7 @@ class build(_build):
     def run(self):
         # Simulate a slow package
         import time
-        time.sleep(.5)
+        time.sleep(5)
         # old style class
         _build.run(self)
 
