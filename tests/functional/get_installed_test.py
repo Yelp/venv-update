@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import pytest
+
 from testing import run
 from testing import venv_update_script
 
@@ -24,6 +26,7 @@ for p in sorted(p.reqnames(p.pip_get_installed())):
     return out.split()
 
 
+@pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_pip_get_installed(tmpdir):
     tmpdir.chdir()
 
