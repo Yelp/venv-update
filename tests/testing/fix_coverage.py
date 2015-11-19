@@ -3,28 +3,32 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
+import os.path
 
 from coverage.data import CoverageData
+import coverage.env
+coverage.env.TESTING = 'true'
 
 
 def merge_coverage(coverage_data, from_path, to_path):
-    for filename in tuple(coverage_data.lines):
+    for filename in coverage_data.measured_files():
         result_filename = filename.split(from_path)[-1]
         if filename == result_filename:
             continue
 
+        result_filename = result_filename.lstrip('/')
         result_filename = os.path.join(to_path, result_filename)
+        result_filename = os.path.abspath(result_filename)
         if not os.path.exists(result_filename):
             continue
 
-        coverage_data.lines.setdefault(result_filename, {})
-        coverage_data.lines[result_filename].update(coverage_data.lines[filename])
-        coverage_data.arcs.setdefault(result_filename, {})
-        coverage_data.arcs[result_filename].update(coverage_data.arcs[filename])
+        coverage_data.add_arcs(
+            {result_filename: coverage_data.arcs(filename)}
+        )
 
-        del coverage_data.lines[filename]
-        del coverage_data.arcs[filename]
+        # pylint:disable=protected-access
+        del coverage_data._arcs[filename]
+        coverage_data._validate_invariants()
 
 
 def fix_coverage(from_path, to_path):

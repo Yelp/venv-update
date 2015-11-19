@@ -15,23 +15,23 @@ def test_fix_coverage(tmpdir):
     unrelated_file.ensure()
 
     coverage_data = CoverageData()
-    coverage_data.add_line_data({
-        str(base_file): {0: None, 1: None},
-        str(sub_file): {2: None, 3: None},
-        str(unrelated_file): {4: None, 5: None},
+    coverage_data.add_arcs({
+        str(base_file): {(1, 2): None},
+        str(sub_file): {(3, 4): None},
+        str(unrelated_file): {(5, 6): None},
     })
-    coverage_data.add_arc_data({
-        str(base_file): {(0, 1): None},
-        str(sub_file): {(2, 3): None},
-        str(unrelated_file): {(4, 5): None},
-    })
+
+    assert coverage_data.lines(base_file) == [1]
+    assert coverage_data.lines(sub_file) == [3]
+    assert coverage_data.lines(unrelated_file) == [5]
 
     merge_coverage(coverage_data, '/site-packages/', str(tmpdir))
 
     # The base file should contain all the lines and arcs
-    assert coverage_data.line_data()[base_file] == [0, 1, 2, 3]
-    assert coverage_data.arc_data()[base_file] == [(0, 1), (2, 3)]
+    assert coverage_data.lines(base_file) == [1, 3]
+    assert coverage_data.arcs(base_file) == [(1, 2), (3, 4)]
+    assert coverage_data.lines(unrelated_file) == [5]
+    assert coverage_data.arcs(unrelated_file) == [(5, 6)]
 
     # And the sub file should no longer exist
-    assert sub_file not in coverage_data.lines
-    assert sub_file not in coverage_data.arcs
+    assert sub_file not in coverage_data.measured_files()
