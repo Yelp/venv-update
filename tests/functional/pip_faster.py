@@ -33,4 +33,4 @@ def it_installs_stuff(tmpdir):
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
-    assert 'pure-python-package==0.1.0' in pip_freeze(str(venv)).split('\n')
+    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
