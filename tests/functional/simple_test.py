@@ -64,7 +64,7 @@ many_versions_package>=2,<3
         'many-versions-package==2.1',
         'pip-faster==0.1.4.4',
         'project-with-c==0.1.0',
-        'pure-python-package==0.1.0',
+        'pure-python-package==0.2.0',
         'slow-python-package==0.1.0',
         'virtualenv==1.11.6',
         'wheel==0.26.0',
@@ -116,8 +116,8 @@ def test_noop_install_faster(tmpdir):
 
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2015-11-19 linux py27: 6-7
-    assert 5 < install_twice(tmpdir, between=do_nothing) < 8
+    #   2015-11-19 linux py27: 12.21 - 13.14
+    assert 11 < install_twice(tmpdir, between=do_nothing) < 14
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -131,8 +131,8 @@ def test_cached_clean_install_faster(tmpdir):
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2015-11-19 linux py27: 2.06-2.35
-    assert 1.8 < install_twice(tmpdir, between=clean) < 2.7
+    #   2015-11-19 linux py27: 4.00 - 4.22
+    assert 3 < install_twice(tmpdir, between=clean) < 5
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')

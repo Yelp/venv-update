@@ -13,9 +13,8 @@ from testing.python_lib import PYTHON_LIB
 def test_conflicting_reqs(tmpdir):
     tmpdir.chdir()
     T.requirements('''
-# flake8 2.2.5 requires mccabe>=0.2.1, so this isn't satisfiable
-flake8==2.2.5
-mccabe==0.2
+dependant_package
+conflicting_package
 ''')
 
     with pytest.raises(CalledProcessError) as excinfo:
@@ -30,8 +29,8 @@ mccabe==0.2
     assert (
         '''
 Cleaning up...
-Error: version conflict: mccabe 0.2 (virtualenv_run/%s)'''
-        ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: version conflict: many-versions-package 3 (virtualenv_run/%s)'''
+        ''' <-> many-versions-package<2 (from conflicting-package (from -r requirements.txt (line 3)))
 Storing debug log for failure in %s/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
@@ -43,15 +42,14 @@ Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's 
 def test_multiple_issues(tmpdir):
     # Make it a bit worse. The output should show all three issues.
     tmpdir.chdir()
-    T.requirements('flake8==2.2.5')
+    T.requirements('dependant_package')
     T.venv_update()
 
-    T.run('./virtualenv_run/bin/pip', 'uninstall', '--yes', 'pyflakes')
+    T.run('./virtualenv_run/bin/pip', 'uninstall', '--yes', 'implicit_dependency')
     T.requirements('''
-# flake8 2.2.5 requires mccabe>=0.2.1 and pep8>=1.5.7, so this isn't satisfiable
-flake8==2.2.5
-mccabe==0.2
-pep8==1.0
+dependant_package
+conflicting_package
+pure_python_package==0.1.0
 ''')
 
     with pytest.raises(CalledProcessError) as excinfo:
@@ -66,11 +64,11 @@ pep8==1.0
     assert (
         '''
 Cleaning up...
-Error: version conflict: mccabe 0.2 (virtualenv_run/%s)'''
-        ''' <-> mccabe>=0.2.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
-Error: version conflict: pep8 1.0 (virtualenv_run/%s)'''
-        ''' <-> pep8>=1.5.7 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
-Error: unmet dependency: pyflakes>=0.8.1 (from flake8==2.2.5 (from -r requirements.txt (line 3)))
+Error: unmet dependency: implicit-dependency (from dependant-package (from -r requirements.txt (line 2)))
+Error: version conflict: many-versions-package 1 (virtualenv_run/%s)'''
+        ''' <-> many-versions-package>=2,<4 (from dependant-package (from -r requirements.txt (line 2)))
+Error: version conflict: pure-python-package 0.1.0 (virtualenv_run/%s)'''
+        ''' <-> pure-python-package>=0.2.0 (from dependant-package (from -r requirements.txt (line 2)))
 Storing debug log for failure in %s/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
