@@ -1,8 +1,4 @@
 # Minimal set of pacakges to get coverage working
 # NOTE: versions must be specified in post-order or else we get the wrong versions.
 
-# cov-core ## pending pull requests:
-#       * https://github.com/schlamar/cov-core/pull/6
-#       * https://github.com/schlamar/cov-core/pull/7
-# -e doesn't work here because of setuptools data_files >.<
-git+git://github.com/bukzor/cov-core.git@master#egg=cov-core
+coverage

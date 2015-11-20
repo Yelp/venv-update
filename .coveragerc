@@ -4,6 +4,7 @@ source =
     venv_update
     pip_faster
     $TOP/tests
+data_file = $TOP/.coverage
 
 [report]
 exclude_lines =

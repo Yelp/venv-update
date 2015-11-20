@@ -18,9 +18,11 @@ if $PYPY; then
     py.test -n $((NCPU / 3)) \
         "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
 else
+    # See: http://nedbatchelder.com/code/coverage/subprocess.html
+    $TOP/tests/testing/install_coverage_pth.py
+
     coverage erase
-    py.test -n $NCPU \
-        --cov --cov-config=$TOP/.coveragerc --cov-report='' \
+    COVERAGE_PROCESS_START=$TOP/.coveragerc py.test -n $NCPU \
         "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
     coverage combine
     python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP

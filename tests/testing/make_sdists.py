@@ -83,6 +83,7 @@ def make_sdists(sources, destination):
 
     build_all(sources, staging)
     wheel('argparse', staging)
+    wheel('coverage', staging)
 
     if destination.islink():
         old = destination.readlink()
