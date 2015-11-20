@@ -2,11 +2,19 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
+import time
 from subprocess import CalledProcessError
 
 import pytest
 import testing as T
 from testing.python_lib import PYTHON_LIB
+
+
+def assert_venv_marked_invalid(venv):
+    """we mark a virtualenv as invalid by bumping its timestamp back by a day"""
+    venv_age = time.time() - os.path.getmtime(venv.strpath)
+    assert venv_age / 60 / 60 / 24 > 1
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -36,6 +44,8 @@ Storing debug log for failure in %s/.pip/pip.log
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
 ''' % (PYTHON_LIB, tmpdir)
     ) in out
+
+    assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -74,3 +84,5 @@ Storing debug log for failure in %s/.pip/pip.log
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
 ''' % (PYTHON_LIB, PYTHON_LIB, tmpdir)
     ) in out
+
+    assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
