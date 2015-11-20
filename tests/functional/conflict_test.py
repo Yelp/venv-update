@@ -11,9 +11,9 @@ import testing as T
 from testing.python_lib import PYTHON_LIB
 
 
-def assert_venv_age(tmpdir):
-    venv_dir = tmpdir.join('virtualenv_run')
-    venv_age = time.time() - os.path.getmtime(venv_dir.strpath)
+def assert_venv_marked_invalid(venv):
+    """we mark a virtualenv as invalid by bumping its timestamp back by a day"""
+    venv_age = time.time() - os.path.getmtime(venv.strpath)
     assert venv_age / 60 / 60 / 24 > 1
 
 
@@ -45,7 +45,7 @@ Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's 
 ''' % (PYTHON_LIB, tmpdir)
     ) in out
 
-    assert_venv_age(tmpdir)
+    assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -85,4 +85,4 @@ Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's 
 ''' % (PYTHON_LIB, PYTHON_LIB, tmpdir)
     ) in out
 
-    assert_venv_age(tmpdir)
+    assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
