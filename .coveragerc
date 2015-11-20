@@ -1,9 +1,10 @@
 [run]
+parallel = True
 branch = True
 source =
+    $TOP/tests
     venv_update
     pip_faster
-    $TOP/tests
 data_file = $TOP/.coverage
 
 [report]
@@ -19,11 +20,11 @@ exclude_lines =
     # Don't complain if tests don't hit re-raise of unexpected errors:
     ^\s*raise$
 
-    # Don't complain if non-runnable code isn't run:
-    ^if __name__ == ['"]__main__['"]:$
+    # if main is covered, we're good:
+    ^\s*exit\(main\(\)\)$
 show_missing = True
 
 [html]
-directory = coverage-html
+directory = $TOP/coverage-html
 
 # vim:ft=dosini

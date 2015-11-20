@@ -17,7 +17,7 @@ from testing.ephemeral_port_reserve import reserve
 from venv_update import colorize
 
 
-ENV_WHITELIST = ()
+ENV_WHITELIST = ('COVERAGE_PROCESS_START', 'TOP')
 
 
 @pytest.fixture(autouse=True)

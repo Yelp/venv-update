@@ -10,12 +10,14 @@ from testing import run
 from testing import venv_update
 from testing import venv_update_symlink_pwd
 from testing import pip_freeze
+from testing import enable_coverage
 
 
 @pytest.mark.usefixtures('pypi_server')
 def test_python_versions(tmpdir):
     tmpdir.chdir()
-    requirements('pure_python_package')
+    requirements('pure_python_package\ncoverage')
+    enable_coverage(tmpdir)
 
     venv_update('--python=python2.6')
     run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')

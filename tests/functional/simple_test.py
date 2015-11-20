@@ -13,6 +13,7 @@ from testing import TOP
 from testing import uncolor
 from testing import venv_update
 from testing import pip_freeze
+from testing import enable_coverage
 PY33 = (version_info >= (3, 3))
 
 
@@ -21,18 +22,6 @@ def test_trivial(tmpdir):
     tmpdir.chdir()
     requirements('')
     venv_update()
-
-
-def enable_coverage(tmpdir):
-    venv = tmpdir.join('virtualenv_run')
-    if not venv.isdir():
-        run('virtualenv', venv.strpath)
-    run(
-        venv.join('bin/python').strpath,
-        '-m', 'pip.__main__',
-        'install',
-        '-r', TOP.join('requirements.d/coverage.txt').strpath,
-    )
 
 
 def install_twice(tmpdir, between):
@@ -51,8 +40,7 @@ many_versions_package>=2,<3
 ''')
 
     from time import time
-    # TODO: re-enable coverage
-    #enable_coverage(tmpdir)
+    enable_coverage(tmpdir)
 
     start = time()
     venv_update()
