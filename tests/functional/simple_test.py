@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import re
 from sys import version_info
 
 import pytest
@@ -13,7 +12,7 @@ from testing import strip_coverage_warnings
 from testing import TOP
 from testing import uncolor
 from testing import venv_update
-from testing import venv_update_symlink_pwd
+from testing import pip_freeze
 PY33 = (version_info >= (3, 3))
 
 
@@ -173,7 +172,7 @@ def test_arguments_version(tmpdir):
 
     lines = [uncolor(line) for line in out.split('\n')]
     assert len(lines) == 3, lines
-    assert lines[0].endswith(' -m virtualenv virtualenv_run --version'), repr(lines[0])
+    assert lines[0].endswith('/virtualenv virtualenv_run --version'), repr(lines[0])
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -194,59 +193,6 @@ for p in sys.path:
     assert err == ''
     out = out.rstrip('\n')
     assert out and Path(out).isdir()
-
-
-def pip_freeze(venv='virtualenv_run'):
-    from os.path import join
-    out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local')
-
-    # Most python distributions which have argparse in the stdlib fail to
-    # expose it to setuptools as an installed package (it seems all but ubuntu
-    # do this). This results in argparse sometimes being installed locally,
-    # sometimes not, even for a specific version of python.
-    # We normalize by never looking at argparse =/
-    out = re.sub(r'argparse==[\d.]+\n', '', out, count=1)
-
-    assert err == ''
-    return out
-
-
-@pytest.mark.usefixtures('pypi_server')
-def test_update_while_active(tmpdir):
-    tmpdir.chdir()
-    requirements('virtualenv<2')
-
-    venv_update()
-    assert 'mccabe' not in pip_freeze()
-
-    # An arbitrary small package: mccabe
-    requirements('virtualenv<2\nmccabe')
-
-    venv_update_symlink_pwd()
-    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
-
-    assert err == ''
-    assert out.startswith('Keeping virtualenv from previous run.\n')
-    assert 'mccabe' in pip_freeze()
-
-
-@pytest.mark.usefixtures('pypi_server')
-def test_update_invalidated_while_active(tmpdir):
-    tmpdir.chdir()
-    requirements('virtualenv<2')
-
-    venv_update()
-    assert 'mccabe' not in pip_freeze()
-
-    # An arbitrary small package: mccabe
-    requirements('virtualenv<2\nmccabe')
-
-    venv_update_symlink_pwd()
-    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py --system-site-packages')
-
-    assert err == ''
-    assert out.startswith('Removing invalidated virtualenv.\n')
-    assert 'mccabe' in pip_freeze()
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -325,7 +271,6 @@ def test_timestamps_multiple(tmpdir):
 def pipe_output(read, write):
     from os import environ
     environ = environ.copy()
-    environ['HOME'] = str(Path('.').realpath())
 
     from subprocess import Popen
     vupdate = Popen(
@@ -346,7 +291,7 @@ def pipe_output(read, write):
     assert uncolored.startswith('> ')
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
     assert uncolored.endswith('''\
- -m virtualenv virtualenv_run --version
+/virtualenv virtualenv_run --version
 1.11.6
 ''')
 

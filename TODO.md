@@ -1,3 +1,39 @@
+
+NEXT
+====
+We plan to work on these as soon as possible.
+
+
+ - [ ] dogfood venv-update during travis, tox
+   - [ ] recommended tox config: install_command=pip-faster --prune {opts} {packages}
+
+* change host-python requirement to simply virtualenv, any version
+
+ - [ ] missing tests
+   - [ ] non-default requirements file(s)
+   - [ ] run from virtualenv which doesn't have virtualenv installed
+   - [ ] update an active virtualenv which wasn't created by venv-update
+
+
+
+
+BACKLOG
+=======
+
+
+
+
+
+
+
+
+
+
+ARCHIVE
+=======
+
+
+
 v1.0: tox support
 -----------------
 
