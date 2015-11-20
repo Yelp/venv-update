@@ -1,7 +1,9 @@
 import pytest
+from testing import requirements
 from testing import run
 
 from functional.simple_test import pip_freeze
+
 
 def it_shows_help_for_prune():
     out, err = run('pip-faster', 'install', '--help')
@@ -34,3 +36,19 @@ def it_installs_stuff(tmpdir):
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
     assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
+
+
+@pytest.mark.usefixtures('pypi_server_with_fallback')
+def it_installs_stuff_from_requirements_file(tmpdir):
+    tmpdir.chdir()
+
+    venv = tmpdir.join('venv')
+    run('virtualenv', str(venv))
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster')
+
+    # An arbitrary small package: mccabe
+    requirements('mccabe\npep8==1.0')
+
+    run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
