@@ -97,11 +97,9 @@ def validate_venv(venv_path, venv_args):
     """Ensure we have a valid virtualenv."""
     import json
     from sys import executable, version
-    from virtualenv import __version__ as virtualenv_version
     # we count any existing virtualenv invalidated if any of these relevant values changes
     validation = (
         version,  # includes e.g. pypy version
-        virtualenv_version,
         venv_args,
         venv_path,
     )
@@ -127,11 +125,9 @@ def validate_venv(venv_path, venv_args):
             info('Removing invalidated virtualenv.')
             run(('rm', '-rf', venv_path))
 
-            # run virtualenv using the same executable as last time
-            # this avoids running virtualenv against its own container
-            executable = previous_state.get('executable', executable)
-
-    run((executable, '-m', 'virtualenv', venv_path) + venv_args)
+    from distutils.spawn import find_executable as which
+    virtualenv = which('virtualenv')
+    run((timid_relpath(virtualenv), venv_path,) + venv_args)
 
     if isdir(venv_path):
         with open(state_path, 'w') as state:

@@ -1,9 +1,11 @@
 [pep8]
 max-line-length=131
 exclude=.tox,*.tmp,tmp/
+ignore=E265,E266
 
 [flake8]
 max-line-length=131
 exclude=.tox,*.tmp,tmp/
+ignore=E265,E266
+
 max-complexity=12
-ignore=E266

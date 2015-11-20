@@ -26,8 +26,8 @@ def run(*cmd, **env):
         env = None
 
     from .capture_subprocess import capture_subprocess
-    from venv_update import colorize
-    capture_subprocess(('echo', '\nTEST>', colorize(cmd)))
+    from venv_update import info, colorize
+    info('\nTEST> ' + colorize(cmd))
     out, err = capture_subprocess(cmd, env=env)
     err = strip_coverage_warnings(err)
     return out, err
@@ -55,14 +55,6 @@ def venv_update_symlink_pwd():
     if local_vu.exists():
         local_vu.remove()
     local_vu.mksymlinkto(venv_update_path)
-
-    # TODO(Yelp/#70): remove this -- we shouldn't need to vendor pip-faster
-    from pip_faster import __file__ as pip_faster_path
-    pip_faster_path = Path(dotpy(pip_faster_path))
-    local_pf = Path(pip_faster_path.basename)
-    if local_pf.exists():
-        local_pf.remove()
-    local_pf.mksymlinkto(pip_faster_path)
 
 
 def venv_update_script(pyscript, venv='virtualenv_run'):
@@ -96,3 +88,19 @@ def uncolor(text):
     # the colored_tty, uncolored_pipe tests cover this pretty well.
     from re import sub
     return sub('\033\\[[^A-z]*[A-z]', '', text)
+
+
+def pip_freeze(venv='virtualenv_run'):
+    from os.path import join
+    out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local')
+
+    # Most python distributions which have argparse in the stdlib fail to
+    # expose it to setuptools as an installed package (it seems all but ubuntu
+    # do this). This results in argparse sometimes being installed locally,
+    # sometimes not, even for a specific version of python.
+    # We normalize by never looking at argparse =/
+    import re
+    out = re.sub(r'argparse==[\d.]+\n', '', out, count=1)
+
+    assert err == ''
+    return out

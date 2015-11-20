@@ -5,25 +5,28 @@ from __future__ import unicode_literals
 import pytest
 
 from testing import run
-from testing import venv_update_script
 
+ALWAYS = set(['pip', 'pip-faster', 'setuptools', 'virtualenv', 'wheel'])
 
 def get_installed():
-    out, err = venv_update_script('''\
+    out, err = run('myvenv/bin/python', '-c', '''\
 import pip_faster as p
 for p in sorted(p.reqnames(p.pip_get_installed())):
-    print(p)''', venv='myvenv')
+    print(p)''')
 
     assert err == ''
+    out = set(out.split())
 
     # Most python distributions which have argparse in the stdlib fail to
     # expose it to setuptools as an installed package (it seems all but ubuntu
     # do this). This results in argparse sometimes being installed locally,
     # sometimes not, even for a specific version of python.
     # We normalize by never looking at argparse =/
-    out = out.replace('argparse\n', '', 1)
+    out -= set(['argparse'])
 
-    return out.split()
+    # these will always be present
+    assert ALWAYS.issubset(out)
+    return sorted(out - ALWAYS)
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -32,7 +35,9 @@ def test_pip_get_installed(tmpdir):
 
     run('virtualenv', 'myvenv')
     run('rm', '-rf', 'myvenv/local')
-    assert get_installed() == ['pip', 'setuptools']
+    run('myvenv/bin/pip', 'install', 'pip-faster')
+
+    assert get_installed() == []
 
     run(
         'myvenv/bin/pip', 'install',
@@ -40,13 +45,13 @@ def test_pip_get_installed(tmpdir):
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )
-    assert get_installed() == ['cov-core', 'coverage', 'pip', 'py', 'pytest', 'pytest-cov', 'setuptools']
+    assert get_installed() == ['cov-core', 'coverage', 'py', 'pytest', 'pytest-cov']
 
     run('myvenv/bin/pip', 'uninstall', '--yes', 'cov-core', 'coverage', 'py', 'pytest', 'pytest-cov')
-    assert get_installed() == ['pip', 'setuptools']
+    assert get_installed() == []
 
     run('myvenv/bin/pip', 'install', 'flake8')
-    assert get_installed() == ['flake8', 'mccabe', 'pep8', 'pip', 'pyflakes', 'setuptools']
+    assert get_installed() == ['flake8', 'mccabe', 'pep8', 'pyflakes']
 
     run('myvenv/bin/pip', 'uninstall', '--yes', 'flake8')
-    assert get_installed() == ['mccabe', 'pep8', 'pip', 'pyflakes', 'setuptools']
+    assert get_installed() == ['mccabe', 'pep8', 'pyflakes']

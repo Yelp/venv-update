@@ -17,19 +17,35 @@ from testing.ephemeral_port_reserve import reserve
 from venv_update import colorize
 
 
-@pytest.fixture(scope='session', autouse=True)
-def no_pip_environment_vars():
+ENV_WHITELIST = ()
+
+
+@pytest.fixture(autouse=True)
+def fixed_environment_variables():
     for var in dict(os.environ):
-        if var.startswith('PIP_'):
+        if var not in ENV_WHITELIST:
             del os.environ[var]
+
+    # disable casual interaction with python.org
     os.environ['PIP_INDEX_URL'] = '(total garbage)'
 
+    # normalize $PATH
+    from sys import executable
+    from os import defpath
+    from os.path import dirname
+    os.environ['PATH'] = dirname(executable) + ':' + defpath
 
-@pytest.fixture(scope='session', autouse=True)
-def no_pythonpath_environment_var():
-    for var in dict(os.environ):
-        if var == 'PYTHONPATH':
-            del os.environ[var]
+
+@pytest.fixture(autouse=True)
+def tmpdir(tmpdir):
+    """override tmpdir to provide a $HOME and $TMPDIR"""
+    home = tmpdir.ensure('home', dir=True)
+    tmpdir = tmpdir.ensure('tmp', dir=True)
+
+    os.environ['HOME'] = str(home)
+    os.environ['TMPDIR'] = str(tmpdir)
+
+    return tmpdir
 
 
 @pytest.yield_fixture(scope='session')
@@ -47,7 +63,6 @@ def prepare_pypi_server():
     )
 
     port = reserve()
-    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + str(port) + '/simple'
 
     yield packages, port
 
@@ -74,6 +89,7 @@ def start_pypi_server(packages, port, pypi_fallback):
         else:
             raise AssertionError('pypi server never became ready!')
 
+    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + str(port) + '/simple'
     try:
         yield
     finally:
