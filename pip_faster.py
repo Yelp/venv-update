@@ -361,7 +361,7 @@ class FasterRequirementSet(RequirementSet):
         wb.build()
 
         for req in self.requirements.values():
-            if req.is_wheel or req.source_dir is None:
+            if req.is_wheel or req.source_dir is None or req.editable:
                 continue
 
             link = optimistic_wheel_search(req, finder.find_links)
@@ -374,6 +374,7 @@ class FasterRequirementSet(RequirementSet):
             rmtree(req.source_dir)
             unzip_file(link.path, req.source_dir, flatten=False)
             req.url = link.url
+
 
 # patch >>>
 class Sentinel(str):
