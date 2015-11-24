@@ -3,7 +3,7 @@
 *.py[co]
 .*.sw[a-z]
 build/
-.coverage
+.coverage*
 .idea
 .project
 .pydevproject

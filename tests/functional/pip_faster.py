@@ -1,6 +1,7 @@
 import pytest
 from testing import requirements
 from testing import run
+from testing import TOP
 
 from functional.simple_test import pip_freeze
 
@@ -53,5 +54,28 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
 
-    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
-    assert 'project-with-c==0.1.0' in pip_freeze(str(venv)).split('\n')
+    frozen_requirements = pip_freeze(str(venv)).split('\n')
+
+    assert 'pure-python-package==0.2.0' in frozen_requirements
+    assert 'project-with-c==0.1.0' in frozen_requirements
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_installs_stuff_with_dash_e(tmpdir):
+    tmpdir.chdir()
+
+    venv = tmpdir.join('venv')
+    run('virtualenv', str(venv))
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster')
+
+    requirements('-e ' + TOP.join('tests/testing/packages/dependant_package').strpath)
+
+    run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
+
+    frozen_requirements = pip_freeze(str(venv)).split('\n')
+
+    assert 'dependant-package==1' in frozen_requirements
+    assert 'implicit-dependency==1' in frozen_requirements
+    assert 'pure-python-package==0.2.0' in frozen_requirements
