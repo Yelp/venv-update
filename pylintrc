@@ -5,7 +5,9 @@ disable=
     fixme,
     star-args,
     redefined-outer-name,
-    too-many-public-methods
+    too-many-public-methods,
+    no-init,
+
 
 [REPORTS]
 output-format=colorized
@@ -25,6 +27,9 @@ method-rgx=(%(function-rgx)s|%(const-rgx)s)
 
 #variable-rgx=[a-z_][a-z0-9_]{2,30}$
 variable-rgx=%(method-rgx)s
+
+#class-rgx=[A-Z_][a-zA-Z0-9]+$
+class-rgx=%(const-rgx)s
 
 [FORMAT]
 max-line-length=131

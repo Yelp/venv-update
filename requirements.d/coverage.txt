@@ -1,4 +1,5 @@
-# Minimal set of pacakges to get coverage working
+# Minimal set of packages to get coverage working
 # NOTE: versions must be specified in post-order or else we get the wrong versions.
 
 coverage
+coverage-enable-subprocess

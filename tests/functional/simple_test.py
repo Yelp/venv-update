@@ -131,6 +131,7 @@ def test_install_custom_path_and_requirements(tmpdir):
         'six==1.8.0\n',
         path='requirements2.txt',
     )
+    enable_coverage(tmpdir.join('venv'))
     venv_update('venv', 'requirements2.txt')
     assert pip_freeze('venv') == '\n'.join((
         'pip-faster==0.1.4.4',

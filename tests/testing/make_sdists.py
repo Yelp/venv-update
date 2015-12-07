@@ -2,6 +2,15 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from sys import executable as python
+
+
+def info(*msg):
+    from sys import stdout
+    stdout.write(' '.join(str(x) for x in msg))
+    stdout.write('\n')
+    stdout.flush()
+
 
 def random_string():
     """return a short suffix that shouldn't collide with any subsequent calls"""
@@ -16,10 +25,9 @@ def random_string():
 
 def sdist(setuppy, dst):
     import subprocess
-    import sys
-    print('sdist', setuppy.dirname)
+    info('sdist', setuppy.dirname)
     subprocess.check_call(
-        (sys.executable, 'setup.py', 'sdist', '--dist-dir', str(dst)),
+        (python, 'setup.py', 'sdist', '--dist-dir', str(dst)),
         cwd=setuppy.dirname,
     )
 
@@ -56,20 +64,36 @@ def flock(path):
     return fd
 
 
+class public_pypi_enabled(object):
+    orig = None
+
+    def __enter__(self):
+        from os import environ
+        self.orig = environ.pop('PIP_INDEX_URL', None)
+
+    def __exit__(self, value, type_, traceback):
+        from os import environ
+        if self.orig is not None:
+            environ['PIP_INDEX_URL'] = self.orig
+
+
 def wheel(src, dst):
     import subprocess
-    import sys
-    import os
-    print('wheel', src)
+    info('wheel', src)
 
-    # explicitly enable default PIP_INDEX_URL
-    env = os.environ.copy()
-    env.pop('PIP_INDEX_URL', None)
+    with public_pypi_enabled():
+        subprocess.check_call(
+            (python, '-m', 'pip.__main__', 'wheel', '--wheel-dir', str(dst), str(src)),
+        )
 
-    subprocess.check_call(
-        (sys.executable, '-m', 'pip.__main__', 'wheel', '--wheel-dir', str(dst), str(src)),
-        env=env,
-    )
+
+def download_sdist(source, destination):
+    import subprocess
+    info('download sdist', source)
+    with public_pypi_enabled():
+        subprocess.check_call(
+            (python, '-m', 'pip.__main__', 'install', '-d', str(destination), str(source), '--no-use-wheel', '--no-deps'),
+        )
 
 
 def make_sdists(sources, destination):
@@ -83,7 +107,9 @@ def make_sdists(sources, destination):
 
     build_all(sources, staging)
     wheel('argparse', staging)
-    wheel('coverage', staging)
+    wheel('coverage-enable-subprocess', staging)
+    download_sdist('coverage', staging)
+    download_sdist('coverage-enable-subprocess', staging)
 
     if destination.islink():
         old = destination.readlink()

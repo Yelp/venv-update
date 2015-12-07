@@ -125,9 +125,9 @@ def validate_venv(venv_path, venv_args):
             info('Removing invalidated virtualenv.')
             run(('rm', '-rf', venv_path))
 
-    from distutils.spawn import find_executable as which
+    from distutils.spawn import find_executable as which  # pylint:disable=import-error
     virtualenv = which('virtualenv')
-    run((timid_relpath(virtualenv), venv_path,) + venv_args)
+    run((virtualenv, venv_path,) + venv_args)
 
     if isdir(venv_path):
         with open(state_path, 'w') as state:

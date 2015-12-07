@@ -46,7 +46,7 @@ def optimistic_wheel_search(req, find_links):
         if findlink.startswith('file://'):
             findlink = findlink[7:]
         else:
-            continue
+            continue  # not sure how to cover this. :pragma:nocover:
         # this matches the name-munging done in pip.wheel:
         reqname = req.name.replace('-', '_')
 
@@ -248,7 +248,7 @@ def importlib_invalidate_caches():
 
 
 def fresh_working_set():
-    """return a pkg_resources "working set", representing the *currently* installed pacakges"""
+    """return a pkg_resources "working set", representing the *currently* installed packages"""
     try:
         from pip._vendor import pkg_resources
     except ImportError:  # pragma: no cover
