@@ -2,7 +2,11 @@
 # this is used by the lint environment.
 -r coverage.txt
 -r prod.txt
-pytest
+
+##pytest
+# pending release of https://github.com/pytest-dev/pytest/pull/1124
+# "tests of (and fixes for) Config.fromdictargs"
+-e git+git://github.com/bukzor/pytest.git@eabf2f9#egg=pytest
 
 mock
 pip<2

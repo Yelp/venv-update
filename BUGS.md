@@ -3,6 +3,8 @@ This is a simple listing of bugs previously encountered:
 Known Bugs
 ============
 
+    * venv-update can `rm -rf .`, if '.' is its first argument.
+
     * Explosion when argparse is not installed:
 
        $ pip-faster install argparse
