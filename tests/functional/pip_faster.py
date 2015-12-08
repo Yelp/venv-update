@@ -1,9 +1,12 @@
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import unicode_literals
+
 import pytest
+from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import TOP
-
-from functional.simple_test import pip_freeze
 
 
 def it_shows_help_for_prune():

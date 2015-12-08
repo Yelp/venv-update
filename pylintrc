@@ -7,6 +7,9 @@ disable=
     redefined-outer-name,
     too-many-public-methods,
     no-init,
+    redefined-variable-type,
+    wrong-import-order,  # pending https://bitbucket.org/logilab/pylint/issues/725/__future__-false-positive-for-wrong-import,
+    duplicate-code,  # pending https://bitbucket.org/logilab/pylint/issues/214/the-duplicate-code-r0801-cant-be-disabled,
 
 
 [REPORTS]

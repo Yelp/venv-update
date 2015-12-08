@@ -28,13 +28,20 @@ import pip as pipmodule
 from pip import logger
 from pip.commands.install import InstallCommand
 from pip.commands.install import RequirementSet
+from pip.exceptions import InstallationError
 from pip.index import BestVersionAlreadyInstalled
 from pip.index import PackageFinder
 from pip.wheel import WheelBuilder
-from pip.exceptions import InstallationError
 
 from venv_update import colorize
 from venv_update import timid_relpath
+
+
+def either(char):
+    if char.isalpha():
+        return '[%s%s]' % (char.lower(), char.upper())
+    else:
+        return char
 
 
 def optimistic_wheel_search(req, find_links):
@@ -50,16 +57,11 @@ def optimistic_wheel_search(req, find_links):
         # this matches the name-munging done in pip.wheel:
         reqname = req.name.replace('-', '_')
 
-        def either(char):
-            if char.isalpha():
-                return '[%s%s]' % (char.lower(), char.upper())
-            else:
-                return char
         reqname = ''.join([either(c) for c in reqname])
-        pattern = join(findlink, reqname + '-*.whl')
-        print('WHEELSEARCH:', pattern)
+        reqname = join(findlink, reqname + '-*.whl')
+        print('WHEELSEARCH:', reqname)
         from glob import glob
-        for link in glob(pattern):
+        for link in glob(reqname):
             from pip.index import Link
             link = Link('file://' + link)
             from pip.wheel import Wheel
@@ -209,13 +211,11 @@ def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     FIXME: does not list anything installed via -e
     """
-    if True:
-        # pragma:no cover:pylint:disable=no-name-in-module,import-error
-        try:
-            from pip.utils import dist_is_local
-        except ImportError:
-            # pip < 6.0
-            from pip.util import dist_is_local
+    try:
+        from pip.utils import dist_is_local
+    except ImportError:
+        # pip < 6.0
+        from pip.util import dist_is_local
 
     return tuple(
         dist_to_req(dist)
@@ -251,7 +251,7 @@ def fresh_working_set():
     """return a pkg_resources "working set", representing the *currently* installed packages"""
     try:
         from pip._vendor import pkg_resources
-    except ImportError:  # pragma: no cover
+    except ImportError:
         # Debian de-vendorizes the version of pip it ships
         import pkg_resources
 
@@ -275,7 +275,7 @@ def trace_requirements(requirements):
     from pip.req import InstallRequirement
     try:
         from pip._vendor import pkg_resources
-    except ImportError:  # pragma: no cover
+    except ImportError:
         # Debian de-vendorizes the version of pip it ships
         import pkg_resources
 
@@ -346,6 +346,7 @@ class CacheOpts(object):
 
 
 class FasterRequirementSet(RequirementSet):
+
     def prepare_files(self, finder, **kwargs):
         super(FasterRequirementSet, self).prepare_files(finder, **kwargs)
 
@@ -376,6 +377,8 @@ class FasterRequirementSet(RequirementSet):
             req.url = link.url
 
 # patch >>>
+
+
 class Sentinel(str):
     """A named value that only supports the `is` operator."""
 
@@ -479,7 +482,7 @@ def main():
                     exit_code = pipmodule.main()
                 except SystemExit as error:
                     exit_code = error.code
-                except KeyboardInterrupt:
+                except KeyboardInterrupt:  # I don't plan to test-cover this.  :pragma:nocover:
                     exit_code = 1
 
     return exit_code
