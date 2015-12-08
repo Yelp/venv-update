@@ -123,6 +123,7 @@ def validate_venv(venv_path, venv_args):
             return
         else:
             info('Removing invalidated virtualenv.')
+            # TODO: error out if venv_path is nonempty and doesn't look like a virtualenv
             run(('rm', '-rf', venv_path))
 
     from distutils.spawn import find_executable as which  # pylint:disable=import-error
@@ -232,30 +233,35 @@ def venv_update(venv_path, reqs, venv_args):
     ))
 
 
+def raise_on_failure(mainfunc):
+    """raise if and only if mainfunc fails"""
+    from subprocess import CalledProcessError
+    try:
+        errors = mainfunc()
+        if errors:
+            exit(errors)
+    except CalledProcessError as error:
+        exit(error.returncode)
+    except SystemExit as error:
+        if error.code:
+            raise
+    except KeyboardInterrupt:  # I don't plan to test-cover this.  :pragma:nocover:
+        exit(1)
+    except Exception as error:
+        raise
+
+
 def main():
     from sys import argv, path
     del path[:1]  # we don't (want to) import anything from pwd or the script's directory
     venv_path, reqs, venv_args = parseargs(argv[1:])
 
-    from subprocess import CalledProcessError
     try:
-        exit_code = venv_update(venv_path, reqs, venv_args)
-    except SystemExit as error:
-        exit_code = error.code
-    except CalledProcessError as error:
-        exit_code = error.returncode
-    except KeyboardInterrupt:
-        exit_code = 1
-    except Exception as error:
-        mark_venv_invalid(venv_path, reqs)
-        raise
-
-    if exit_code:
+        raise_on_failure(lambda: venv_update(venv_path, reqs, venv_args))
+    except BaseException:
         mark_venv_invalid(venv_path, reqs)
     else:
         mark_venv_valid(venv_path)
-
-    return exit_code
 
 
 if __name__ == '__main__':

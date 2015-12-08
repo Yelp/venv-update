@@ -35,6 +35,7 @@ from pip.wheel import WheelBuilder
 
 from venv_update import colorize
 from venv_update import timid_relpath
+from venv_update import raise_on_failure
 
 
 def either(char):
@@ -478,14 +479,7 @@ def main():
     with pipfaster_install_prune_option():
         with pipfaster_packagefinder():
             with pipfaster_install():
-                try:
-                    exit_code = pipmodule.main()
-                except SystemExit as error:
-                    exit_code = error.code
-                except KeyboardInterrupt:  # I don't plan to test-cover this.  :pragma:nocover:
-                    exit_code = 1
-
-    return exit_code
+                raise_on_failure(pipmodule.main)
 
 
 if __name__ == '__main__':

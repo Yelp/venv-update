@@ -11,20 +11,23 @@ else
     PYPY=false
 fi
 
+if [ -z "$*" ]; then
+    # default arguments
+    set $TOP/tests $SITEPACKAGES/${PROJECT}.py
+fi
+
 if $PYPY; then
     # coverage under pypy takes too dang long:
     #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182
     # Having issues with memory, let's try reducing CPUs by half
-    py.test -n $((NCPU / 3)) \
-        "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
+    py.test -n $((NCPU / 3)) "$@"
 else
     # See: http://nedbatchelder.com/code/coverage/subprocess.html
     $TOP/tests/testing/install_coverage_pth.py
 
     coverage erase
     export COVERAGE_PROCESS_START=$TOP/.coveragerc
-    py.test -n $NCPU \
-        "$@" $TOP/tests $SITEPACKAGES/${PROJECT}.py
+    py.test -n $NCPU "$@"
     coverage combine
     python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
     unset COVERAGE_PROCESS_START
