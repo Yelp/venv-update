@@ -90,13 +90,12 @@ for p in sys.path:
 @pytest.mark.usefixtures('pypi_server')
 def test_eggless_url(tmpdir):
     tmpdir.chdir()
-    requirements('')
 
-    venv_update()
+    enable_coverage(tmpdir)
     assert 'pure-python-package' not in pip_freeze()
 
     # An arbitrary url requirement.
-    requirements('file://' + str(TOP / 'tests/testing/packages/pure_python_package'))
+    requirements('-e file://' + str(TOP / 'tests/testing/packages/pure_python_package'))
 
     venv_update()
     assert 'pure-python-package' in pip_freeze()
