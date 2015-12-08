@@ -1,4 +1,4 @@
 # packages necessary to `make lint`
--r testing.txt
+-r import_tests.txt
 # mixin pattern, only to avoid the diamond-include issue
 -r _lint.txt

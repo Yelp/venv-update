@@ -8,9 +8,9 @@ from testing import Path
 from testing import pip_freeze
 from testing import requirements
 from testing import run
+from testing import TOP
 from testing import venv_update
 from testing import venv_update_symlink_pwd
-from testing import TOP
 
 
 @pytest.mark.usefixtures('pypi_server')

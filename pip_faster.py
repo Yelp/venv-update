@@ -34,8 +34,8 @@ from pip.index import PackageFinder
 from pip.wheel import WheelBuilder
 
 from venv_update import colorize
-from venv_update import timid_relpath
 from venv_update import raise_on_failure
+from venv_update import timid_relpath
 
 
 def either(char):

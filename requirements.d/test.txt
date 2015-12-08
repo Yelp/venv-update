@@ -1,5 +1,5 @@
 # minimal set of packages to run tests (under tox, for example)
--r testing.txt
+-r import_tests.txt
 
 pytest-xdist
 pytest-timeout
