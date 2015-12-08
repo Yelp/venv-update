@@ -56,7 +56,7 @@ def prepare_pypi_server():
             sys.executable,
             'tests/testing/make_sdists.py',
             'tests/testing/packages',
-            '.',  # we need pip-faster too be installable too
+            '.',  # we need pip-faster to be installable too
             packages,
         ),
         cwd=str(TOP),

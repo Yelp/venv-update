@@ -10,6 +10,7 @@ from testing import requirements
 from testing import run
 from testing import venv_update
 from testing import venv_update_symlink_pwd
+from testing import TOP
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -70,6 +71,8 @@ def test_recreate_active_virtualenv(tmpdir):
         tmpenv = 'tmpenv'
 
         run('virtualenv', tmpenv)
+        run('tmpenv/bin/pip', 'install', '-r', str(TOP / 'requirements.d/coverage.txt'))
+
         requirements('pure_python_package', 'reqs.txt')
         venv_update_symlink_pwd()
         run('tmpenv/bin/python', 'venv_update.py', tmpenv, 'reqs.txt')
