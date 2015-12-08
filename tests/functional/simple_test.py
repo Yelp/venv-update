@@ -258,9 +258,13 @@ pyflakes<0.8
 # simply to prevent these from drifting:
 mccabe<=0.3
 pep8<=1.5.7
-''')
+
+-r %s/requirements.d/coverage.txt
+''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
+        'coverage==4.0.3',
+        'coverage-enable-subprocess==0',
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
@@ -281,9 +285,13 @@ pyflakes<=0.8.1
 # simply to prevent these from drifting:
 mccabe<=0.3
 pep8<=1.5.7
-''')
+
+-r %s/requirements.d/coverage.txt
+''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
+        'coverage==4.0.3',
+        'coverage-enable-subprocess==0',
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
