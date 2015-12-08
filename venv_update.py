@@ -247,8 +247,6 @@ def raise_on_failure(mainfunc):
             raise
     except KeyboardInterrupt:  # I don't plan to test-cover this.  :pragma:nocover:
         exit(1)
-    except Exception as error:
-        raise
 
 
 def main():
@@ -260,6 +258,7 @@ def main():
         raise_on_failure(lambda: venv_update(venv_path, reqs, venv_args))
     except BaseException:
         mark_venv_invalid(venv_path, reqs)
+        raise
     else:
         mark_venv_valid(venv_path)
 

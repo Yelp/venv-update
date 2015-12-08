@@ -22,15 +22,24 @@ if $PYPY; then
     # Having issues with memory, let's try reducing CPUs by half
     py.test -n $((NCPU / 3)) "$@"
 else
-    # See: http://nedbatchelder.com/code/coverage/subprocess.html
-    $TOP/tests/testing/install_coverage_pth.py
-
+    # clean up anything left behind from before:
+    coverage combine
     coverage erase
+
+    # See: http://nedbatchelder.com/code/coverage/subprocess.html
     export COVERAGE_PROCESS_START=$TOP/.coveragerc
+
+    # run the tests!
     py.test -n $NCPU "$@"
+
+    # reporting:
     coverage combine
     python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
     unset COVERAGE_PROCESS_START
     coverage combine
-    coverage report --rcfile=$TOP/.coveragerc --fail-under 90  # FIXME: should be 100
+    
+    # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
+    python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
+
+    coverage report --rcfile=$TOP/.coveragerc --fail-under 92  # FIXME: should be 100
 fi
