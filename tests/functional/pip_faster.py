@@ -3,9 +3,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
+
+from testing import enable_coverage
 from testing import pip_freeze
 from testing import requirements
-from testing import enable_coverage
 from testing import run
 from testing import TOP
 

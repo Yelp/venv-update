@@ -1,5 +1,5 @@
 -   repo: git://github.com/pre-commit/pre-commit-hooks
-    sha: 616c1ebd1898c91de9a0548866a59cbd9f4547f6
+    sha: e306ff3b7d0d9a6fc7d128ef9ca2e0b6e6e76e8f
     hooks:
     -   id: autopep8-wrapper
     -   id: check-added-large-files
@@ -15,7 +15,7 @@
     -   id: end-of-file-fixer
     -   id: flake8
 -   repo: git://github.com/asottile/reorder_python_imports
-    sha: 3d86483455ab5bd06cc1069fdd5ac57be5463f10
+    sha: 8b583ac1beb0dd0f14c4bceb0a53bb1023cb3dd7
     hooks:
     -   id: reorder-python-imports
         args:
@@ -25,6 +25,8 @@
         - from __future__ import print_function
         - --add-import
         - from __future__ import unicode_literals
+        - --application-directories
+        - .:tests
 -   repo: local
     hooks:
     -   id: system

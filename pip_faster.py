@@ -26,8 +26,6 @@ from contextlib import contextmanager
 
 import pip as pipmodule
 from pip import logger
-# pip<6 needs this exact import -- they clobber `commands` in __init__
-from pip.commands import install
 from pip.commands.install import InstallCommand
 from pip.commands.install import RequirementSet
 from pip.exceptions import InstallationError
@@ -173,11 +171,13 @@ def pipfaster_packagefinder():
     """
     # A poor man's dependency injection: monkeypatch :(
     # we need this exact import -- pip clobbers `commands` in their __init__
+    from pip.commands import install
     return patched(vars(install), {'PackageFinder': FasterPackageFinder})
 
 
 def pipfaster_install():
     # pip<6 needs this exact import -- they clobber `commands` in __init__
+    from pip.commands import install
     return patched(vars(install), {'RequirementSet': FasterRequirementSet})
 
 

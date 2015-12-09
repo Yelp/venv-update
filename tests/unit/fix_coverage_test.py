@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from coverage.data import CoverageData
+
 from testing.fix_coverage import merge_coverage
 
 

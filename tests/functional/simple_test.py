@@ -6,6 +6,7 @@ from sys import version_info
 
 import pytest
 from py._path.local import LocalPath as Path
+
 from testing import enable_coverage
 from testing import pip_freeze
 from testing import requirements

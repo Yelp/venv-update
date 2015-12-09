@@ -3,10 +3,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
-from testing import Path
 
 import pip_faster
 import venv_update
+from testing import Path
 
 
 def test_importable():
