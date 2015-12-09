@@ -326,3 +326,27 @@ def test_package_name_normalization(tmpdir):
 
         venv_update()
         assert '\nweird-CASING-pACKage==' in pip_freeze()
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_cant_wheel_package(tmpdir):
+    with tmpdir.as_cwd():
+        enable_coverage(tmpdir)
+        requirements('cant-wheel-package')
+
+        out, err = venv_update()
+        assert err == ''
+
+        out = uncolor(out)
+        assert '''
+----------------------------------------
+  Failed building wheel for cant-wheel-package
+Failed to build cant-wheel-package
+Installing collected packages: cant-wheel-package
+  Running setup.py install for cant-wheel-package
+    
+Successfully installed cant-wheel-package
+Cleaning up...
+''' in out  # noqa
+
+        assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')

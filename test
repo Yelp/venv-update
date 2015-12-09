@@ -41,5 +41,5 @@ else
     # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
     python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
 
-    coverage report --rcfile=$TOP/.coveragerc --fail-under 92  # FIXME: should be 100
+    coverage report --rcfile=$TOP/.coveragerc --fail-under 95  # FIXME: should be 100
 fi

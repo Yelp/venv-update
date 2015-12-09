@@ -20,8 +20,8 @@ def install_twice(tmpdir, between):
         # NOTE: Avoid projects that use 2to3 (urwid). It makes the runtime vary too widely.
         requirements('\n'.join((
             'project_with_c',
-            'pure_python_package',
-            'slow_python_package',
+            'pure_python_package==0.2.0',
+            'slow_python_package==0.1.0',
             'dependant_package',
             'many_versions_package>=2,<3',
             ''
@@ -78,10 +78,15 @@ def install_twice(tmpdir, between):
         time2 = time() - start
         assert pip_freeze() == expected
 
-        # second install should be at least twice as fast
+        print('%.3fs orignally' % time1)
+        print('%.3fs subsequently' % time2)
+
+        difference = time1 - time2
+        print('%.2fs speedup' % difference)
+
         ratio = time1 / time2
         print('%.2fx speedup' % ratio)
-        return ratio
+        return difference
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -91,8 +96,9 @@ def test_noop_install_faster(tmpdir):
 
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2015-11-19 linux py27: 12.21 - 13.14
-    assert 11 < install_twice(tmpdir, between=do_nothing) < 14
+    #   2015-11-19 lucid py27: 12.21 - 13.14
+    #   2015-12-10 lucid py27: 7.4s 11.1x, 7.92s 12.11, 7.3 11.29
+    assert 6 < install_twice(tmpdir, between=do_nothing) < 10
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -106,5 +112,6 @@ def test_cached_clean_install_faster(tmpdir):
     # I get ~4x locally, but only 2.5x on travis
     # constrain both ends, to show that we know what's going on
     # performance log: (clear when numbers become invalidated)
-    #   2015-11-19 linux py27: 4.00 - 4.22
-    assert 3 < install_twice(tmpdir, between=clean) < 5
+    #   2015-11-19 lucid py27: 4.00 - 4.22
+    #   2015-12-10 lucid py27: 5.8s 3.5x, 5.4 3.0, 5.7 3.5
+    assert 5 < install_twice(tmpdir, between=clean) < 8

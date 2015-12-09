@@ -82,3 +82,21 @@ def it_installs_stuff_with_dash_e(tmpdir):
     assert 'dependant-package==1' in frozen_requirements
     assert 'implicit-dependency==1' in frozen_requirements
     assert 'pure-python-package==0.2.0' in frozen_requirements
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_can_handle_requirements_already_met(tmpdir):
+    tmpdir.chdir()
+
+    venv = enable_coverage(tmpdir, 'venv')
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster')
+
+    requirements('many-versions-package==1')
+
+    run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
+    assert 'many-versions-package==1\n' in pip_freeze(str(venv))
+
+    run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
+    assert 'many-versions-package==1\n' in pip_freeze(str(venv))

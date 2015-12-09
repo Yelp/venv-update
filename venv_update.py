@@ -114,7 +114,7 @@ def validate_venv(venv_path, venv_args):
     if isdir(venv_path):
         try:
             with open(state_path) as state:
-                previous_state = json.load(state)
+                previous_state = json.load(state)  # due to a coverage bug :pragma:nobranch:
         except IOError:
             previous_state = {}
 

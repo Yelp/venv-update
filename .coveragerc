@@ -22,6 +22,8 @@ exclude_lines =
 
     # if main is covered, we're good:
     ^\s*exit\(main\(\)\)$
+partial_branches =
+    \#.*:pragma:nobranch:
 show_missing = True
 
 [html]

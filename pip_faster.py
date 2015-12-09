@@ -26,6 +26,8 @@ from contextlib import contextmanager
 
 import pip as pipmodule
 from pip import logger
+# pip<6 needs this exact import -- they clobber `commands` in __init__
+from pip.commands import install
 from pip.commands.install import InstallCommand
 from pip.commands.install import RequirementSet
 from pip.exceptions import InstallationError
@@ -37,12 +39,20 @@ from venv_update import colorize
 from venv_update import raise_on_failure
 from venv_update import timid_relpath
 
+if True:  # :pragma:nocover:pylint:disable=using-constant-test
+    # Debian de-vendorizes the version of pip it ships
+    try:
+        from pip._vendor import pkg_resources
+    except ImportError:
+        import pkg_resources
 
-def either(char):
-    if char.isalpha():
-        return '[%s%s]' % (char.lower(), char.upper())
-    else:
-        return char
+
+def ignorecase_glob(char):
+    return ''.join([
+        '[%s%s]' % (char.lower(), char.upper())
+        if char.isalpha() else
+        char
+    ])
 
 
 def optimistic_wheel_search(req, find_links):
@@ -54,13 +64,13 @@ def optimistic_wheel_search(req, find_links):
         if findlink.startswith('file://'):
             findlink = findlink[7:]
         else:
-            continue  # not sure how to cover this. :pragma:nocover:
+            assert False, 'findlink not file:/// coverage'
+            continue  # TODO: test coverage
         # this matches the name-munging done in pip.wheel:
         reqname = req.name.replace('-', '_')
 
-        reqname = ''.join([either(c) for c in reqname])
+        reqname = ignorecase_glob(reqname)
         reqname = join(findlink, reqname + '-*.whl')
-        print('WHEELSEARCH:', reqname)
         from glob import glob
         for link in glob(reqname):
             from pip.index import Link
@@ -74,13 +84,11 @@ def optimistic_wheel_search(req, find_links):
             if not wheel.supported():
                 continue
 
-            from pkg_resources import parse_version
-            version = parse_version(wheel.version)
+            version = pkg_resources.parse_version(wheel.version)
             if version > best_version:
                 best_version = version
                 best_link = link
 
-    print('WHEELFOUND:', best_link)
     return best_link
 
 
@@ -120,9 +128,6 @@ class FasterPackageFinder(PackageFinder):
 
 
 class FasterWheelBuilder(WheelBuilder):
-
-    def build_one(self, req):
-        return self._build_one(req)
 
     def build(self):
         """This is copy-pasta of pip.wheel.Wheelbuilder.build except in the two noted spots"""
@@ -168,14 +173,12 @@ def pipfaster_packagefinder():
     """
     # A poor man's dependency injection: monkeypatch :(
     # we need this exact import -- pip clobbers `commands` in their __init__
-    from pip.commands import install
-    return patch(vars(install), {'PackageFinder': FasterPackageFinder})
+    return patched(vars(install), {'PackageFinder': FasterPackageFinder})
 
 
 def pipfaster_install():
     # pip<6 needs this exact import -- they clobber `commands` in __init__
-    from pip.commands import install
-    return patch(vars(install), {'RequirementSet': FasterRequirementSet})
+    return patched(vars(install), {'RequirementSet': FasterRequirementSet})
 
 
 def pip(args):
@@ -188,11 +191,8 @@ def pip(args):
     stdout.write('\n')
     stdout.flush()
 
-    result = pipmodule.main(list(args))
-
-    if result:
-        # pip exited with failure, then we should too
-        exit(result)
+    # TODO: we probably can do bettter than calling pipmodule.main() now.
+    return pipmodule.main(list(args))
 
 
 def dist_to_req(dist):
@@ -236,26 +236,8 @@ def pip_parse_requirements(requirement_files):
     return required
 
 
-def importlib_invalidate_caches():
-    """importlib.invalidate_caches is necessary if anything has been installed after python startup.
-    New in python3.3.
-    """
-    try:
-        import importlib
-    except ImportError:
-        return
-    invalidate_caches = getattr(importlib, 'invalidate_caches', lambda: None)
-    invalidate_caches()
-
-
 def fresh_working_set():
     """return a pkg_resources "working set", representing the *currently* installed packages"""
-    try:
-        from pip._vendor import pkg_resources
-    except ImportError:
-        # Debian de-vendorizes the version of pip it ships
-        import pkg_resources
-
     class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
 
         def add_entry(self, entry):
@@ -272,25 +254,19 @@ def trace_requirements(requirements):
     """given an iterable of pip InstallRequirements,
     return the set of required packages, given their transitive requirements.
     """
-    from collections import deque
-    from pip.req import InstallRequirement
-    try:
-        from pip._vendor import pkg_resources
-    except ImportError:
-        # Debian de-vendorizes the version of pip it ships
-        import pkg_resources
-
     working_set = fresh_working_set()
 
     # breadth-first traversal:
-    errors = []
+    from collections import deque
     queue = deque(requirements)
+    errors = []
     result = []
     seen_warnings = set()
     while queue:
         req = queue.popleft()
         if req.req is None:
             # a file:/// requirement
+            assert False, 'req.req is None: is this still a thing?'  # TODO: test coverage
             continue
 
         try:
@@ -302,7 +278,8 @@ def trace_requirements(requirements):
                 if dist.location:
                     location = ' (%s)' % timid_relpath(dist.location)
                 else:
-                    location = ''
+                    assert False, 'not dist.location coverage'
+                    location = ''  # TODO: test coverage
                 errors.append('Error: version conflict: %s%s <-> %s' % (dist, location, req))
                 seen_warnings.add(req.name)
 
@@ -315,7 +292,8 @@ def trace_requirements(requirements):
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
             # there really shouldn't be any circular dependencies...
             # temporarily shorten the str(req)
-            with patch(vars(req), {'url': None, 'satisfied_by': None}):
+            with patched(vars(req), {'url': None, 'satisfied_by': None}):
+                from pip.req import InstallRequirement
                 queue.append(InstallRequirement(dist_req, str(req)))
 
     if errors:
@@ -368,7 +346,6 @@ class FasterRequirementSet(RequirementSet):
 
             link = optimistic_wheel_search(req, finder.find_links)
             if link is None:
-                print('WHEEL MISS!')
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"
@@ -377,36 +354,28 @@ class FasterRequirementSet(RequirementSet):
             unzip_file(link.path, req.source_dir, flatten=False)
             req.url = link.url
 
-# patch >>>
+
+# TODO: a pip_faster.patch module
 
 
-class Sentinel(str):
-    """A named value that only supports the `is` operator."""
-
-    def __repr__(self):
-        return '<Sentinel: %s>' % str(self)
-
-
-def do_patch(attrs, updates):
+def patch(attrs, updates):
     """Perform a set of updates to a attribute dictionary, return the original values."""
     orig = {}
     for attr, value in updates:
-        orig[attr] = attrs.get(attr, patch.DELETE)
-        if value is patch.DELETE:
-            del attrs[attr]
-        else:
-            attrs[attr] = value
+        orig[attr] = attrs[attr]
+        attrs[attr] = value
     return orig
 
 
 @contextmanager
-def patch(attrs, updates):
+def patched(attrs, updates):
     """A context in which some attributes temporarily have a modified value."""
-    orig = do_patch(attrs, updates.items())
-    yield orig
-    do_patch(attrs, orig.items())
-patch.DELETE = Sentinel('patch.DELETE')
-# patch <<<
+    orig = patch(attrs, updates.items())
+    try:
+        yield orig
+    finally:
+        patch(attrs, orig.items())
+# END: pip_faster.patch module
 
 
 class FasterInstallCommand(InstallCommand):
@@ -472,7 +441,7 @@ class FasterInstallCommand(InstallCommand):
 
 
 def pipfaster_install_prune_option():
-    return patch(pipmodule.commands, {FasterInstallCommand.name: FasterInstallCommand})
+    return patched(pipmodule.commands, {FasterInstallCommand.name: FasterInstallCommand})
 
 
 def main():
