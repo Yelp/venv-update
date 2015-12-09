@@ -73,7 +73,7 @@ def optimistic_wheel_search(req, find_links):
 
             from pkg_resources import parse_version
             version = parse_version(wheel.version)
-            if version > best_version:
+            if best_version is None or version > best_version:
                 best_version = version
                 best_link = link
 
