@@ -22,6 +22,7 @@ PY33 = (version_info >= (3, 3))
 def test_trivial(tmpdir):
     tmpdir.chdir()
     requirements('')
+    enable_coverage(tmpdir)
     venv_update()
 
 
@@ -317,7 +318,11 @@ def test_downgrade(tmpdir):
     flake8_older()
 
 
-def utime(path, time):
-    """set both mtime and atime of a py.path object"""
-    from os import utime
-    utime(path.strpath, (time, time))
+@pytest.mark.usefixtures('pypi_server')
+def test_package_name_normalization(tmpdir):
+    with tmpdir.as_cwd():
+        enable_coverage(tmpdir)
+        requirements('WEIRD_cAsing-packAge')
+
+        venv_update()
+        assert '\nweird-CASING-pACKage==' in pip_freeze()
