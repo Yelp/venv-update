@@ -3,13 +3,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
-
 from testing import Path
+from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import venv_update
 from testing import venv_update_symlink_pwd
-from testing import pip_freeze
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -55,7 +54,7 @@ def test_virtualenv_moved(tmpdir):
         with pytest.raises(OSError) as excinfo:
             run('virtualenv_run/bin/pure-python-script')
         # python >= 3.3 raises FileNotFoundError
-        assert excinfo.type is OSError or excinfo.type is FileNotFoundError
+        assert excinfo.type is OSError or excinfo.type is FileNotFoundError  # noqa
         assert excinfo.value.args[0] == 2  # no such file
         run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
 

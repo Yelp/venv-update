@@ -6,13 +6,13 @@ from sys import version_info
 
 import pytest
 from py._path.local import LocalPath as Path
+from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import strip_coverage_warnings
 from testing import TOP
 from testing import uncolor
 from testing import venv_update
-from testing import pip_freeze
 PY33 = (version_info >= (3, 3))
 
 

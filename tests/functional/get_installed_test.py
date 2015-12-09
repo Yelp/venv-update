@@ -3,10 +3,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
-
 from testing import run
 
 ALWAYS = set(['pip', 'pip-faster', 'setuptools', 'virtualenv', 'wheel'])
+
 
 def get_installed():
     out, err = run('myvenv/bin/python', '-c', '''\
