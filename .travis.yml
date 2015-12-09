@@ -11,6 +11,14 @@ python:
     - "2.6"
     - pypy
     - "2.7"
+    - "3.5"
+
+addons:
+    apt:
+        packages:
+            - python2.6
+            - python2.7
+            - python3.3
 
 matrix:
     # notify a failed build as soon as anything fails
