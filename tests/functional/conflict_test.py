@@ -52,7 +52,7 @@ Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's 
 def test_multiple_issues(tmpdir):
     # Make it a bit worse. The output should show all three issues.
     tmpdir.chdir()
-    T.requirements('dependant_package')
+    T.requirements('dependant_package\n-r %s/requirements.d/coverage.txt' % T.TOP)
     T.venv_update()
 
     T.run('./virtualenv_run/bin/pip', 'uninstall', '--yes', 'implicit_dependency')
