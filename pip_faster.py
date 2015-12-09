@@ -39,8 +39,9 @@ from venv_update import timid_relpath
 
 def optimistic_wheel_search(req, find_links):
     from os.path import join
+    from pkg_resources import parse_version
 
-    best_version = None
+    best_version = parse_version('')
     best_link = None
     for findlink in find_links:
         if findlink.startswith('file://'):
@@ -71,9 +72,8 @@ def optimistic_wheel_search(req, find_links):
             if not wheel.supported():
                 continue
 
-            from pkg_resources import parse_version
             version = parse_version(wheel.version)
-            if best_version is None or version > best_version:
+            if version > best_version:
                 best_version = version
                 best_link = link
 
