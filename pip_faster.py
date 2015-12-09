@@ -28,10 +28,10 @@ import pip as pipmodule
 from pip import logger
 from pip.commands.install import InstallCommand
 from pip.commands.install import RequirementSet
+from pip.exceptions import InstallationError
 from pip.index import BestVersionAlreadyInstalled
 from pip.index import PackageFinder
 from pip.wheel import WheelBuilder
-from pip.exceptions import InstallationError
 
 from venv_update import colorize
 from venv_update import timid_relpath
@@ -39,8 +39,9 @@ from venv_update import timid_relpath
 
 def optimistic_wheel_search(req, find_links):
     from os.path import join
+    from pkg_resources import parse_version
 
-    best_version = None
+    best_version = parse_version('')
     best_link = None
     for findlink in find_links:
         if findlink.startswith('file://'):
@@ -71,7 +72,6 @@ def optimistic_wheel_search(req, find_links):
             if not wheel.supported():
                 continue
 
-            from pkg_resources import parse_version
             version = parse_version(wheel.version)
             if version > best_version:
                 best_version = version
@@ -346,6 +346,7 @@ class CacheOpts(object):
 
 
 class FasterRequirementSet(RequirementSet):
+
     def prepare_files(self, finder, **kwargs):
         super(FasterRequirementSet, self).prepare_files(finder, **kwargs)
 
@@ -376,6 +377,8 @@ class FasterRequirementSet(RequirementSet):
             req.url = link.url
 
 # patch >>>
+
+
 class Sentinel(str):
     """A named value that only supports the `is` operator."""
 

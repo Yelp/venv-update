@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 
 import os.path
 
-from coverage.data import CoverageData
 import coverage.env
+from coverage.data import CoverageData
 coverage.env.TESTING = 'true'
 
 
