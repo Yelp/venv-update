@@ -1,7 +1,8 @@
 #include <Python.h>
 
 static PyObject* _hello_world(PyObject* self) {
-    return PyUnicode_FromString("hello world");
+    PyObject_Print(PyUnicode_FromString("hello world\n"), stdout, Py_PRINT_RAW);
+    return Py_None;
 }
 
 static struct PyMethodDef methods[] = {

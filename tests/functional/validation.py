@@ -13,29 +13,42 @@ from testing import venv_update
 from testing import venv_update_symlink_pwd
 
 
+def assert_c_extension_runs():
+    out, err = run('virtualenv_run/bin/c-extension-script')
+    assert err == ''
+    assert out == 'hello world\n'
+
+    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && c-extension-script')
+    assert err == ''
+    assert out == 'hello world\n'
+
+
+def assert_python_version(version):
+    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
+    assert out == ''
+    assert err.startswith(version)
+
+
 @pytest.mark.usefixtures('pypi_server')
 def test_python_versions(tmpdir):
     tmpdir.chdir()
-    requirements('pure_python_package\ncoverage')
-    enable_coverage(tmpdir)
+    requirements('project-with-c')
 
-    venv_update('--python=python2.6')
-    run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')
-    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
-    assert out == ''
-    assert err.startswith('Python 2.6')
+    def run_with_coverage(*options):
+        enable_coverage(tmpdir, options=options)
+        venv_update(*options)
 
-    venv_update('--python=python2.7')
-    run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')
-    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
-    assert out == ''
-    assert err.startswith('Python 2.7')
+    run_with_coverage('--python=python2.6')
+    assert_c_extension_runs()
+    assert_python_version('Python 2.6')
 
-    venv_update('--python=python2.6')
-    run('sh', '-c', '. virtualenv_run/bin/activate && pure-python-script')
-    out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python --version')
-    assert out == ''
-    assert err.startswith('Python 2.6')
+    run_with_coverage('--python=python2.7')
+    assert_c_extension_runs()
+    assert_python_version('Python 2.7')
+
+    run_with_coverage('--python=python2.6')
+    assert_c_extension_runs()
+    assert_python_version('Python 2.6')
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -45,39 +58,34 @@ def test_virtualenv_moved(tmpdir):
     new_path = 'new_dir'
 
     with tmpdir.mkdir(original_path).as_cwd():
-        requirements('pure_python_package')
+        requirements('project_with_c')
         venv_update()
-        run('virtualenv_run/bin/pure-python-script')
-        run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
+        assert_c_extension_runs()
 
     with tmpdir.as_cwd():
         Path(original_path).rename(new_path)
 
     with tmpdir.join(new_path).as_cwd():
         with pytest.raises(OSError) as excinfo:
-            run('virtualenv_run/bin/pure-python-script')
+            assert_c_extension_runs()
         assert excinfo.type is OSError
         assert excinfo.value.args[0] == 2  # no such file
-        run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
 
         venv_update()
-        run('virtualenv_run/bin/pure-python-script')
-        run('virtualenv_run/bin/python', 'virtualenv_run/bin/pure-python-script')
+        assert_c_extension_runs()
 
 
 @pytest.mark.usefixtures('pypi_server')
 def test_recreate_active_virtualenv(tmpdir):
     with tmpdir.as_cwd():
-        tmpenv = 'tmpenv'
+        run('virtualenv', 'virtualenv_run')
+        run('virtualenv_run/bin/pip', 'install', '-r', str(TOP / 'requirements.d/coverage.txt'))
 
-        run('virtualenv', tmpenv)
-        run('tmpenv/bin/pip', 'install', '-r', str(TOP / 'requirements.d/coverage.txt'))
-
-        requirements('pure_python_package', 'reqs.txt')
+        requirements('project_with_c')
         venv_update_symlink_pwd()
-        run('tmpenv/bin/python', 'venv_update.py', tmpenv, 'reqs.txt')
+        run('virtualenv_run/bin/python', 'venv_update.py')
 
-        run('sh', '-c', '. tmpenv/bin/activate && pure-python-script')
+        assert_c_extension_runs()
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -86,17 +94,17 @@ def test_update_while_active(tmpdir):
     requirements('virtualenv<2')
 
     venv_update()
-    assert 'pure-python-package' not in pip_freeze()
+    assert 'project-with-c' not in pip_freeze()
 
-    # An arbitrary small package: pure_python_package
-    requirements('pure_python_package')
+    # An arbitrary small package: project_with_c
+    requirements('project_with_c')
 
     venv_update_symlink_pwd()
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py')
 
     assert err == ''
     assert out.startswith('Keeping virtualenv from previous run.\n')
-    assert 'pure-python-package' in pip_freeze()
+    assert 'project-with-c' in pip_freeze()
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -105,14 +113,14 @@ def test_update_invalidated_while_active(tmpdir):
     requirements('virtualenv<2')
 
     venv_update()
-    assert 'pure-python-package' not in pip_freeze()
+    assert 'project-with-c' not in pip_freeze()
 
-    # An arbitrary small package: pure_python_package
-    requirements('pure-python-package')
+    # An arbitrary small package: project_with_c
+    requirements('project-with-c')
 
     venv_update_symlink_pwd()
     out, err = run('sh', '-c', '. virtualenv_run/bin/activate && python venv_update.py --system-site-packages')
 
     assert err == ''
     assert out.startswith('Removing invalidated virtualenv.\n')
-    assert 'pure-python-package' in pip_freeze()
+    assert 'project-with-c' in pip_freeze()
