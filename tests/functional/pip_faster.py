@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 from testing import pip_freeze
 from testing import requirements
+from testing import enable_coverage
 from testing import run
 from testing import TOP
 
@@ -67,8 +68,7 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 def it_installs_stuff_with_dash_e(tmpdir):
     tmpdir.chdir()
 
-    venv = tmpdir.join('venv')
-    run('virtualenv', str(venv))
+    venv = enable_coverage(tmpdir, 'venv')
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster')
