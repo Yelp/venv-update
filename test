@@ -23,8 +23,8 @@ if $PYPY; then
     py.test -n $((NCPU / 3)) "$@"
 else
     # clean up anything left behind from before:
-    coverage combine
-    coverage erase
+    coverage combine --rcfile=$TOP/.coveragerc
+    coverage erase --rcfile=$TOP/.coveragerc
 
     # See: http://nedbatchelder.com/code/coverage/subprocess.html
     export COVERAGE_PROCESS_START=$TOP/.coveragerc
@@ -33,13 +33,14 @@ else
     py.test -n $NCPU "$@"
 
     # reporting:
+    cd $TOP
     coverage combine
-    python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
+    python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
     unset COVERAGE_PROCESS_START
     coverage combine
     
     # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
-    python $TOP/tests/testing/fix_coverage.py '/site-packages/' $TOP
+    python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
 
-    coverage report --rcfile=$TOP/.coveragerc --fail-under 95  # FIXME: should be 100
+    coverage report --fail-under 95  # FIXME: should be 100
 fi
