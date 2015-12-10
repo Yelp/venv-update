@@ -91,9 +91,15 @@ def download_sdist(source, destination):
     import subprocess
     info('download sdist', source)
     with public_pypi_enabled():
-        subprocess.check_call(
-            (python, '-m', 'pip.__main__', 'install', '--quiet', '-d', str(destination), str(source), '--no-use-wheel', '--no-deps'),
-        )
+        subprocess.check_call((
+            python, '-m', 'pip.__main__',
+            'install',
+            '--quiet',
+            '--no-deps',
+            '--no-use-wheel',
+            '-d', str(destination),
+            str(source),
+        ))
 
 
 def make_sdists(sources, destination):
