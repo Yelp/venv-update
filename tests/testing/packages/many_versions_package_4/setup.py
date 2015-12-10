@@ -8,6 +8,9 @@ from setuptools import setup
 setup(
     name=str('many_versions_package'),
     version='4',
+    url='example.com',
+    author='nobody',
+    author_email='nobody@example.com',
     options={
         'bdist_wheel': {
             'universal': 1,

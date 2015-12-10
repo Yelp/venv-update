@@ -21,6 +21,9 @@ class build(_build):
 setup(
     name=str('slow_python_package'),
     version='0.1.0',
+    url='example.com',
+    author='nobody',
+    author_email='nobody@example.com',
     py_modules=[str('slow_python_package')],
     cmdclass={'build': build},
     options={

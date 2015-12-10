@@ -9,6 +9,9 @@ from setuptools import setup
 setup(
     name=str('project_with_c'),
     version='0.1.0',
+    url='example.com',
+    author='nobody',
+    author_email='nobody@example.com',
     ext_modules=[Extension(str('project_with_c'), [str('project_with_c.c')])],
     entry_points={
         'console_scripts': [

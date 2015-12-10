@@ -8,6 +8,9 @@ from setuptools import setup
 setup(
     name=str('pure_python_package'),
     version='0.1.0',
+    url='example.com',
+    author='nobody',
+    author_email='nobody@example.com',
     py_modules=[str('pure_python_package')],
     entry_points={
         'console_scripts': [
