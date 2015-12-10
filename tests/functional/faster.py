@@ -12,7 +12,7 @@ from testing import TOP
 from testing import venv_update
 
 
-def install_twice(tmpdir, between):
+def time_savings(tmpdir, between):
     """install twice, and the second one should be faster, due to whl caching"""
     with tmpdir.as_cwd():
 
@@ -95,11 +95,8 @@ def test_noop_install_faster(tmpdir):
     def do_nothing():
         pass
 
-    # constrain both ends, to show that we know what's going on
-    # performance log: (clear when numbers become invalidated)
-    #   2015-11-19 lucid py27: 12.21 - 13.14
-    #   2015-12-10 lucid py27: 7.4s 11.1x, 7.92s 12.11, 7.3 11.29
-    assert 6 < install_twice(tmpdir, between=do_nothing) < 10
+    # the slow-python-package takes five seconds to compile
+    assert time_savings(tmpdir, between=do_nothing) > 6
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -110,9 +107,5 @@ def test_cached_clean_install_faster(tmpdir):
         venv.remove()
         assert not venv.exists()
 
-    # I get ~4x locally, but only 2.5x on travis
-    # constrain both ends, to show that we know what's going on
-    # performance log: (clear when numbers become invalidated)
-    #   2015-11-19 lucid py27: 4.00 - 4.22
-    #   2015-12-10 lucid py27: 5.8s 3.5x, 5.4 3.0, 5.7 3.5
-    assert 5 < install_twice(tmpdir, between=clean) < 8
+    # the slow-python-package takes five seconds to compile
+    assert time_savings(tmpdir, between=clean) > 5
