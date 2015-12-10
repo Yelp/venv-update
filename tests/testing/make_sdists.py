@@ -15,12 +15,13 @@ def info(*msg):
 def random_string():
     """return a short suffix that shouldn't collide with any subsequent calls"""
     import os
-    import base64
+    import string
+    import random
 
-    return '.'.join((
-        str(os.getpid()),
-        base64.urlsafe_b64encode(os.urandom(3)),
-    ))
+    return '{}.{}'.format(
+        os.getpid(),
+        ''.join(random.choice(string.ascii_lowercase) for x in range(8)),
+    )
 
 
 def sdist(setuppy, dst):

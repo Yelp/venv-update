@@ -69,7 +69,8 @@ def test_virtualenv_moved(tmpdir):
     with tmpdir.join(new_path).as_cwd():
         with pytest.raises(OSError) as excinfo:
             assert_c_extension_runs()
-        assert excinfo.type is OSError
+        # python >= 3.3 raises FileNotFoundError
+        assert excinfo.type.__name__ in ('OSError', 'FileNotFoundError')
         assert excinfo.value.args[0] == 2  # no such file
 
         venv_update()

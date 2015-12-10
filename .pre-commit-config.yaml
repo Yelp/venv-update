@@ -6,7 +6,6 @@
     -   id: check-case-conflict
     -   id: check-docstring-first
     -   id: check-json
-    -   id: check-merge-conflict
     -   id: check-xml
     -   id: check-yaml
     -   id: debug-statements

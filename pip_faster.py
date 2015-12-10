@@ -56,7 +56,7 @@ def ignorecase_glob(char):
 def optimistic_wheel_search(req, find_links):
     from os.path import join
 
-    best_version = None
+    best_version = pkg_resources.parse_version('')
     best_link = None
     for findlink in find_links:
         if findlink.startswith('file://'):
