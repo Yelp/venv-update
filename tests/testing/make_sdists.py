@@ -28,7 +28,7 @@ def sdist(setuppy, dst):
     import subprocess
     info('sdist', setuppy.dirname)
     subprocess.check_call(
-        (python, 'setup.py', 'sdist', '--dist-dir', str(dst)),
+        (python, 'setup.py', '--quiet', 'sdist', '--dist-dir', str(dst)),
         cwd=setuppy.dirname,
     )
 
@@ -84,7 +84,7 @@ def wheel(src, dst):
 
     with public_pypi_enabled():
         subprocess.check_call(
-            (python, '-m', 'pip.__main__', 'wheel', '--wheel-dir', str(dst), str(src)),
+            (python, '-m', 'pip.__main__', 'wheel', '--quiet', '--wheel-dir', str(dst), str(src)),
         )
 
 
@@ -93,7 +93,7 @@ def download_sdist(source, destination):
     info('download sdist', source)
     with public_pypi_enabled():
         subprocess.check_call(
-            (python, '-m', 'pip.__main__', 'install', '-d', str(destination), str(source), '--no-use-wheel', '--no-deps'),
+            (python, '-m', 'pip.__main__', 'install', '--quiet', '-d', str(destination), str(source), '--no-use-wheel', '--no-deps'),
         )
 
 
@@ -127,7 +127,8 @@ def make_sdists(sources, destination):
 
 def main():
     from sys import argv
-    sources, destination = argv[1:-1], argv[-1]
+    argv = argv[1:]
+    sources, destination = argv[:-1], argv[-1]
 
     from py._path.local import LocalPath
     sources = tuple([
