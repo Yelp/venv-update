@@ -2,6 +2,5 @@
 -r import_tests.txt
 
 pytest-xdist
-pytest-timeout
 
 pypiserver
