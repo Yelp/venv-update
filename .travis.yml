@@ -18,10 +18,9 @@ addons:
         sources:
             - deadsnakes
         packages:
-            - python2.6
-            - python2.7
-            - python3.3
-            - gcc
+            - python2.6-dev
+            - python2.7-dev
+            - python3.3-dev
 
 matrix:
     # notify a failed build as soon as anything fails
