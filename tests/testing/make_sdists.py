@@ -15,18 +15,17 @@ def info(*msg):
 def random_string():
     """return a short suffix that shouldn't collide with any subsequent calls"""
     import os
-    import string
-    import random
+    import base64
 
-    return '{}.{}'.format(
-        os.getpid(),
-        ''.join(random.choice(string.ascii_lowercase) for x in range(8)),
-    )
+    return '.'.join((
+        str(os.getpid()),
+        base64.urlsafe_b64encode(os.urandom(3)).decode('US-ASCII'),
+    ))
 
 
 def sdist(setuppy, dst):
     import subprocess
-    info('sdist', setuppy.dirname)
+    info('sdist', setuppy.dirpath().basename)
     subprocess.check_call(
         (python, 'setup.py', '--quiet', 'sdist', '--dist-dir', str(dst)),
         cwd=setuppy.dirname,
@@ -48,7 +47,7 @@ def build_all(sources, dst):
     for source in sources:
         if build_one(source, dst):
             continue
-        for source in source.listdir():
+        for source in sorted(source.listdir()):
             if not source.check(dir=True):
                 continue
 
