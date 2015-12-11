@@ -23,7 +23,10 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-__version__ = '0.1.4.4'
+from os.path import exists
+
+VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
+__version__ = '1.0-dev43'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
@@ -171,7 +174,7 @@ def mark_venv_valid(venv_path):
 
 def mark_venv_invalid(venv_path, reqs):
     # LBYL, to attempt to avoid any exception during exception handling
-    from os.path import isdir, exists
+    from os.path import isdir
     if isdir(venv_path) and exists(reqs[0]):
         info('')
         info("Something went wrong! Sending '%s' back in time, so make knows it's invalid." % timid_relpath(venv_path))
@@ -206,7 +209,6 @@ def venv_update(venv_path, reqs, venv_args):
     from os.path import abspath
     venv_path = abspath(venv_path)
     validate_venv(venv_path, venv_args)
-    from os.path import exists
     python = venv_python(venv_path)
     if not exists(python):
         return 'virtualenv executable not found: %s' % python
@@ -219,12 +221,18 @@ def venv_update(venv_path, reqs, venv_args):
     # We could combine these caches to one directory, but pip would search everything twice, going slower.
     pip_wheels = pipdir + '/wheelhouse'
 
-    # TODO: short-circuit when pip-faster is already there.
-    run((
+    pip_install = (
         python, '-m', 'pip.__main__', 'install',
         '--find-links=file://' + pip_wheels,
-        'pip-faster==' + __version__
-    ))
+    )
+
+    if exists(VENV_UPDATE_REQS_OVERRIDE):
+        args = ('-r', VENV_UPDATE_REQS_OVERRIDE)
+    else:
+        args = ('pip-faster==' + __version__,)
+
+    # TODO: short-circuit when pip-faster is already there.
+    run(pip_install + args)
 
     run((python, '-m', 'pip_faster', 'install', '--prune', '--upgrade') + sum(
         [('-r', req) for req in reqs],
