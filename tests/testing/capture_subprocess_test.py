@@ -2,8 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import pytest
-
 from .capture_subprocess import capture_subprocess
 from testing import coverage_warnings_regex
 

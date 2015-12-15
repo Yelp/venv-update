@@ -15,6 +15,7 @@ from testing import strip_coverage_warnings
 from testing import TOP
 from testing import uncolor
 from testing import venv_update
+from venv_update import __version__
 
 PY33 = (version_info >= (3, 3))
 
@@ -39,7 +40,7 @@ def test_install_custom_path_and_requirements(tmpdir):
     enable_coverage(tmpdir, 'venv')
     venv_update('venv', 'requirements2.txt')
     assert pip_freeze('venv') == '\n'.join((
-        'pip-faster==0.1.4.4',
+        'pip-faster==' + __version__,
         'six==1.8.0',
         'virtualenv==1.11.6',
         'wheel==0.26.0',
@@ -270,7 +271,7 @@ pep8<=1.5.7
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
-        'pip-faster==0.1.4.4',
+        'pip-faster==' + __version__,
         'pyflakes==0.7.3',
         'virtualenv==1.11.6',
         'wheel==0.26.0',
@@ -297,7 +298,7 @@ pep8<=1.5.7
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
-        'pip-faster==0.1.4.4',
+        'pip-faster==' + __version__,
         'pyflakes==0.8.1',
         'virtualenv==1.11.6',
         'wheel==0.26.0',
@@ -343,6 +344,7 @@ def test_cant_wheel_package(tmpdir):
 ----------------------------------------
   Failed building wheel for cant-wheel-package
 Failed to build cant-wheel-package
+SLOW!! No wheel found for cant-wheel-package (from -r requirements.txt (line 1))
 Installing collected packages: cant-wheel-package
   Running setup.py install for cant-wheel-package
     

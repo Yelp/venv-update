@@ -178,3 +178,12 @@ def capture_subprocess(cmd, encoding='UTF-8', **popen_kwargs):
         error = CalledProcessError(exit_code, cmd)
         error.result = result
         raise error
+
+
+def main():
+    import sys
+    capture_subprocess(sys.argv[1:])
+
+
+if __name__ == '__main__':
+    exit(main())

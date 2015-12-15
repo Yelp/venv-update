@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 from testing import run
+from venv_update import __version__
 
 ALWAYS = set(['pip', 'pip-faster', 'setuptools', 'virtualenv', 'wheel'])
 
@@ -36,7 +37,7 @@ def test_pip_get_installed(tmpdir):
 
     run('virtualenv', 'myvenv')
     run('rm', '-rf', 'myvenv/local')
-    run('myvenv/bin/pip', 'install', 'pip-faster')
+    run('myvenv/bin/pip', 'install', 'pip-faster==' + __version__)
 
     assert get_installed() == []
 

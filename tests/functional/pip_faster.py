@@ -9,6 +9,7 @@ from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import TOP
+from venv_update import __version__
 
 
 def it_shows_help_for_prune():
@@ -32,7 +33,7 @@ def it_installs_stuff(tmpdir):
 '''
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster')
+    run(pip, 'install', 'pip-faster==' + __version__)
 
     assert [
         req.split('==')[0]
@@ -52,7 +53,7 @@ def it_installs_stuff_from_requirements_file(tmpdir):
     run('virtualenv', str(venv))
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster')
+    run(pip, 'install', 'pip-faster==' + __version__)
 
     # An arbitrary small package: pure_python_package
     requirements('pure_python_package\nproject_with_c')
@@ -72,7 +73,7 @@ def it_installs_stuff_with_dash_e(tmpdir):
     venv = enable_coverage(tmpdir, 'venv')
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster')
+    run(pip, 'install', 'pip-faster==' + __version__)
 
     requirements('-e ' + TOP.join('tests/testing/packages/dependant_package').strpath)
 
@@ -92,7 +93,7 @@ def it_can_handle_requirements_already_met(tmpdir):
     venv = enable_coverage(tmpdir, 'venv')
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster')
+    run(pip, 'install', 'pip-faster==' + __version__)
 
     requirements('many-versions-package==1')
 

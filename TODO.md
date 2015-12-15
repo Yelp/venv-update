@@ -4,6 +4,11 @@ NEXT
 We plan to work on these as soon as possible.
 
 
+- [ ] testing
+  - [ ] PIP\_FIND\_LINKS=https://...
+  - [ ] pip-faster install nonsense
+
+
  - [ ] dogfood venv-update during travis, tox
    - [ ] recommended tox config: install_command=pip-faster --prune {opts} {packages}
 

@@ -45,37 +45,39 @@ if True:  # :pragma:nocover:pylint:disable=using-constant-test
         import pkg_resources
 
 
-def ignorecase_glob(char):
+def ignorecase_glob(glob):
     return ''.join([
         '[%s%s]' % (char.lower(), char.upper())
         if char.isalpha() else
         char
+        for char in glob
     ])
 
 
 def optimistic_wheel_search(req, find_links):
-    from os.path import join
+    from os.path import join, exists
 
     best_version = pkg_resources.parse_version('')
     best_link = None
     for findlink in find_links:
-        if findlink.startswith('file://'):
-            findlink = findlink[7:]
-        else:
-            assert False, 'findlink not file:/// coverage'
+        if findlink.startswith('file:'):
+            findlink = findlink[5:]
+        elif not exists(findlink):
+            assert False, 'findlink not file: coverage: %r' % findlink
             continue  # TODO: test coverage
         # this matches the name-munging done in pip.wheel:
         reqname = req.name.replace('-', '_')
 
         reqname = ignorecase_glob(reqname)
         reqname = join(findlink, reqname + '-*.whl')
+        logger.debug('wheel glob: %s', reqname)
         from glob import glob
         for link in glob(reqname):
             from pip.index import Link
             link = Link('file://' + link)
             from pip.wheel import Wheel
             wheel = Wheel(link.filename)
-            print(link.filename)
+            logger.debug('Candidate wheel: %s', link.filename)
             if wheel.version not in req.req:
                 continue
 
@@ -108,19 +110,20 @@ class FasterPackageFinder(PackageFinder):
             # if the version is pinned-down by a ==
             # first try to use any installed package that satisfies the req
             if req.satisfied_by:
-                if upgrade:
-                    # as a matter of api, find_requirement() only raises during upgrade -- shrug
-                    raise BestVersionAlreadyInstalled
-                else:
-                    return None
+                logger.notify('Faster! pinned requirement already installed.')
+                raise BestVersionAlreadyInstalled
 
             # then try an optimistic search for a .whl file:
             link = optimistic_wheel_search(req, self.find_links)
-            if link is not None:
+            if link is None:
+                logger.notify('SLOW!! no wheel found for pinned requirement %s', req)
+            else:
+                logger.notify('Faster! Pinned wheel found, without hitting PyPI.')
                 return link
+        else:
+            logger.info('slow: full search for unpinned requirement %s', req)
 
         # otherwise, do the full network search, per usual
-        print('FULL SEARCH FOR', req)
         return super(FasterPackageFinder, self).find_requirement(req, upgrade)
         # TODO: optimization -- do optimisitic wheel search even for unpinned reqs
 
@@ -128,7 +131,7 @@ class FasterPackageFinder(PackageFinder):
 class FasterWheelBuilder(WheelBuilder):
 
     def build(self):
-        """This is copy-pasta of pip.wheel.Wheelbuilder.build except in the two noted spots"""
+        """This is copy-paasta of pip.wheel.Wheelbuilder.build except in the two noted spots"""
         # TODO-TEST: `pip-faster wheel` works at all
         # FASTER: the slower wheelbuilder did self.requirement_set.prepare_files() here
 
@@ -242,12 +245,29 @@ def fresh_working_set():
 
         def add_entry(self, entry):
             """Same as the original .add_entry, but sets only=False, so that egg-links are honored."""
+            logger.debug('working-set entry: %r', entry)
             self.entry_keys.setdefault(entry, [])
             self.entries.append(entry)
             for dist in pkg_resources.find_distributions(entry, False):
-                self.add(dist, entry, False)
+
+                # eggs override anything that's installed normally
+                # fun fact: pkg_resources.working_set's results depend on the
+                # ordering of os.listdir since the order of os.listdir is
+                # entirely arbitrary (an implemenation detail of file system),
+                # without calling site.main(), an .egg-link file may or may not
+                # be honored, depending on the filesystem
+                replace = (dist.precedence == pkg_resources.EGG_DIST)
+                self.add(dist, entry, False, replace=replace)
 
     return WorkingSetPlusEditableInstalls()
+
+
+def pretty_req(req):
+    """
+    a context that makes the str() of a pip requirement a bit more readable,
+    at the expense of munging its data temporarily
+    """
+    return patched(vars(req), {'url': None, 'satisfied_by': None})
 
 
 def trace_requirements(requirements):
@@ -259,32 +279,23 @@ def trace_requirements(requirements):
     # breadth-first traversal:
     from collections import deque
     queue = deque(requirements)
-    errors = []
+    errors = set()
     result = []
-    seen_warnings = set()
     while queue:
         req = queue.popleft()
-        if req.req is None:
-            # a file:/// requirement
-            assert False, 'req.req is None: is this still a thing?'  # TODO: test coverage
-            continue
+        logger.debug('tracing: %s', req)
 
         try:
             dist = working_set.find(req.req)
         except pkg_resources.VersionConflict as conflict:
             dist = conflict.args[0]
-            if req.name not in seen_warnings:
-                # TODO-TEST: conflict with an egg in a directory install via -e ...
-                if dist.location:
-                    location = ' (%s)' % timid_relpath(dist.location)
-                else:
-                    assert False, 'not dist.location coverage'
-                    location = ''  # TODO: test coverage
-                errors.append('Error: version conflict: %s%s <-> %s' % (dist, location, req))
-                seen_warnings.add(req.name)
+            with pretty_req(req):
+                errors.add('Error: version conflict: %s (%s) <-> %s' % (
+                    dist, timid_relpath(dist.location), req
+                ))
 
         if dist is None:
-            errors.append('Error: unmet dependency: %s' % req)
+            errors.add('Error: unmet dependency: %s' % req)
             continue
 
         result.append(dist_to_req(dist))
@@ -292,12 +303,15 @@ def trace_requirements(requirements):
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
             # there really shouldn't be any circular dependencies...
             # temporarily shorten the str(req)
-            with patched(vars(req), {'url': None, 'satisfied_by': None}):
+            with pretty_req(req):
                 from pip.req import InstallRequirement
-                queue.append(InstallRequirement(dist_req, str(req)))
+                dist_req = InstallRequirement(dist_req, str(req))
+
+            logger.debug('adding sub-requirement %s', dist_req)
+            queue.append(dist_req)
 
     if errors:
-        raise InstallationError('\n'.join(errors))
+        raise InstallationError('\n'.join(sorted(errors)))
 
     return result
 
@@ -327,13 +341,16 @@ class CacheOpts(object):
 class FasterRequirementSet(RequirementSet):
 
     def prepare_files(self, finder, **kwargs):
+        wheel_dir = CacheOpts().pip_wheels
+        self.wheel_download_dir = wheel_dir
+
         super(FasterRequirementSet, self).prepare_files(finder, **kwargs)
 
         # build wheels before install.
         wb = FasterWheelBuilder(
             self,
             finder,
-            wheel_dir=CacheOpts().pip_wheels,
+            wheel_dir=wheel_dir,
         )
         # Ignore the result: a failed wheel will be
         # installed from the sdist/vcs whatever.
@@ -346,6 +363,7 @@ class FasterRequirementSet(RequirementSet):
 
             link = optimistic_wheel_search(req, finder.find_links)
             if link is None:
+                logger.notify('SLOW!! No wheel found for %s', req)
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"
@@ -404,6 +422,12 @@ class FasterInstallCommand(InstallCommand):
         cache_opts = CacheOpts()
         options.find_links.append('file://' + cache_opts.pip_wheels)
         options.download_cache = cache_opts.pip_download_cache
+
+        # from pip.commands.wheel: make the wheelhouse
+        import os.path
+        if not os.path.exists(cache_opts.pip_wheels):
+            os.makedirs(cache_opts.pip_wheels)
+
         # from pip.commands.install
         do_install = (not options.no_install and not self.bundle)
         do_prune = do_install and options.prune
@@ -411,9 +435,6 @@ class FasterInstallCommand(InstallCommand):
             previously_installed = pip_get_installed()
 
         requirement_set = super(FasterInstallCommand, self).run(options, args)
-
-        if not do_prune:
-            return requirement_set
 
         if requirement_set is None:
             required = ()
@@ -423,7 +444,11 @@ class FasterInstallCommand(InstallCommand):
             successfully_installed = requirement_set.successfully_installed
 
         # transitive requirements, previously installed, are also required
+        # this has a side-effect of finding any missing / conflicting requirements
         required = trace_requirements(required)
+
+        if not do_prune:
+            return requirement_set
 
         extraneous = (
             reqnames(previously_installed) -

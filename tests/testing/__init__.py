@@ -38,7 +38,6 @@ def venv_update(*args, **env):
     return run(
         'venv-update',
         *args,
-        HOME=str(Path('.').realpath()),
         **env
     )
 

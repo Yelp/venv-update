@@ -17,7 +17,12 @@ from testing.ephemeral_port_reserve import reserve
 from venv_update import colorize
 
 
-ENV_WHITELIST = ('COVERAGE_PROCESS_START', 'TOP')
+ENV_WHITELIST = (
+    # allows coverage of subprocesses
+    'COVERAGE_PROCESS_START',
+    # used in the configuration of coverage
+    'TOP',
+)
 
 
 @pytest.fixture(autouse=True)
@@ -40,10 +45,10 @@ def fixed_environment_variables():
 def tmpdir(tmpdir):
     """override tmpdir to provide a $HOME and $TMPDIR"""
     home = tmpdir.ensure('home', dir=True)
-    tmpdir = tmpdir.ensure('tmp', dir=True)
+    tmp = tmpdir.ensure('tmp', dir=True)
 
     os.environ['HOME'] = str(home)
-    os.environ['TMPDIR'] = str(tmpdir)
+    os.environ['TMPDIR'] = str(tmp)
 
     return tmpdir
 

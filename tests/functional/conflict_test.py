@@ -40,7 +40,7 @@ conflicting_package
 Cleaning up...
 Error: version conflict: many-versions-package 3 (virtualenv_run/%s)'''
         ''' <-> many-versions-package<2 (from conflicting-package (from -r requirements.txt (line 3)))
-Storing debug log for failure in %s/.pip/pip.log
+Storing debug log for failure in %s/home/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
 ''' % (PYTHON_LIB, tmpdir)
@@ -80,10 +80,66 @@ Error: version conflict: many-versions-package 1 (virtualenv_run/%s)'''
         ''' <-> many-versions-package>=2,<4 (from dependant-package (from -r requirements.txt (line 2)))
 Error: version conflict: pure-python-package 0.1.0 (virtualenv_run/%s)'''
         ''' <-> pure-python-package>=0.2.0 (from dependant-package (from -r requirements.txt (line 2)))
-Storing debug log for failure in %s/.pip/pip.log
+Storing debug log for failure in %s/home/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
 ''' % (PYTHON_LIB, PYTHON_LIB, tmpdir)
     ) in out
 
     assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_editable_egg_conflict(tmpdir):
+    conflicting_package = tmpdir / 'tmp/conflicting_package'
+    many_versions_package_2 = tmpdir / 'tmp/many_versions_package_2'
+
+    from shutil import copytree
+    copytree(
+        str(T.TOP / 'tests/testing/packages/conflicting_package'),
+        str(conflicting_package),
+    )
+
+    copytree(
+        str(T.TOP / 'tests/testing/packages/many_versions_package_2'),
+        str(many_versions_package_2),
+    )
+
+    with many_versions_package_2.as_cwd():
+        from sys import executable as python
+        T.run(python, 'setup.py', 'bdist_egg', '--dist-dir', str(conflicting_package))
+
+    with tmpdir.as_cwd():
+        T.requirements('-r %s/requirements.d/coverage.txt' % T.TOP)
+        T.venv_update()
+
+        T.requirements('-e %s' % conflicting_package)
+        with pytest.raises(CalledProcessError) as excinfo:
+            T.venv_update()
+        assert excinfo.value.returncode == 1
+        out, err = excinfo.value.result
+
+        err = T.strip_coverage_warnings(err)
+        assert err == ''
+
+        out = T.uncolor(out)
+        expected = '\nSuccessfully installed many-versions-package conflicting-package\n'
+        assert expected in out
+        rest = out.rsplit(expected, 1)[-1]
+        assert (
+            '''\
+Cleaning up...
+Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py2.7.egg)'''
+            ''' <-> many-versions-package<2 (from conflicting-package==1 (from -r requirements.txt (line 1)))
+Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py2.7.egg)'''
+            ''' <-> many-versions-package<2 (from conflicting-package==1->-r requirements.txt (line 1))
+Storing debug log for failure in %s/home/.pip/pip.log
+
+Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
+Waiting for all subprocesses to finish...
+DONE
+
+''' % tmpdir
+        ) == rest
+
+        assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))

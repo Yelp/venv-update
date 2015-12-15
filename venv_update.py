@@ -23,7 +23,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
-__version__ = '0.1.4.4'
+__version__ = '1.0.dev1'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
@@ -123,6 +123,7 @@ def validate_venv(venv_path, venv_args):
             return
         else:
             info('Removing invalidated virtualenv.')
+            info('(%r != %r)' % (validation, validation))
             # TODO: error out if venv_path is nonempty and doesn't look like a virtualenv
             run(('rm', '-rf', venv_path))
 
