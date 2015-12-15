@@ -126,20 +126,27 @@ def test_editable_egg_conflict(tmpdir):
         expected = '\nSuccessfully installed many-versions-package conflicting-package\n'
         assert expected in out
         rest = out.rsplit(expected, 1)[-1]
+
+        if True:  # :pragma:nocover:pylint:disable=using-constant-test
+            # Debian de-vendorizes the version of pip it ships
+            try:
+                from sysconfig import get_python_version
+            except ImportError:  # <= python2.6
+                from distutils.sysconfig import get_python_version
         assert (
             '''\
 Cleaning up...
-Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py2.7.egg)'''
+Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py{0}.egg)'''
             ''' <-> many-versions-package<2 (from conflicting-package==1 (from -r requirements.txt (line 1)))
-Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py2.7.egg)'''
+Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py{0}.egg)'''
             ''' <-> many-versions-package<2 (from conflicting-package==1->-r requirements.txt (line 1))
-Storing debug log for failure in %s/home/.pip/pip.log
+Storing debug log for failure in {1}/home/.pip/pip.log
 
 Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
 Waiting for all subprocesses to finish...
 DONE
 
-''' % tmpdir
+'''.format(get_python_version(), tmpdir)
         ) == rest
 
         assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
