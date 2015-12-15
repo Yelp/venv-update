@@ -469,11 +469,21 @@ def pipfaster_install_prune_option():
     return patched(pipmodule.commands, {FasterInstallCommand.name: FasterInstallCommand})
 
 
+def improved_wheel_support():
+    """get the wheel supported-tags from wheel, rather than vendor"""
+    import pip.pep425tags
+    from wheel.pep425tags import get_supported
+    return patched(vars(pip.pep425tags), {
+        'supported_tags': get_supported(),
+    })
+
+
 def main():
     with pipfaster_install_prune_option():
         with pipfaster_packagefinder():
             with pipfaster_install():
-                raise_on_failure(pipmodule.main)
+                with improved_wheel_support():
+                    raise_on_failure(pipmodule.main)
 
 
 if __name__ == '__main__':

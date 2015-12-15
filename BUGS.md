@@ -22,6 +22,14 @@ Known Bugs
        pkg_resources.DistributionNotFound: argparse
 
 
+Annoyances
+==========
+
+    * `print 1; print 2` is coming from somewhere during py.test -s
+    * `capture_subprocess` doesn't properly proxy tty input/output.
+      see: https://github.com/bukzor/ptyproxy
+
+
 Fixed, Not Tested
 =================
 
