@@ -5,11 +5,11 @@ from __future__ import unicode_literals
 
 import pytest
 
+from testing import enable_coverage
 from testing import pip_freeze
 from testing import requirements
 from testing import TOP
 from testing import venv_update
-from testing import enable_coverage
 from venv_update import __version__
 
 
