@@ -340,6 +340,9 @@ def test_cant_wheel_package(tmpdir):
         assert err == ''
 
         out = uncolor(out)
+        
+        # for unknown reasons, py27 has an extra line with four spaces in this output, where py26 does not.
+        out = out.replace('\n    \n', '\n')
         assert '''
 ----------------------------------------
   Failed building wheel for cant-wheel-package
@@ -347,7 +350,6 @@ Failed to build cant-wheel-package
 SLOW!! No wheel found for cant-wheel-package (from -r requirements.txt (line 1))
 Installing collected packages: cant-wheel-package
   Running setup.py install for cant-wheel-package
-    
 Successfully installed cant-wheel-package
 Cleaning up...
 ''' in out  # noqa
