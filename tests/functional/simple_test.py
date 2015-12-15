@@ -340,7 +340,7 @@ def test_cant_wheel_package(tmpdir):
         assert err == ''
 
         out = uncolor(out)
-        
+
         # for unknown reasons, py27 has an extra line with four spaces in this output, where py26 does not.
         out = out.replace('\n    \n', '\n')
         assert '''

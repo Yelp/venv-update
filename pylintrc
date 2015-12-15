@@ -17,7 +17,7 @@ output-format=colorized
 reports=no
 
 [BASIC]
-good-names=fd,ip
+good-names=fd,ip,op
 
 #const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
 const-rgx=(([A-Za-z_][A-Za-z0-9_]*)|(__.*__))$
