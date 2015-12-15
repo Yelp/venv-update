@@ -136,3 +136,27 @@ def service_up(port):
             return False
         else:
             raise
+
+
+def pytest_assertrepr_compare(config, op, left, right):
+    if op == 'in' and '\n' in left:
+        # Convert 'in' comparisons to '==' comparisons, for more usable error messaging.
+        # Truncate the right-hand-side such that it has the longest common prefix with the LHS,
+        # and the longest common suffix as well.
+        # Given the diff of the two, this should pinpoint the difference.
+        beginning = end = None
+        for i in range(len(left)):
+            if beginning and end:
+                break
+
+            if beginning is None and left[:i + 1] not in right:
+                beginning = left[:i]
+
+            if end is None and left[-i - 1:] not in right:
+                end = left[-i:]
+
+        right = right.split(beginning, 1)[-1].rsplit(end, 1)[0]
+        right = ''.join((beginning, right, end))
+
+        from _pytest.assertion.util import assertrepr_compare
+        return assertrepr_compare(config, '==', left, right)
