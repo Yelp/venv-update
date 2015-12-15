@@ -2,7 +2,7 @@
 
 static PyObject* _hello_world(PyObject* self) {
     PyObject_Print(PyUnicode_FromString("hello world\n"), stdout, Py_PRINT_RAW);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static struct PyMethodDef methods[] = {
