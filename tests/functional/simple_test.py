@@ -331,6 +331,35 @@ def test_package_name_normalization(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
+def test_override_requirements_file(tmpdir):
+    tmpdir.chdir()
+    requirements('')
+    Path('.').ensure_dir('requirements.d').join('venv-update.txt').write('''\
+pip-faster==%s
+pure_python_package
+''' % __version__)
+    out, err = venv_update()
+    assert err == ''
+
+    out = uncolor(out)
+    assert ' '.join((
+        '\n> virtualenv_run/bin/python -m pip.__main__ install',
+        '--find-links=file://%s/.pip/wheelhouse' % tmpdir,
+        '-r requirements.d/venv-update.txt\n',
+    )) in out
+    assert '\nSuccessfully installed pip-faster pure-python-package wheel virtualenv\n' in out
+    assert '\n  Successfully uninstalled pure-python-package\n' in out
+
+    expected = '\n'.join((
+        'pip-faster==%s' % __version__,
+        'virtualenv==1.11.6',
+        'wheel==0.26.0',
+        ''
+    ))
+    assert pip_freeze() == expected
+
+
+@pytest.mark.usefixtures('pypi_server')
 def test_cant_wheel_package(tmpdir):
     with tmpdir.as_cwd():
         enable_coverage(tmpdir)
