@@ -344,10 +344,10 @@ pure_python_package
     out = uncolor(out)
     assert ' '.join((
         '\n> virtualenv_run/bin/python -m pip.__main__ install',
-        '--find-links=file://%s/.pip/wheelhouse' % tmpdir,
+        '--find-links=file://%s/home/.pip/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out
-    assert '\nSuccessfully installed pip-faster pure-python-package wheel virtualenv\n' in out
+    assert '\nSuccessfully installed pip-faster pure-python-package ' in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
