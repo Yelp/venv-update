@@ -26,7 +26,7 @@ from __future__ import unicode_literals
 from os.path import exists
 
 VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
-__version__ = '1.0.dev2'
+__version__ = '1.0rc1'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
