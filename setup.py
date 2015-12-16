@@ -65,6 +65,11 @@ def main():
             ],
         },
         keywords=['pip', 'virtualenv'],
+        options={
+            'bdist_wheel': {
+                'universal': 1,
+            }
+        },
     )  # pragma: no cover: covered by tox
 
 if __name__ == '__main__':
