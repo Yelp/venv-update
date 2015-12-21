@@ -25,8 +25,10 @@ ENV_WHITELIST = (
 )
 
 
-@pytest.fixture(autouse=True)
+@pytest.yield_fixture(autouse=True)
 def fixed_environment_variables():
+    orig_environ = os.environ.copy()
+
     for var in dict(os.environ):
         if var not in ENV_WHITELIST:
             del os.environ[var]
@@ -39,6 +41,9 @@ def fixed_environment_variables():
     from os import defpath
     from os.path import dirname
     os.environ['PATH'] = dirname(executable) + ':' + defpath
+    yield
+    os.environ.clear()
+    os.environ.update(orig_environ)
 
 
 @pytest.fixture(autouse=True)

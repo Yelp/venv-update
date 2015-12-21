@@ -21,7 +21,7 @@ venv-venv_update: setup.py requirements.d/* Makefile
 	rm -rf venv-venv_update/local
 	# TODO use pip-faster
 	venv-venv_update/bin/pip install -r requirements.d/dev.txt
-
+	venv-venv_update/bin/pre-commit install
 
 .PHONY: clean
 clean:
