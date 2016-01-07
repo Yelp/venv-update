@@ -3,6 +3,7 @@ NEXT
 ====
 We plan to work on these as soon as possible.
 
+* neither pip-faster nor venv-update report their *own* versions
 
 - [ ] testing
   - [ ] PIP\_FIND\_LINKS=https://...
@@ -10,7 +11,7 @@ We plan to work on these as soon as possible.
 
 
  - [ ] dogfood venv-update during travis, tox
-   - [ ] recommended tox config: install_command=pip-faster --prune {opts} {packages}
+   - [ ] recommended tox config: `install_command=pip-faster --prune {opts} {packages}`
 
 * change host-python requirement to simply virtualenv, any version
 
@@ -18,6 +19,23 @@ We plan to work on these as soon as possible.
    - [ ] non-default requirements file(s)
    - [ ] run from virtualenv which doesn't have virtualenv installed
    - [ ] update an active virtualenv which wasn't created by venv-update
+
+* upgrade-install of unpinned requirements is ~50% slower than vanilla pip.
+  compare:
+
+  - time pip install --find-links file://$HOME/.pip/wheelhouse --upgrade -r
+    requirements.d/dev.txt -vvvv > fast
+
+    real    0m3.107s
+    user    0m2.424s
+    sys     0m0.427s
+
+  - time make venv > slow
+
+    real    0m4.870s
+    user    0m4.021s
+    sys     0m0.631s
+
 
 
 
