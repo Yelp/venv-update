@@ -53,3 +53,5 @@ else
     py.test -n $NCPU "$@"
     coverage-report
 fi
+
+echo '[37;1;42mSUCCESS[m'
