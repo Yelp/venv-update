@@ -1,16 +1,19 @@
-*.egg-info
+# only ignored in this directory, specifically
+/*.egg-info/
+/build/
+/.coverage
+/.idea
+/.project
+/.pydevproject
+/.tox
+/coverage-html
+/dist
+/tmp*/
+/venv/
+/.cache
+
+# ignored anywhere
 *.iml
 *.py[co]
 .*.sw[a-z]
-build/
-.coverage
-.idea
-.project
-.pydevproject
-.tox
-coverage-html
-dist
 *.tmp
-tmp/
-venv-venv_update
-.cache
