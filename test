@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -eu
 export TOP=$(readlink -f ${TOP:-.})
 export SITEPACKAGES=${SITEPACKAGES:-.}
 export PROJECT=venv_update
@@ -11,11 +11,32 @@ else
     PYPY=false
 fi
 
+coverage-report() {
+    # reporting:
+    cd $TOP
+    coverage combine
+    python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
+    unset COVERAGE_PROCESS_START
+    coverage combine
+
+    # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
+    python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
+
+    coverage report --fail-under 91  # FIXME: should be 100
+}
+fail() {
+    if ! $PYPY; then coverage-report; fi
+    echo '[31;1mFAIL[m'
+}
+trap fail ERR
+
+
 if [ -z "$*" ]; then
     # default arguments
     set $TOP/tests $SITEPACKAGES/${PROJECT}.py
 fi
 
+set -x
 if $PYPY; then
     # coverage under pypy takes too dang long:
     #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182
@@ -23,24 +44,12 @@ if $PYPY; then
     py.test -n $((NCPU / 3)) "$@"
 else
     # clean up anything left behind from before:
-    coverage combine --rcfile=$TOP/.coveragerc
-    coverage erase --rcfile=$TOP/.coveragerc
+    rm -f $TOP/.coverage $TOP/.coverage.*
 
     # See: http://nedbatchelder.com/code/coverage/subprocess.html
     export COVERAGE_PROCESS_START=$TOP/.coveragerc
 
     # run the tests!
     py.test -n $NCPU "$@"
-
-    # reporting:
-    cd $TOP
-    coverage combine
-    python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
-    unset COVERAGE_PROCESS_START
-    coverage combine
-    
-    # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
-    python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
-
-    coverage report --fail-under 95  # FIXME: should be 100
+    coverage-report
 fi
