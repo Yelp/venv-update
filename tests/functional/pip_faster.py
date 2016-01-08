@@ -68,6 +68,8 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
+    from pip.wheel import Wheel
+
     tmpdir.chdir()
 
     venv = enable_coverage(tmpdir, 'venv')
@@ -95,17 +97,19 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
 
     # we shouldn't wheel things installed editable
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
-    assert set(f.basename for f in wheelhouse.listdir()) == set([
-        'coverage-4.0.3-cp27-none-linux_x86_64.whl',
-        'coverage_enable_subprocess-0-py2.py3-none-any.whl',
-        'implicit_dependency-1-py2.py3-none-any.whl',
-        'many_versions_package-3-py2.py3-none-any.whl',
-        'pure_python_package-0.2.0-py2.py3-none-any.whl',
+    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
+        'coverage',
+        'coverage-enable-subprocess',
+        'implicit-dependency',
+        'many-versions-package',
+        'pure-python-package',
     ])
 
 
 @pytest.mark.usefixtures('pypi_server')
 def it_doesnt_wheel_local_dirs(tmpdir):
+    from pip.wheel import Wheel
+
     tmpdir.chdir()
 
     venv = enable_coverage(tmpdir, 'venv')
@@ -134,12 +138,12 @@ def it_doesnt_wheel_local_dirs(tmpdir):
     ])
 
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
-    assert set(f.basename for f in wheelhouse.listdir()) == set([
-        'coverage-4.0.3-cp27-none-linux_x86_64.whl',
-        'coverage_enable_subprocess-0-py2.py3-none-any.whl',
-        'implicit_dependency-1-py2.py3-none-any.whl',
-        'many_versions_package-3-py2.py3-none-any.whl',
-        'pure_python_package-0.2.0-py2.py3-none-any.whl',
+    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
+        'coverage',
+        'coverage-enable-subprocess',
+        'implicit-dependency',
+        'many-versions-package',
+        'pure-python-package',
     ])
 
 
