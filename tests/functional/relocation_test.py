@@ -14,7 +14,7 @@ from testing import venv_update
 def test_relocatable(tmpdir):
     tmpdir.chdir()
     requirements('')
-    venv_update('--python=python')  # this makes pypy work right. derp.
+    venv_update()
 
     Path('venv').rename('relocated')
 

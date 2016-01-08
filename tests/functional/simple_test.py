@@ -126,7 +126,7 @@ def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
 
-    venv_update('--python=python', 'venv', *reqs)
+    venv_update('venv', *reqs)
 
     assert firstreq.mtime() < Path('venv').mtime()
 
