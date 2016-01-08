@@ -38,15 +38,15 @@ conflicting_package
     assert (
         '''
 Cleaning up...
-Error: version conflict: many-versions-package 3 (virtualenv_run/%s)'''
+Error: version conflict: many-versions-package 3 (venv/%s)'''
         ''' <-> many-versions-package<2 (from conflicting-package (from -r requirements.txt (line 3)))
 Storing debug log for failure in %s/home/.pip/pip.log
 
-Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
+Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
 ''' % (PYTHON_LIB, tmpdir)
     ) in out
 
-    assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
+    assert_venv_marked_invalid(tmpdir.join('venv'))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -56,7 +56,7 @@ def test_multiple_issues(tmpdir):
     T.requirements('dependant_package\n-r %s/requirements.d/coverage.txt' % T.TOP)
     T.venv_update()
 
-    T.run('./virtualenv_run/bin/pip', 'uninstall', '--yes', 'implicit_dependency')
+    T.run('./venv/bin/pip', 'uninstall', '--yes', 'implicit_dependency')
     T.requirements('''
 dependant_package
 conflicting_package
@@ -76,17 +76,17 @@ pure_python_package==0.1.0
         '''
 Cleaning up...
 Error: unmet dependency: implicit-dependency (from dependant-package (from -r requirements.txt (line 2)))
-Error: version conflict: many-versions-package 1 (virtualenv_run/%s)'''
+Error: version conflict: many-versions-package 1 (venv/%s)'''
         ''' <-> many-versions-package>=2,<4 (from dependant-package (from -r requirements.txt (line 2)))
-Error: version conflict: pure-python-package 0.1.0 (virtualenv_run/%s)'''
+Error: version conflict: pure-python-package 0.1.0 (venv/%s)'''
         ''' <-> pure-python-package>=0.2.0 (from dependant-package (from -r requirements.txt (line 2)))
 Storing debug log for failure in %s/home/.pip/pip.log
 
-Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
+Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
 ''' % (PYTHON_LIB, PYTHON_LIB, tmpdir)
     ) in out
 
-    assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
+    assert_venv_marked_invalid(tmpdir.join('venv'))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -142,11 +142,8 @@ Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_v
             ''' <-> many-versions-package<2 (from conflicting-package==1->-r requirements.txt (line 1))
 Storing debug log for failure in {1}/home/.pip/pip.log
 
-Something went wrong! Sending 'virtualenv_run' back in time, so make knows it's invalid.
-Waiting for all subprocesses to finish...
-DONE
-
+Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
 '''.format(get_python_version(), tmpdir)
         ) == rest
 
-        assert_venv_marked_invalid(tmpdir.join('virtualenv_run'))
+        assert_venv_marked_invalid(tmpdir.join('venv'))

@@ -87,9 +87,9 @@ def test_noop_install_faster(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
-def test_cached_clean_install_faster(tmpdir):
+def test_cached_clean_install_faster(tmpdir, pypi_packages):
     def clean():
-        venv = tmpdir.join('virtualenv_run')
+        venv = tmpdir.join('venv')
         assert venv.isdir()
         venv.remove()
         assert not venv.exists()
@@ -103,16 +103,16 @@ def test_cached_clean_install_faster(tmpdir):
                 'argparse',
                 'pip',
                 'pip_faster',
-                'virtualenv',
+                'virtualenv-1.11.6',
                 'wheel',
         ):
-            pattern = str(TOP.join('build/packages', package + '-*.whl'))
+            pattern = str(pypi_packages.join(package + '-*.whl'))
             wheel = glob(pattern)
             assert len(wheel) == 1, (pattern, wheel)
             wheel = wheel[0]
 
             from shutil import copy
-            copy(wheel, str(tmpdir.join('home/.pip/wheelhouse')))
+            copy(wheel, str(tmpdir.join('home/.cache/pip-faster/wheelhouse')))
 
     # the slow-python-package takes five seconds to compile
     assert time_savings(tmpdir, between=clean) > 5

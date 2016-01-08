@@ -80,37 +80,6 @@ def test_dotpy(filename, expected):
     assert venv_update.dotpy(filename) == expected
 
 
-@pytest.mark.parametrize('args,expected', [
-    (
-        (),
-        ('virtualenv_run', ('requirements.txt',), ()),
-    ), (
-        ('a',),
-        ('a', ('requirements.txt',), ())
-    ), (
-        ('a', 'b'),
-        ('a', ('b',), ())
-    ), (
-        ('a', 'b', 'c'),
-        ('a', ('b', 'c'), ())
-    ), (
-        ('a', 'b', 'c', 'd'),
-        ('a', ('b', 'c', 'd'), ())
-    ), (
-        ('a', '--opt', 'optval', 'b', 'c', 'd'),
-        ('a', ('optval', 'b', 'c', 'd'), ('--opt',))
-    ), (
-        ('a', '--opt', 'optval', 'b', '--opt2', 'c', 'd'),
-        ('a', ('optval', 'b', 'c', 'd'), ('--opt', '--opt2'))
-    ), (
-        ('--opt2', 'a', '--opt', 'optval', 'b', '--opt2', 'c', 'd'),
-        ('a', ('optval', 'b', 'c', 'd'), ('--opt2', '--opt', '--opt2'))
-    ),
-])
-def test_parseargs(args, expected):
-    assert venv_update.parseargs(args) == expected
-
-
 @pytest.mark.parametrize('args', [
     ('-h',),
     ('a', '-h',),
@@ -222,3 +191,52 @@ def test_wait_for_all_subprocesses(monkeypatch):
 
     assert _nonlocal.wait == 0
     assert _nonlocal.thrown is True
+
+
+def test_samefile(tmpdir):
+    with tmpdir.as_cwd():
+        a = tmpdir.ensure('a')
+        b = tmpdir.ensure('b')
+        tmpdir.join('c').mksymlinkto(a, absolute=True)
+        tmpdir.join('d').mksymlinkto(b, absolute=False)
+
+        assert venv_update.samefile('a', 'b') is False
+        assert venv_update.samefile('a', 'x') is False
+        assert venv_update.samefile('x', 'a') is False
+
+        assert venv_update.samefile('a', 'a') is True
+        assert venv_update.samefile('a', 'c') is True
+        assert venv_update.samefile('d', 'b') is True
+
+
+def passwd():
+    import os
+    import pwd
+    return pwd.getpwuid(os.getuid())
+
+
+def test_user_cache_dir():
+    assert venv_update.user_cache_dir() == passwd().pw_dir + '/.cache'
+
+    from os import environ
+    environ['HOME'] = '/foo/bar'
+    assert venv_update.user_cache_dir() == '/foo/bar/.cache'
+
+    environ['XDG_CACHE_HOME'] = '/quux/bar'
+    assert venv_update.user_cache_dir() == '/quux/bar'
+
+
+def test_get_python_version():
+    import sys
+
+    expected = '.'.join(str(part) for part in sys.version_info[:3])
+    actual = venv_update.get_python_version(sys.executable)
+    assert actual.startswith(expected)
+    assert actual[len(expected)] in ' +'
+
+    assert venv_update.get_python_version('total garbage') is None
+
+    from subprocess import CalledProcessError
+    with pytest.raises(CalledProcessError) as excinfo:
+        venv_update.get_python_version('/bin/false')
+    assert excinfo.value.returncode == 1

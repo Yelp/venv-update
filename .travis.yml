@@ -18,9 +18,8 @@ addons:
         sources:
             - deadsnakes
         packages:
-            - python2.6-dev
             - python2.7-dev
-            - python3.3-dev
+            - python3.4-dev
 
 matrix:
     # notify a failed build as soon as anything fails
@@ -36,7 +35,7 @@ matrix:
         - python: '3.4'
           env: TOXENV=lint
 
-install: pip install -r requirements.d/travis.txt
+install: ./venv_update.py $VIRTUAL_ENV -- -r requirements.d/travis.txt
 script: tox
 after_success:
     - coveralls

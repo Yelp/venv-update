@@ -56,7 +56,7 @@ def venv_update_symlink_pwd():
     local_vu.mksymlinkto(venv_update_path)
 
 
-def venv_update_script(pyscript, venv='virtualenv_run'):
+def venv_update_script(pyscript, venv='venv'):
     """Run a python script that imports venv_update"""
 
     # symlink so that we get coverage, where possible
@@ -86,10 +86,11 @@ def strip_coverage_warnings(stderr):
 def uncolor(text):
     # the colored_tty, uncolored_pipe tests cover this pretty well.
     from re import sub
-    return sub('\033\\[[^A-z]*[A-z]', '', text)
+    text = sub('\033\\[[^A-z]*[A-z]', '', text)
+    return sub('[^\n\r]*\r', '', text)
 
 
-def pip_freeze(venv='virtualenv_run'):
+def pip_freeze(venv='venv'):
     from os.path import join
     out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local')
 
@@ -105,8 +106,22 @@ def pip_freeze(venv='virtualenv_run'):
     return out
 
 
-def enable_coverage(tmpdir, venv='virtualenv_run', options=()):
+def enable_coverage(tmpdir, venv='venv', options=()):
     venv = tmpdir.join(venv)
-    venv_update(str(venv), str(TOP.join('requirements.d/coverage.txt')), *options)
+    options += ('--', '-r', str(TOP.join('requirements.d/coverage.txt')))
+    venv_update(str(venv), *options)
 
     return venv
+
+
+class OtherPython(object):
+    """represents a python interpreter that doesn't match the "current" interpreter's version"""
+
+    def __init__(self):
+        import sys
+        if sys.version_info[0] <= 2:
+            self.interpreter = 'python3.4'
+            self.version_prefix = '3.4.'
+        else:
+            self.interpreter = 'python2.7'
+            self.version_prefix = '2.7.'

@@ -33,6 +33,7 @@ from pip.index import BestVersionAlreadyInstalled
 from pip.index import PackageFinder
 from pip.wheel import WheelBuilder
 
+from venv_update import CacheOpts
 from venv_update import colorize
 from venv_update import raise_on_failure
 from venv_update import timid_relpath
@@ -40,6 +41,7 @@ from venv_update import timid_relpath
 if True:  # :pragma:nocover:pylint:disable=using-constant-test
     # Debian de-vendorizes the version of pip it ships
     try:
+        # pylint:disable=ungrouped-imports
         from pip._vendor import pkg_resources
     except ImportError:
         import pkg_resources
@@ -320,28 +322,10 @@ def reqnames(reqs):
     return set(req.name for req in reqs)
 
 
-class CacheOpts(object):
-
-    def __init__(self):
-        from os import environ
-        # We put the cache in the directory that pip already uses.
-        # This has better security characteristics than a machine-wide cache, and is a
-        #   pattern people can use for open-source projects
-        self.pipdir = environ['HOME'] + '/.pip'
-        # We could combine these caches to one directory, but pip would search everything twice, going slower.
-        self.pip_download_cache = self.pipdir + '/cache'
-        self.pip_wheels = self.pipdir + '/wheelhouse'
-
-        self.opts = (
-            '--download-cache=' + self.pip_download_cache,
-            '--find-links=file://' + self.pip_wheels,
-        )
-
-
 class FasterRequirementSet(RequirementSet):
 
     def prepare_files(self, finder, **kwargs):
-        wheel_dir = CacheOpts().pip_wheels
+        wheel_dir = CacheOpts().wheelhouse
         self.wheel_download_dir = wheel_dir
 
         super(FasterRequirementSet, self).prepare_files(finder, **kwargs)
@@ -420,13 +404,12 @@ class FasterInstallCommand(InstallCommand):
     def run(self, options, args):
         """update install options with caching values"""
         cache_opts = CacheOpts()
-        options.find_links.append('file://' + cache_opts.pip_wheels)
-        options.download_cache = cache_opts.pip_download_cache
+        options.find_links.append('file://' + cache_opts.wheelhouse)
 
         # from pip.commands.wheel: make the wheelhouse
         import os.path
-        if not os.path.exists(cache_opts.pip_wheels):
-            os.makedirs(cache_opts.pip_wheels)
+        if not os.path.exists(cache_opts.wheelhouse):
+            os.makedirs(cache_opts.wheelhouse)
 
         # from pip.commands.install
         do_install = (not options.no_install and not self.bundle)

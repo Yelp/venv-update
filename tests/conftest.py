@@ -7,11 +7,13 @@ import socket
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from errno import ECONNREFUSED
 
 import pytest
 import six
 
+from testing import run
 from testing import TOP
 from testing.ephemeral_port_reserve import reserve
 from venv_update import colorize
@@ -22,6 +24,11 @@ ENV_WHITELIST = (
     'COVERAGE_PROCESS_START',
     # used in the configuration of coverage
     'TOP',
+    # let's not fill up the root partition, please
+    'TMPDIR',
+    # these help my debugger not freak out
+    'HOME',
+    'TERM',
 )
 
 
@@ -40,49 +47,56 @@ def fixed_environment_variables():
     from sys import executable
     from os import defpath
     from os.path import dirname
-    os.environ['PATH'] = dirname(executable) + ':' + defpath
+    assert defpath.startswith(':')
+    os.environ['PATH'] = dirname(executable) + defpath
     yield
     os.environ.clear()
     os.environ.update(orig_environ)
 
 
-@pytest.fixture(autouse=True)
+@pytest.yield_fixture
 def tmpdir(tmpdir):
     """override tmpdir to provide a $HOME and $TMPDIR"""
     home = tmpdir.ensure('home', dir=True)
     tmp = tmpdir.ensure('tmp', dir=True)
 
+    orig_environ = os.environ.copy()
     os.environ['HOME'] = str(home)
     os.environ['TMPDIR'] = str(tmp)
 
-    return tmpdir
+    yield tmpdir
+
+    os.environ.clear()
+    os.environ.update(orig_environ)
 
 
 @pytest.yield_fixture(scope='session')
-def prepare_pypi_server():
-    packages = 'build/packages'
-    subprocess.check_call(
-        (
+def pypi_packages(tmpdir_factory):
+    package_temp = tmpdir_factory.ensuretemp('venv-update-packages')
+    with TOP.as_cwd():
+        run(
             sys.executable,
             'tests/testing/make_sdists.py',
             'tests/testing/packages',
             '.',  # we need pip-faster to be installable too
-            packages,
-        ),
-        cwd=str(TOP),
-    )
+            str(package_temp),
+        )
 
-    port = reserve()
-
-    yield packages, port
+    yield package_temp
 
 
+@pytest.yield_fixture(scope='session')
+def pypi_port():
+    yield reserve()
+
+
+@contextmanager
 def start_pypi_server(packages, port, pypi_fallback):
     port = str(port)
     cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
-    cmd += (packages,)
+    cmd += (str(packages),)
     print(colorize(cmd))
     server = subprocess.Popen(cmd, close_fds=True, cwd=str(TOP))
 
@@ -108,16 +122,14 @@ def start_pypi_server(packages, port, pypi_fallback):
 
 
 @pytest.yield_fixture
-def pypi_server(prepare_pypi_server):
-    packages, port = prepare_pypi_server
-    for _ in start_pypi_server(packages, port, False):
+def pypi_server(pypi_packages, pypi_port):
+    with start_pypi_server(pypi_packages, pypi_port, False):
         yield
 
 
 @pytest.yield_fixture
-def pypi_server_with_fallback(prepare_pypi_server):
-    packages, port = prepare_pypi_server
-    for _ in start_pypi_server(packages, port, True):
+def pypi_server_with_fallback(pypi_packages, pypi_port):
+    with start_pypi_server(pypi_packages, pypi_port, True):
         yield
 
 

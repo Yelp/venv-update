@@ -14,9 +14,9 @@ from testing import venv_update
 def test_relocatable(tmpdir):
     tmpdir.chdir()
     requirements('')
-    venv_update('--python=python')  # this makes pypy work right. derp.
+    venv_update()
 
-    Path('virtualenv_run').rename('relocated')
+    Path('venv').rename('relocated')
 
     python = 'relocated/bin/python'
     assert Path(python).exists()

@@ -8,6 +8,7 @@ import pytest
 from py._path.local import LocalPath as Path
 
 from testing import enable_coverage
+from testing import OtherPython
 from testing import pip_freeze
 from testing import requirements
 from testing import run
@@ -37,9 +38,9 @@ def test_install_custom_path_and_requirements(tmpdir):
         'six==1.8.0\n',
         path='requirements2.txt',
     )
-    enable_coverage(tmpdir, 'venv')
-    venv_update('venv', 'requirements2.txt')
-    assert pip_freeze('venv') == '\n'.join((
+    enable_coverage(tmpdir, 'venv2')
+    venv_update('venv2', '--', '-r', 'requirements2.txt')
+    assert pip_freeze('venv2') == '\n'.join((
         'pip-faster==' + __version__,
         'six==1.8.0',
         'virtualenv==1.11.6',
@@ -53,21 +54,15 @@ def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
 
-    from subprocess import CalledProcessError
-    with pytest.raises(CalledProcessError) as excinfo:
-        # should show virtualenv version, then crash
-        venv_update('--version')
+    # should show virtualenv version, successfully
+    out, err = venv_update('--version')
+    assert err == ''
 
-    assert excinfo.value.returncode == 1
-    out, err = excinfo.value.result
-    err = strip_coverage_warnings(err)
-    lasterr = err.rsplit('\n', 2)[-2]
-    assert lasterr.startswith('virtualenv executable not found: /'), err
-    assert lasterr.endswith('/virtualenv_run/bin/python'), err
-
-    lines = [uncolor(line) for line in out.split('\n')]
-    assert len(lines) == 3, lines
-    assert lines[0].endswith('/virtualenv virtualenv_run --version'), repr(lines[0])
+    out = uncolor(out)
+    lines = out.splitlines()
+    # 13:py27 14:py35 15:pypy
+    assert len(lines) in (13, 14, 15), repr(lines)
+    assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -76,9 +71,9 @@ def test_arguments_system_packages(tmpdir):
     tmpdir.chdir()
     requirements('')
 
-    venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
+    venv_update('--system-site-packages')
 
-    out, err = run('virtualenv_run/bin/python', '-c', '''\
+    out, err = run('venv/bin/python', '-c', '''\
 import sys
 for p in sys.path:
     if p.startswith(sys.real_prefix) and p.endswith("-packages"):
@@ -112,10 +107,10 @@ def test_scripts_left_behind(tmpdir):
     venv_update()
 
     # an arbitrary small package with a script: pep8
-    script_path = Path('virtualenv_run/bin/pep8')
+    script_path = Path('venv/bin/pep8')
     assert not script_path.exists()
 
-    run('virtualenv_run/bin/pip', 'install', 'pep8')
+    run('venv/bin/pip', 'install', 'pep8')
     assert script_path.exists()
 
     venv_update()
@@ -125,26 +120,27 @@ def test_scripts_left_behind(tmpdir):
 def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
+    args = ['--'] + sum([['-r', req] for req in reqs], [])
 
-    venv_update('--python=python', 'virtualenv_run', *reqs)
+    venv_update(*args)
 
-    assert firstreq.mtime() < Path('virtualenv_run').mtime()
+    assert firstreq.mtime() < Path('venv').mtime()
 
     # garbage, to cause a failure
     lastreq.write('-w wat')
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
-        venv_update('virtualenv_run', *reqs)
+        venv_update(*args)
 
     assert excinfo.value.returncode == 2
-    assert firstreq.mtime() > Path('virtualenv_run').mtime()
+    assert firstreq.mtime() > Path('venv').mtime()
 
     # blank requirements should succeed
     lastreq.write('')
 
-    venv_update('virtualenv_run', *reqs)
-    assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
+    venv_update(*args)
+    assert firstreq.mtime() < Path('venv').mtime()
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -181,17 +177,19 @@ def pipe_output(read, write):
     vupdate.wait()
 
     result = result.decode('US-ASCII')
+    print(result)
     uncolored = uncolor(result)
     assert uncolored.startswith('> ')
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
-    assert uncolored.endswith('''\
-/virtualenv virtualenv_run --version
-1.11.6
+    assert uncolored.endswith('''
+> virtualenv --version
+13.1.2
 ''')
 
     return result, uncolored
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_colored_tty(tmpdir):
     tmpdir.chdir()
 
@@ -206,6 +204,7 @@ def test_colored_tty(tmpdir):
     assert out != uncolored
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_uncolored_pipe(tmpdir):
     tmpdir.chdir()
 
@@ -217,6 +216,7 @@ def test_uncolored_pipe(tmpdir):
     assert out == uncolored
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_args_backward(tmpdir):
     tmpdir.chdir()
     requirements('')
@@ -242,14 +242,17 @@ def test_args_backward(tmpdir):
 def test_wrong_wheel(tmpdir):
     tmpdir.chdir()
 
-    requirements('')
-    venv_update('venv1', 'requirements.txt', '-ppython2.7')
+    requirements('pure_python_package==0.1.0')
+    venv_update('venv1')
     # A different python
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
-    ret2out, _ = venv_update('venv2', 'requirements.txt', '-ppython3.3')
+    other_python = OtherPython()
+    ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter)
 
-    assert 'py2-none-any' not in ret2out
+    assert '''
+  SLOW!! no wheel found for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+''' in ret2out
 
 
 def flake8_older():
@@ -343,11 +346,12 @@ pure_python_package
 
     out = uncolor(out)
     assert ' '.join((
-        '\n> virtualenv_run/bin/python -m pip.__main__ install',
-        '--find-links=file://%s/home/.pip/wheelhouse' % tmpdir,
+        '\n> venv/bin/python -m pip.__main__ install',
+        '--find-links=file://%s/home/.cache/pip-faster/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out
-    assert '\nSuccessfully installed pip-faster pure-python-package ' in out
+    expected = ('\nSuccessfully installed pip-1.5.6 pip-faster-%s pure-python-package-0.2.0 virtualenv-1.11.6' % __version__)
+    assert expected in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
