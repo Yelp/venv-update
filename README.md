@@ -1,7 +1,4 @@
-# pip-faster [![Build
-Status](https://travis-ci.org/Yelp/pip-faster.svg?branch=master)](https://travis-ci.org/Yelp/pip-faster)
-[![Coverage
-Status](https://img.shields.io/coveralls/Yelp/pip-faster.svg?branch=master)](https://coveralls.io/r/Yelp/pip-faster)
+# pip-faster [![Build Status](https://travis-ci.org/Yelp/pip-faster.svg?branch=master)](https://travis-ci.org/Yelp/pip-faster) [![Coverage Status](https://img.shields.io/coveralls/Yelp/pip-faster.svg?branch=master)](https://coveralls.io/r/Yelp/pip-faster)
 
 `venv-update` is a tool for keeping a virtualenv up-to-date with
 version-controlled requirement lists.  It's optimized for big projects
