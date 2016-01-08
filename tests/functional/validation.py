@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import pytest
 
 from testing import enable_coverage
+from testing import OtherPython
 from testing import Path
 from testing import pip_freeze
 from testing import requirements
@@ -25,9 +26,13 @@ def assert_c_extension_runs():
 
 
 def assert_python_version(version):
-    out, err = run('sh', '-c', '. venv/bin/activate && python --version')
-    assert out == ''
-    assert err.startswith(version)
+    outputs = run('sh', '-c', '. venv/bin/activate && python -c "import sys; print(sys.version)"')
+
+    # older versions of python output on stderr, newer on stdout, but we dont care too much which
+    assert '' in outputs
+    actual_version = ''.join(outputs)
+    assert actual_version.startswith(version)
+    return actual_version
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -39,17 +44,20 @@ def test_python_versions(tmpdir):
         enable_coverage(tmpdir, options=options)
         venv_update(*options)
 
-    run_with_coverage('--python=python2.6')
+    other_python = OtherPython()
+    run_with_coverage('--python=' + other_python.interpreter)
     assert_c_extension_runs()
-    assert_python_version('Python 2.6')
+    assert_python_version(other_python.version_prefix)
 
-    run_with_coverage('--python=python2.7')
+    from sys import executable as python
+    run_with_coverage('--python=' + python)
     assert_c_extension_runs()
-    assert_python_version('Python 2.7')
+    from sys import version
+    assert_python_version(version)
 
-    run_with_coverage('--python=python2.6')
+    run_with_coverage('--python=' + other_python.interpreter)
     assert_c_extension_runs()
-    assert_python_version('Python 2.6')
+    assert_python_version(other_python.version_prefix)
 
 
 @pytest.mark.usefixtures('pypi_server')

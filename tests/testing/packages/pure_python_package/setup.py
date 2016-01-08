@@ -17,9 +17,5 @@ setup(
             'pure-python-script = pure_python_package:main',
         ],
     },
-    options={
-        'bdist_wheel': {
-            'universal': 1,
-        }
-    },
+    # NOT a universal wheel
 )  # pylint:disable=duplicate-code

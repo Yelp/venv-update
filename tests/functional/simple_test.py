@@ -8,6 +8,7 @@ import pytest
 from py._path.local import LocalPath as Path
 
 from testing import enable_coverage
+from testing import OtherPython
 from testing import pip_freeze
 from testing import requirements
 from testing import run
@@ -242,14 +243,17 @@ def test_args_backward(tmpdir):
 def test_wrong_wheel(tmpdir):
     tmpdir.chdir()
 
-    requirements('')
+    requirements('pure_python_package==0.1.0')
     venv_update('venv1', 'requirements.txt', '-ppython2.7')
     # A different python
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
-    ret2out, _ = venv_update('venv2', 'requirements.txt', '-ppython3.3')
+    other_python = OtherPython()
+    ret2out, _ = venv_update('venv2', 'requirements.txt', '-p' + other_python.interpreter)
 
-    assert 'py2-none-any' not in ret2out
+    assert '''
+  SLOW!! no wheel found for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+''' in ret2out
 
 
 def flake8_older():
