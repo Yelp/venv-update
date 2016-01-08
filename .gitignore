@@ -2,7 +2,6 @@
 /*.egg-info/
 /build/
 /.coverage
-/.coverage.*
 /.idea
 /.project
 /.pydevproject

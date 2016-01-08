@@ -159,8 +159,9 @@ def wheelable(req):
         # let's not wheel things that are already installed
         not req.satisfied_by and
         # we don't want to permanently cache something we'll edit
-        # (people expect `pip install .` to work without bumping the version)
-        not (is_local_directory(req.url) or req.editable)
+        not req.editable and
+        # people expect `pip install .` to work without bumping the version
+        not is_local_directory(req.url)
     )
 
 

@@ -67,7 +67,7 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
-def it_installs_stuff_with_dash_e(tmpdir):
+def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     tmpdir.chdir()
 
     venv = enable_coverage(tmpdir, 'venv')
@@ -84,6 +84,12 @@ def it_installs_stuff_with_dash_e(tmpdir):
     assert 'dependant-package==1' in frozen_requirements
     assert 'implicit-dependency==1' in frozen_requirements
     assert 'pure-python-package==0.2.0' in frozen_requirements
+
+    # we shouldn't wheel things installed editable
+    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
+    assert wheelhouse.join('implicit_dependency-1-py2.py3-none-any.whl').exists()
+    assert wheelhouse.join('pure_python_package-0.2.0-py2.py3-none-any.whl').exists()
+    assert not wheelhouse.join('dependant_package-1-py2.py3-none-any.whl').exists()
 
 
 @pytest.mark.usefixtures('pypi_server')
