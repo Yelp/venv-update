@@ -2,7 +2,6 @@
 set -eu
 export TOP=$(readlink -f ${TOP:-.})
 export SITEPACKAGES=${SITEPACKAGES:-.}
-export PROJECT=venv_update
 NCPU=$(getconf _NPROCESSORS_CONF)
 
 if python -c 'import platform; exit(not(platform.python_implementation() == "PyPy"))'; then
@@ -33,7 +32,7 @@ trap fail ERR
 
 if [ -z "$*" ]; then
     # default arguments
-    set $TOP/tests $SITEPACKAGES/${PROJECT}.py
+    set $TOP/tests $SITEPACKAGES/{venv_update,pip_faster}.py
 fi
 
 set -x
