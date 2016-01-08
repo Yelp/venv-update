@@ -108,7 +108,8 @@ def pip_freeze(venv='venv'):
 
 def enable_coverage(tmpdir, venv='venv', options=()):
     venv = tmpdir.join(venv)
-    venv_update(str(venv), str(TOP.join('requirements.d/coverage.txt')), *options)
+    options += ('--', '-r', str(TOP.join('requirements.d/coverage.txt')))
+    venv_update(str(venv), *options)
 
     return venv
 

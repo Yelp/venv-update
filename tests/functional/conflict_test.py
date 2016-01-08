@@ -143,9 +143,6 @@ Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_v
 Storing debug log for failure in {1}/home/.pip/pip.log
 
 Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
-Waiting for all subprocesses to finish...
-DONE
-
 '''.format(get_python_version(), tmpdir)
         ) == rest
 

@@ -11,8 +11,10 @@ from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import TOP
+from testing import uncolor
 from testing import venv_update
 from testing import venv_update_symlink_pwd
+from venv_update import __version__
 
 
 def assert_c_extension_runs():
@@ -111,9 +113,10 @@ def test_update_while_active(tmpdir):
 
     venv_update_symlink_pwd()
     out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py')
+    out = uncolor(out)
 
     assert err == ''
-    assert out.startswith('Keeping virtualenv from previous run.\n')
+    assert out.startswith('> virtualenv\nKeeping valid virtualenv from previous run.\n')
     assert 'project-with-c' in pip_freeze()
 
 
@@ -132,5 +135,37 @@ def test_update_invalidated_while_active(tmpdir):
     out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py --system-site-packages')
 
     assert err == ''
-    assert out.startswith('Removing invalidated virtualenv.\n')
+    out = uncolor(out)
+    assert out.startswith('''\
+> virtualenv --system-site-packages
+Removing invalidated virtualenv.
+''')
     assert 'project-with-c' in pip_freeze()
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_gives_the_same_python_version_as_we_started_with(tmpdir):
+    other_python = OtherPython()
+    with tmpdir.as_cwd():
+        requirements('')
+
+        # first simulate some unrelated use of venv-update
+        # this guards against statefulness in the venv-update scratch dir
+        venv_update('unrelated_venv', '--', '--version')
+
+        run('virtualenv', '--python', other_python.interpreter, 'venv')
+        initial_version = assert_python_version(other_python.version_prefix)
+
+        venv_update_symlink_pwd()
+        out, err = run('./venv/bin/python', 'venv_update.py')
+
+        assert err == ''
+        out = uncolor(out)
+        assert out.startswith('''\
+> virtualenv
+Keeping valid virtualenv from previous run.
+> venv/bin/python -m pip.__main__ install --find-links=file://%s/home/.cache/pip-faster/wheelhouse pip-faster==%s
+''' % (tmpdir, __version__))
+
+        final_version = assert_python_version(other_python.version_prefix)
+        assert final_version == initial_version

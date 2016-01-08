@@ -39,7 +39,7 @@ def test_install_custom_path_and_requirements(tmpdir):
         path='requirements2.txt',
     )
     enable_coverage(tmpdir, 'venv2')
-    venv_update('venv2', 'requirements2.txt')
+    venv_update('venv2', '--', '-r', 'requirements2.txt')
     assert pip_freeze('venv2') == '\n'.join((
         'pip-faster==' + __version__,
         'six==1.8.0',
@@ -54,21 +54,15 @@ def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
 
-    from subprocess import CalledProcessError
-    with pytest.raises(CalledProcessError) as excinfo:
-        # should show virtualenv version, then crash
-        venv_update('--version')
+    # should show virtualenv version, successfully
+    out, err = venv_update('--version')
+    assert err == ''
 
-    assert excinfo.value.returncode == 1
-    out, err = excinfo.value.result
-    err = strip_coverage_warnings(err)
-    lasterr = err.rsplit('\n', 2)[-2]
-    assert lasterr.startswith('virtualenv executable not found: /'), err
-    assert lasterr.endswith('/venv/bin/python'), err
-
-    lines = [uncolor(line) for line in out.split('\n')]
-    assert len(lines) == 3, lines
-    assert lines[0].endswith('/virtualenv venv --version'), repr(lines[0])
+    out = uncolor(out)
+    lines = out.splitlines()
+    # 13:py27 14:py35 15:pypy
+    assert len(lines) in (13, 14, 15), repr(lines)
+    assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -77,7 +71,7 @@ def test_arguments_system_packages(tmpdir):
     tmpdir.chdir()
     requirements('')
 
-    venv_update('--system-site-packages', 'venv', 'requirements.txt')
+    venv_update('--system-site-packages')
 
     out, err = run('venv/bin/python', '-c', '''\
 import sys
@@ -126,8 +120,9 @@ def test_scripts_left_behind(tmpdir):
 def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
+    args = ['--'] + sum([['-r', req] for req in reqs], [])
 
-    venv_update('venv', *reqs)
+    venv_update(*args)
 
     assert firstreq.mtime() < Path('venv').mtime()
 
@@ -136,7 +131,7 @@ def assert_timestamps(*reqs):
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
-        venv_update('venv', *reqs)
+        venv_update(*args)
 
     assert excinfo.value.returncode == 2
     assert firstreq.mtime() > Path('venv').mtime()
@@ -144,8 +139,8 @@ def assert_timestamps(*reqs):
     # blank requirements should succeed
     lastreq.write('')
 
-    venv_update('venv', *reqs)
-    assert Path(reqs[0]).mtime() < Path('venv').mtime()
+    venv_update(*args)
+    assert firstreq.mtime() < Path('venv').mtime()
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -182,17 +177,19 @@ def pipe_output(read, write):
     vupdate.wait()
 
     result = result.decode('US-ASCII')
+    print(result)
     uncolored = uncolor(result)
     assert uncolored.startswith('> ')
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
-    assert uncolored.endswith('''\
-/virtualenv venv --version
-1.11.6
+    assert uncolored.endswith('''
+> virtualenv --version
+13.1.2
 ''')
 
     return result, uncolored
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_colored_tty(tmpdir):
     tmpdir.chdir()
 
@@ -207,6 +204,7 @@ def test_colored_tty(tmpdir):
     assert out != uncolored
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_uncolored_pipe(tmpdir):
     tmpdir.chdir()
 
@@ -218,6 +216,7 @@ def test_uncolored_pipe(tmpdir):
     assert out == uncolored
 
 
+@pytest.mark.usefixtures('pypi_server')
 def test_args_backward(tmpdir):
     tmpdir.chdir()
     requirements('')
@@ -244,12 +243,12 @@ def test_wrong_wheel(tmpdir):
     tmpdir.chdir()
 
     requirements('pure_python_package==0.1.0')
-    venv_update('venv1', 'requirements.txt', '-ppython2.7')
+    venv_update('venv1')
     # A different python
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
     other_python = OtherPython()
-    ret2out, _ = venv_update('venv2', 'requirements.txt', '-p' + other_python.interpreter)
+    ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter)
 
     assert '''
   SLOW!! no wheel found for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
@@ -351,7 +350,8 @@ pure_python_package
         '--find-links=file://%s/home/.cache/pip-faster/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out
-    assert '\nSuccessfully installed pip-faster pure-python-package wheel virtualenv\n' in out
+    expected = ('\nSuccessfully installed pip-1.5.6 pip-faster-%s pure-python-package-0.2.0 virtualenv-1.11.6' % __version__)
+    assert expected in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
