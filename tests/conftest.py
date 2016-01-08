@@ -22,6 +22,11 @@ ENV_WHITELIST = (
     'COVERAGE_PROCESS_START',
     # used in the configuration of coverage
     'TOP',
+    # let's not fill up the root partition, please
+    'TMPDIR',
+    # these help my debugger not freak out
+    'HOME',
+    'TERM',
 )
 
 
@@ -40,22 +45,27 @@ def fixed_environment_variables():
     from sys import executable
     from os import defpath
     from os.path import dirname
-    os.environ['PATH'] = dirname(executable) + ':' + defpath
+    assert defpath.startswith(':')
+    os.environ['PATH'] = dirname(executable) + defpath
     yield
     os.environ.clear()
     os.environ.update(orig_environ)
 
 
-@pytest.fixture(autouse=True)
+@pytest.yield_fixture
 def tmpdir(tmpdir):
     """override tmpdir to provide a $HOME and $TMPDIR"""
     home = tmpdir.ensure('home', dir=True)
     tmp = tmpdir.ensure('tmp', dir=True)
 
+    orig_environ = os.environ.copy()
     os.environ['HOME'] = str(home)
     os.environ['TMPDIR'] = str(tmp)
 
-    return tmpdir
+    yield tmpdir
+
+    os.environ.clear()
+    os.environ.update(orig_environ)
 
 
 @pytest.yield_fixture(scope='session')
