@@ -87,6 +87,33 @@ def it_installs_stuff_with_dash_e(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
+def it_doesnt_wheel_local_dirs(tmpdir):
+    tmpdir.chdir()
+
+    venv = enable_coverage(tmpdir, 'venv')
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster==' + __version__)
+
+    run(
+        venv.join('bin/pip-faster').strpath,
+        'install',
+        TOP.join('tests/testing/packages/dependant_package').strpath,
+    )
+
+    frozen_requirements = pip_freeze(str(venv)).split('\n')
+
+    assert 'dependant-package==1' in frozen_requirements
+    assert 'implicit-dependency==1' in frozen_requirements
+    assert 'pure-python-package==0.2.0' in frozen_requirements
+
+    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
+    assert wheelhouse.join('implicit_dependency-1-py2.py3-none-any.whl').exists()
+    assert wheelhouse.join('pure_python_package-0.2.0-py2.py3-none-any.whl').exists()
+    assert not wheelhouse.join('dependant_package-1-py2.py3-none-any.whl').exists()
+
+
+@pytest.mark.usefixtures('pypi_server')
 def it_can_handle_requirements_already_met(tmpdir):
     tmpdir.chdir()
 
