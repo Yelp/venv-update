@@ -86,7 +86,8 @@ def strip_coverage_warnings(stderr):
 def uncolor(text):
     # the colored_tty, uncolored_pipe tests cover this pretty well.
     from re import sub
-    return sub('\033\\[[^A-z]*[A-z]', '', text)
+    text = sub('\033\\[[^A-z]*[A-z]', '', text)
+    return sub('[^\n\r]*\r', '', text)
 
 
 def pip_freeze(venv='venv'):

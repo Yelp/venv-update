@@ -351,7 +351,7 @@ pure_python_package
         '--find-links=file://%s/home/.cache/pip-faster/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out
-    assert '\nSuccessfully installed pip-faster pure-python-package ' in out
+    assert '\nSuccessfully installed pip-faster pure-python-package wheel virtualenv\n' in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((

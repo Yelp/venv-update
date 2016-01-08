@@ -103,7 +103,7 @@ def test_cached_clean_install_faster(tmpdir, pypi_packages):
                 'argparse',
                 'pip',
                 'pip_faster',
-                'virtualenv',
+                'virtualenv-1.11.6',
                 'wheel',
         ):
             pattern = str(pypi_packages.join(package + '-*.whl'))

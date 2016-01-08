@@ -26,7 +26,7 @@ from __future__ import unicode_literals
 from os.path import exists
 
 VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
-__version__ = '1.0rc1'
+__version__ = '1.0rc2.dev3'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
@@ -246,6 +246,11 @@ def venv_update(venv_path, reqs, venv_args):
         args = ('-r', VENV_UPDATE_REQS_OVERRIDE)
     else:
         args = ('pip-faster==' + __version__,)
+
+    # disable a useless warning
+    # FIXME: ensure a "true SSLContext" is available
+    from os import environ
+    environ['PIP_DISABLE_PIP_VERSION_CHECK'] = '1'
 
     # TODO: short-circuit when pip-faster is already there.
     run(pip_install + args)

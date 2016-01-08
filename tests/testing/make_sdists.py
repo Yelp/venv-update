@@ -129,6 +129,7 @@ def download_sdist(source, destination):
 
 def make_sdists(sources, destination):
     build_all(sources, destination)
+    wheel('virtualenv', destination)
     wheel('argparse', destination)
     wheel('coverage-enable-subprocess', destination)
     download_sdist('coverage', destination)
