@@ -16,17 +16,17 @@ scratch, but *much* more quickly.
 
 Because this tool is meant to be the entry-point for handling requirements and
 dependencies, it's not meant to be installed via pip usually. The design allows
-the single venv_update.py to be vendored (directly checked in) to your project,
-and run without any dependencies beyond the python standard library.
+the single `venv_update.py` to be vendored (directly checked in) to your
+project, and run without any dependencies beyond the python standard library.
 
 
 ## Usage
 
 
-Simply running `venv_update.py` will create a virtualenv named `virtualenv_run`
-in the current directory, using `requirements.txt` in the current directory.
-These are default values that can be overridden by providing arguments. Pass
-`--help` for more detail.
+Simply running `venv_update.py` will create a virtualenv named `venv` in the
+current directory, using `requirements.txt` in the current directory. These are
+default values that can be overridden by providing arguments. Pass `--help` for
+more detail.
 
 
 ## Features:

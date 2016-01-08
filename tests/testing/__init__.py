@@ -56,7 +56,7 @@ def venv_update_symlink_pwd():
     local_vu.mksymlinkto(venv_update_path)
 
 
-def venv_update_script(pyscript, venv='virtualenv_run'):
+def venv_update_script(pyscript, venv='venv'):
     """Run a python script that imports venv_update"""
 
     # symlink so that we get coverage, where possible
@@ -89,7 +89,7 @@ def uncolor(text):
     return sub('\033\\[[^A-z]*[A-z]', '', text)
 
 
-def pip_freeze(venv='virtualenv_run'):
+def pip_freeze(venv='venv'):
     from os.path import join
     out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local')
 
@@ -105,7 +105,7 @@ def pip_freeze(venv='virtualenv_run'):
     return out
 
 
-def enable_coverage(tmpdir, venv='virtualenv_run', options=()):
+def enable_coverage(tmpdir, venv='venv', options=()):
     venv = tmpdir.join(venv)
     venv_update(str(venv), str(TOP.join('requirements.d/coverage.txt')), *options)
 

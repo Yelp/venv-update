@@ -37,9 +37,9 @@ def test_install_custom_path_and_requirements(tmpdir):
         'six==1.8.0\n',
         path='requirements2.txt',
     )
-    enable_coverage(tmpdir, 'venv')
-    venv_update('venv', 'requirements2.txt')
-    assert pip_freeze('venv') == '\n'.join((
+    enable_coverage(tmpdir, 'venv2')
+    venv_update('venv2', 'requirements2.txt')
+    assert pip_freeze('venv2') == '\n'.join((
         'pip-faster==' + __version__,
         'six==1.8.0',
         'virtualenv==1.11.6',
@@ -63,11 +63,11 @@ def test_arguments_version(tmpdir):
     err = strip_coverage_warnings(err)
     lasterr = err.rsplit('\n', 2)[-2]
     assert lasterr.startswith('virtualenv executable not found: /'), err
-    assert lasterr.endswith('/virtualenv_run/bin/python'), err
+    assert lasterr.endswith('/venv/bin/python'), err
 
     lines = [uncolor(line) for line in out.split('\n')]
     assert len(lines) == 3, lines
-    assert lines[0].endswith('/virtualenv virtualenv_run --version'), repr(lines[0])
+    assert lines[0].endswith('/virtualenv venv --version'), repr(lines[0])
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -76,9 +76,9 @@ def test_arguments_system_packages(tmpdir):
     tmpdir.chdir()
     requirements('')
 
-    venv_update('--system-site-packages', 'virtualenv_run', 'requirements.txt')
+    venv_update('--system-site-packages', 'venv', 'requirements.txt')
 
-    out, err = run('virtualenv_run/bin/python', '-c', '''\
+    out, err = run('venv/bin/python', '-c', '''\
 import sys
 for p in sys.path:
     if p.startswith(sys.real_prefix) and p.endswith("-packages"):
@@ -112,10 +112,10 @@ def test_scripts_left_behind(tmpdir):
     venv_update()
 
     # an arbitrary small package with a script: pep8
-    script_path = Path('virtualenv_run/bin/pep8')
+    script_path = Path('venv/bin/pep8')
     assert not script_path.exists()
 
-    run('virtualenv_run/bin/pip', 'install', 'pep8')
+    run('venv/bin/pip', 'install', 'pep8')
     assert script_path.exists()
 
     venv_update()
@@ -126,25 +126,25 @@ def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
 
-    venv_update('--python=python', 'virtualenv_run', *reqs)
+    venv_update('--python=python', 'venv', *reqs)
 
-    assert firstreq.mtime() < Path('virtualenv_run').mtime()
+    assert firstreq.mtime() < Path('venv').mtime()
 
     # garbage, to cause a failure
     lastreq.write('-w wat')
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
-        venv_update('virtualenv_run', *reqs)
+        venv_update('venv', *reqs)
 
     assert excinfo.value.returncode == 2
-    assert firstreq.mtime() > Path('virtualenv_run').mtime()
+    assert firstreq.mtime() > Path('venv').mtime()
 
     # blank requirements should succeed
     lastreq.write('')
 
-    venv_update('virtualenv_run', *reqs)
-    assert Path(reqs[0]).mtime() < Path('virtualenv_run').mtime()
+    venv_update('venv', *reqs)
+    assert Path(reqs[0]).mtime() < Path('venv').mtime()
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -185,7 +185,7 @@ def pipe_output(read, write):
     assert uncolored.startswith('> ')
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
     assert uncolored.endswith('''\
-/virtualenv virtualenv_run --version
+/virtualenv venv --version
 1.11.6
 ''')
 
@@ -343,7 +343,7 @@ pure_python_package
 
     out = uncolor(out)
     assert ' '.join((
-        '\n> virtualenv_run/bin/python -m pip.__main__ install',
+        '\n> venv/bin/python -m pip.__main__ install',
         '--find-links=file://%s/home/.pip/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out

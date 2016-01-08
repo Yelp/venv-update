@@ -83,7 +83,7 @@ def test_dotpy(filename, expected):
 @pytest.mark.parametrize('args,expected', [
     (
         (),
-        ('virtualenv_run', ('requirements.txt',), ()),
+        ('venv', ('requirements.txt',), ()),
     ), (
         ('a',),
         ('a', ('requirements.txt',), ())

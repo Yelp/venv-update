@@ -11,7 +11,7 @@ To set the index server, export a PIP_INDEX_URL variable.
     See also: https://pip.readthedocs.org/en/stable/user_guide/#environment-variables
 
 positional arguments:
-  virtualenv_dir  Destination virtualenv directory (default: virtualenv_run)
+  virtualenv_dir  Destination virtualenv directory (default: venv)
   requirements    Requirements files. (default: requirements.txt)
 
 optional arguments:
@@ -51,7 +51,7 @@ def parseargs(args):
             requirements.append(arg)
 
     if not virtualenv_dir:
-        virtualenv_dir = 'virtualenv_run'
+        virtualenv_dir = 'venv'
     if not requirements:
         requirements = ['requirements.txt']
 

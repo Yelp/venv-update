@@ -89,7 +89,7 @@ def test_noop_install_faster(tmpdir):
 @pytest.mark.usefixtures('pypi_server_with_fallback')
 def test_cached_clean_install_faster(tmpdir):
     def clean():
-        venv = tmpdir.join('virtualenv_run')
+        venv = tmpdir.join('venv')
         assert venv.isdir()
         venv.remove()
         assert not venv.exists()
