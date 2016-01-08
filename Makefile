@@ -14,11 +14,7 @@ tox:
 	tox -e lint,test
 
 venv: setup.py requirements.txt requirements.d/* Makefile
-	rm -rf venv
-	virtualenv --prompt='(pip-faster)' --python=python2.7 venv
-	rm -rf venv/local
-	# TODO use pip-faster
-	./venv/bin/pip install -r requirements.d/dev.txt
+	./venv_update.py --python=python2.7
 	./venv/bin/pre-commit install
 
 .PHONY: clean
