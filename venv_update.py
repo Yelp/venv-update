@@ -43,10 +43,12 @@ def parseargs(args):
 
 
 def timid_relpath(arg):
-    from os.path import isabs, relpath
+    """convert an argument to a relative path, carefully"""
+    # TODO-TEST: unit tests
+    from os.path import isabs, relpath, sep
     if isabs(arg):
         result = relpath(arg)
-        if len(result) < len(arg):
+        if result.count(sep) + 1 < arg.count(sep):
             return result
 
     return arg
