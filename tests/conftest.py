@@ -7,6 +7,7 @@ import socket
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from errno import ECONNREFUSED
 
 import pytest
@@ -89,6 +90,7 @@ def pypi_port():
     yield reserve()
 
 
+@contextmanager
 def start_pypi_server(packages, port, pypi_fallback):
     port = str(port)
     cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
@@ -121,13 +123,13 @@ def start_pypi_server(packages, port, pypi_fallback):
 
 @pytest.yield_fixture
 def pypi_server(pypi_packages, pypi_port):
-    for _ in start_pypi_server(pypi_packages, pypi_port, False):
+    with start_pypi_server(pypi_packages, pypi_port, False):
         yield
 
 
 @pytest.yield_fixture
 def pypi_server_with_fallback(pypi_packages, pypi_port):
-    for _ in start_pypi_server(pypi_packages, pypi_port, True):
+    with start_pypi_server(pypi_packages, pypi_port, True):
         yield
 
 

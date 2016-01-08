@@ -18,7 +18,7 @@ addons:
         sources:
             - deadsnakes
         packages:
-            - python2.6-dev
+            - python2.7-dev
             - python3.4-dev
 
 matrix:

@@ -123,5 +123,5 @@ class OtherPython(object):
             self.interpreter = 'python3.4'
             self.version_prefix = '3.4.'
         else:
-            self.interpreter = 'python2.6'
-            self.version_prefix = '2.6.'
+            self.interpreter = 'python2.7'
+            self.version_prefix = '2.7.'
