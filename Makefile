@@ -2,7 +2,7 @@
 all: lint test
 
 .PHONY: lint
-lint:
+lint: venv
 	pre-commit run --all-files
 
 .PHONY: test tests

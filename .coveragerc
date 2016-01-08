@@ -11,6 +11,8 @@ data_file = $TOP/.coverage
 exclude_lines =
     # Have to re-enable the standard pragma
     \#.*:pragma:nocover:
+    \#.*never returns
+    \#.*doesn't return
 
     # Don't complain if tests don't hit defensive assertion code:
     ^\s*raise AssertionError\b
@@ -22,6 +24,7 @@ exclude_lines =
 
     # if main is covered, we're good:
     ^\s*exit\(main\(\)\)$
+
 partial_branches =
     \#.*:pragma:nobranch:
 show_missing = True
