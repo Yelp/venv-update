@@ -348,7 +348,7 @@ pure_python_package
     out = uncolor(out)
     assert ' '.join((
         '\n> venv/bin/python -m pip.__main__ install',
-        '--find-links=file://%s/home/.pip/wheelhouse' % tmpdir,
+        '--find-links=file://%s/home/.cache/pip-faster/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out
     assert '\nSuccessfully installed pip-faster pure-python-package ' in out

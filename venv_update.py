@@ -203,6 +203,28 @@ def venv_python(venv_path):
     return venv_executable(venv_path, 'python')
 
 
+def user_cache_dir():
+    # stolen from pip.utils.appdirs.user_cache_dir
+    from os import getenv
+    from os.path import expanduser
+    return getenv('XDG_CACHE_HOME', expanduser('~/.cache'))
+
+
+class CacheOpts(object):
+
+    def __init__(self):
+        # We put the cache in the directory that pip already uses.
+        # This has better security characteristics than a machine-wide cache, and is a
+        #   pattern people can use for open-source projects
+        self.pipdir = user_cache_dir() + '/pip-faster'
+        # We could combine these caches to one directory, but pip would search everything twice, going slower.
+        self.wheelhouse = self.pipdir + '/wheelhouse'
+
+        self.pip_options = (
+            '--find-links=file://' + self.wheelhouse,
+        )
+
+
 def venv_update(venv_path, reqs, venv_args):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 
@@ -218,15 +240,7 @@ def venv_update(venv_path, reqs, venv_args):
     # ensure that a compatible version of pip is installed
     run((python, '-m', 'pip.__main__', '--version'))
 
-    from os import environ
-    pipdir = environ['HOME'] + '/.pip'
-    # We could combine these caches to one directory, but pip would search everything twice, going slower.
-    pip_wheels = pipdir + '/wheelhouse'
-
-    pip_install = (
-        python, '-m', 'pip.__main__', 'install',
-        '--find-links=file://' + pip_wheels,
-    )
+    pip_install = (python, '-m', 'pip.__main__', 'install') + CacheOpts().pip_options
 
     if exists(VENV_UPDATE_REQS_OVERRIDE):
         args = ('-r', VENV_UPDATE_REQS_OVERRIDE)

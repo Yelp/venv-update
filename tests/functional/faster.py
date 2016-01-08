@@ -112,7 +112,7 @@ def test_cached_clean_install_faster(tmpdir, pypi_packages):
             wheel = wheel[0]
 
             from shutil import copy
-            copy(wheel, str(tmpdir.join('home/.pip/wheelhouse')))
+            copy(wheel, str(tmpdir.join('home/.cache/pip-faster/wheelhouse')))
 
     # the slow-python-package takes five seconds to compile
     assert time_savings(tmpdir, between=clean) > 5
