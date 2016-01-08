@@ -80,10 +80,18 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
-
-    assert 'dependant-package==1' in frozen_requirements
-    assert 'implicit-dependency==1' in frozen_requirements
-    assert 'pure-python-package==0.2.0' in frozen_requirements
+    assert set(frozen_requirements) == set([
+        'coverage==4.0.3',
+        'coverage-enable-subprocess==0',
+        'dependant-package==1',
+        'implicit-dependency==1',
+        'many-versions-package==3',
+        'pip-faster==' + __version__,
+        'pure-python-package==0.2.0',
+        'virtualenv==1.11.6',
+        'wheel==0.26.0',
+        '',
+    ])
 
     # we shouldn't wheel things installed editable
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
@@ -112,10 +120,18 @@ def it_doesnt_wheel_local_dirs(tmpdir):
     )
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
-
-    assert 'dependant-package==1' in frozen_requirements
-    assert 'implicit-dependency==1' in frozen_requirements
-    assert 'pure-python-package==0.2.0' in frozen_requirements
+    assert set(frozen_requirements) == set([
+        'coverage==4.0.3',
+        'coverage-enable-subprocess==0',
+        'dependant-package==1',
+        'implicit-dependency==1',
+        'many-versions-package==3',
+        'pip-faster==' + __version__,
+        'pure-python-package==0.2.0',
+        'virtualenv==1.11.6',
+        'wheel==0.26.0',
+        '',
+    ])
 
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
     assert set(f.basename for f in wheelhouse.listdir()) == set([
