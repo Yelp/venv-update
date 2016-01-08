@@ -87,7 +87,7 @@ def test_noop_install_faster(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
-def test_cached_clean_install_faster(tmpdir):
+def test_cached_clean_install_faster(tmpdir, pypi_packages):
     def clean():
         venv = tmpdir.join('venv')
         assert venv.isdir()
@@ -106,7 +106,7 @@ def test_cached_clean_install_faster(tmpdir):
                 'virtualenv',
                 'wheel',
         ):
-            pattern = str(TOP.join('build/packages', package + '-*.whl'))
+            pattern = str(pypi_packages.join(package + '-*.whl'))
             wheel = glob(pattern)
             assert len(wheel) == 1, (pattern, wheel)
             wheel = wheel[0]

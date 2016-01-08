@@ -12,6 +12,7 @@ from errno import ECONNREFUSED
 import pytest
 import six
 
+from testing import run
 from testing import TOP
 from testing.ephemeral_port_reserve import reserve
 from venv_update import colorize
@@ -69,22 +70,23 @@ def tmpdir(tmpdir):
 
 
 @pytest.yield_fixture(scope='session')
-def prepare_pypi_server():
-    packages = 'build/packages'
-    subprocess.check_call(
-        (
+def pypi_packages(tmpdir_factory):
+    package_temp = tmpdir_factory.ensuretemp('venv-update-packages')
+    with TOP.as_cwd():
+        run(
             sys.executable,
             'tests/testing/make_sdists.py',
             'tests/testing/packages',
             '.',  # we need pip-faster to be installable too
-            packages,
-        ),
-        cwd=str(TOP),
-    )
+            str(package_temp),
+        )
 
-    port = reserve()
+    yield package_temp
 
-    yield packages, port
+
+@pytest.yield_fixture(scope='session')
+def pypi_port():
+    yield reserve()
 
 
 def start_pypi_server(packages, port, pypi_fallback):
@@ -92,7 +94,7 @@ def start_pypi_server(packages, port, pypi_fallback):
     cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
-    cmd += (packages,)
+    cmd += (str(packages),)
     print(colorize(cmd))
     server = subprocess.Popen(cmd, close_fds=True, cwd=str(TOP))
 
@@ -118,16 +120,14 @@ def start_pypi_server(packages, port, pypi_fallback):
 
 
 @pytest.yield_fixture
-def pypi_server(prepare_pypi_server):
-    packages, port = prepare_pypi_server
-    for _ in start_pypi_server(packages, port, False):
+def pypi_server(pypi_packages, pypi_port):
+    for _ in start_pypi_server(pypi_packages, pypi_port, False):
         yield
 
 
 @pytest.yield_fixture
-def pypi_server_with_fallback(prepare_pypi_server):
-    packages, port = prepare_pypi_server
-    for _ in start_pypi_server(packages, port, True):
+def pypi_server_with_fallback(pypi_packages, pypi_port):
+    for _ in start_pypi_server(pypi_packages, pypi_port, True):
         yield
 
 

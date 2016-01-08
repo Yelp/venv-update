@@ -1,36 +1,66 @@
 #!/usr/bin/env python
+"""
+Build a collection of packages, to be used as a pytest fixture.
+
+This script is reentrant IFF the destinations are not shared.
+"""
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from contextlib import contextmanager
 from sys import executable as python
 
 
-def info(*msg):
+@contextmanager
+def chdir(path):
+    from os import getcwd
+    if getcwd() == str(path):
+        yield
+        return
+
     from sys import stdout
-    stdout.write(' '.join(str(x) for x in msg))
-    stdout.write('\n')
-    stdout.flush()
+    stdout.write('cd %s\n' % path)
+    with path.as_cwd():
+        yield
 
 
-def random_string():
-    """return a short suffix that shouldn't collide with any subsequent calls"""
-    import os
-    import base64
+def run(cmd):
+    from sys import stdout
+    from subprocess import check_call
+    from pipes import quote
+    cmd_string = ' '.join(quote(arg) for arg in cmd)
+    stdout.write('%s\n' % (cmd_string))
+    check_call(cmd)
 
-    return '.'.join((
-        str(os.getpid()),
-        base64.urlsafe_b64encode(os.urandom(3)).decode('US-ASCII'),
-    ))
+
+def make_copy(setuppy, dst):
+    pkg = setuppy.dirpath().basename
+    copy = dst.join('src', pkg).ensure(dir=True)
+
+    # egg-info is also not reentrant-safe: it briefly blanks SOURCES.txt
+    with chdir(setuppy.dirpath()):
+        run((python, 'setup.py', '--quiet', 'egg_info', '--egg-base', str(copy)))
+
+    from glob import glob
+    sources = copy.join('*/SOURCES.txt')
+    sources, = glob(str(sources))
+    sources = open(sources).read().splitlines()
+
+    for source in sources:
+        source = setuppy.dirpath().join(source, abs=1)
+        dest = copy.join(source.relto(setuppy))
+        dest.dirpath().ensure(dir=True)
+        source.copy(dest)
+    return copy
 
 
 def sdist(setuppy, dst):
-    import subprocess
-    info('sdist', setuppy.dirpath().basename)
-    subprocess.check_call(
-        (python, 'setup.py', '--quiet', 'sdist', '--dist-dir', str(dst)),
-        cwd=setuppy.dirname,
-    )
+    copy = make_copy(setuppy, dst)
+    with chdir(copy):
+        run(
+            (python, 'setup.py', '--quiet', 'sdist', '--dist-dir', str(dst)),
+        )
 
 
 def build_one(src, dst):
@@ -39,7 +69,8 @@ def build_one(src, dst):
         sdist(setuppy, dst)
 
         if src.join('wheelme').exists():
-            wheel(src, dst)
+            copy = make_copy(setuppy, dst)
+            wheel(copy, dst)
 
         return True
 
@@ -53,16 +84,6 @@ def build_all(sources, dst):
                 continue
 
             build_one(source, dst)
-
-
-def flock(path):
-    import os
-    fd = os.open(path, os.O_CREAT)
-
-    import fcntl
-    fcntl.flock(fd, fcntl.LOCK_EX)  # exclusive
-
-    return fd
 
 
 class public_pypi_enabled(object):
@@ -79,56 +100,39 @@ class public_pypi_enabled(object):
 
 
 def wheel(src, dst):
-    import subprocess
-    info('wheel', src)
-
     with public_pypi_enabled():
-        subprocess.check_call(
-            (python, '-m', 'pip.__main__', 'wheel', '--quiet', '--wheel-dir', str(dst), str(src)),
-        )
+        build = dst.join('build')
+        run((
+            python, '-m', 'pip.__main__',
+            'wheel',
+            '--quiet',
+            '--build-dir', str(build),
+            '--wheel-dir', str(dst),
+            str(src)
+        ))
+        build.remove()  # pip1.5 wheel doesn't clean up its build =/
 
 
 def download_sdist(source, destination):
-    import subprocess
-    info('download sdist', source)
     with public_pypi_enabled():
-        subprocess.check_call((
+        run((
             python, '-m', 'pip.__main__',
             'install',
             '--quiet',
             '--no-deps',
             '--no-use-wheel',
-            '-d', str(destination),
+            '--build-dir', str(destination.join('build')),
+            '--download', str(destination),
             str(source),
         ))
 
 
 def make_sdists(sources, destination):
-    destination.dirpath().ensure(dir=True)
-
-    lock = destination.new(ext='lock')
-    flock(lock.strpath)
-
-    staging = destination.new(ext=random_string() + '.tmp')
-    staging.ensure(dir=True)
-
-    build_all(sources, staging)
-    wheel('argparse', staging)
-    wheel('coverage-enable-subprocess', staging)
-    download_sdist('coverage', staging)
-    download_sdist('coverage-enable-subprocess', staging)
-
-    if destination.islink():
-        old = destination.readlink()
-    else:
-        old = None
-
-    link = staging.new(ext='ln')
-    link.mksymlinkto(staging, absolute=False)
-    link.rename(destination)
-
-    if old is not None:
-        destination.dirpath(old).remove()
+    build_all(sources, destination)
+    wheel('argparse', destination)
+    wheel('coverage-enable-subprocess', destination)
+    download_sdist('coverage', destination)
+    download_sdist('coverage-enable-subprocess', destination)
 
 
 def main():
