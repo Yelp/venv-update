@@ -63,7 +63,7 @@ def colorize(cmd):
     from os import isatty
 
     if isatty(1):
-        template = '\033[01;36m>\033[m \033[01;32m{0}\033[m'
+        template = '\033[36m>\033[m \033[32m{0}\033[m'
     else:
         template = '> {0}'
 
