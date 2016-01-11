@@ -137,8 +137,6 @@ def test_editable_egg_conflict(tmpdir):
             '''\
 Cleaning up...
 Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py{0}.egg)'''
-            ''' <-> many-versions-package<2 (from conflicting-package==1 (from -r requirements.txt (line 1)))
-Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py{0}.egg)'''
             ''' <-> many-versions-package<2 (from conflicting-package==1->-r requirements.txt (line 1))
 Storing debug log for failure in {1}/home/.pip/pip.log
 
