@@ -56,6 +56,27 @@ def ignorecase_glob(glob):
     ])
 
 
+def is_local_directory(url):
+    """Test if a URL is a directory on this machine.
+
+    >>> is_local_directory('file:///tmp/')
+    True
+    >>> is_local_directory('file:///etc/passwd')
+    False
+    >>> is_local_directory('http://yelp.com/')
+    False
+    >>> is_local_directory('file:.')
+    True
+    """
+    if url is None:
+        return False
+    elif not url.startswith('file:'):
+        return False
+    else:
+        from os.path import isdir
+        return isdir(url[5:])
+
+
 def optimistic_wheel_search(req, find_links):
     from os.path import join, exists
 
@@ -130,6 +151,20 @@ class FasterPackageFinder(PackageFinder):
         # TODO: optimization -- do optimisitic wheel search even for unpinned reqs
 
 
+def wheelable(req):
+    """do we want to wheel that thing?"""
+    return (
+        # there's no point in wheeling something that's already wheeled
+        not req.is_wheel and
+        # let's not wheel things that are already installed
+        not req.satisfied_by and
+        # we don't want to permanently cache something we'll edit
+        not req.editable and
+        # people expect `pip install .` to work without bumping the version
+        not is_local_directory(req.url)
+    )
+
+
 class FasterWheelBuilder(WheelBuilder):
 
     def build(self):
@@ -142,11 +177,11 @@ class FasterWheelBuilder(WheelBuilder):
         buildset = [
             req for req in reqset
             # FASTER: don't wheel things that have no source available
-            if not req.is_wheel and req.source_dir
+            if wheelable(req)
         ]
 
         if not buildset:
-            return
+            return buildset
 
         # build the wheels
         logger.notify(
@@ -167,6 +202,8 @@ class FasterWheelBuilder(WheelBuilder):
             logger.notify('Successfully built %s' % ' '.join([req.name for req in build_success]))
         if build_failure:
             logger.notify('Failed to build %s' % ' '.join([req.name for req in build_failure]))
+
+        return buildset
 
 
 def pipfaster_packagefinder():
@@ -336,15 +373,8 @@ class FasterRequirementSet(RequirementSet):
             finder,
             wheel_dir=wheel_dir,
         )
-        # Ignore the result: a failed wheel will be
-        # installed from the sdist/vcs whatever.
         # TODO-TEST: we only incur the build cost once on uncached install
-        wb.build()
-
-        for req in self.requirements.values():
-            if req.is_wheel or req.source_dir is None or req.editable:
-                continue
-
+        for req in wb.build():
             link = optimistic_wheel_search(req, finder.find_links)
             if link is None:
                 logger.notify('SLOW!! No wheel found for %s', req)

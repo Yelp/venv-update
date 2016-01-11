@@ -67,7 +67,9 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
-def it_installs_stuff_with_dash_e(tmpdir):
+def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
+    from pip.wheel import Wheel
+
     tmpdir.chdir()
 
     venv = enable_coverage(tmpdir, 'venv')
@@ -75,15 +77,73 @@ def it_installs_stuff_with_dash_e(tmpdir):
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
 
-    requirements('-e ' + TOP.join('tests/testing/packages/dependant_package').strpath)
+    # Install a package from git with no extra dependencies in editable mode.
+    #
+    # We need to install a package from VCS instead of the filesystem because
+    # otherwise we aren't testing that editable requirements aren't wheeled
+    # (and instead might just be testing that local paths aren't wheeled).
+    requirements('-e git+git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb-init')  # noqa
 
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
+    assert set(frozen_requirements) == set([
+        '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init-dev',  # noqa
+        'coverage-enable-subprocess==0',
+        'coverage==4.0.3',
+        'pip-faster==' + __version__,
+        'virtualenv==1.11.6',
+        'wheel==0.26.0',
+        '',
+    ])
 
-    assert 'dependant-package==1' in frozen_requirements
-    assert 'implicit-dependency==1' in frozen_requirements
-    assert 'pure-python-package==0.2.0' in frozen_requirements
+    # we shouldn't wheel things installed editable
+    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
+    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
+        'coverage',
+        'coverage-enable-subprocess',
+    ])
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_doesnt_wheel_local_dirs(tmpdir):
+    from pip.wheel import Wheel
+
+    tmpdir.chdir()
+
+    venv = enable_coverage(tmpdir, 'venv')
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster==' + __version__)
+
+    run(
+        venv.join('bin/pip-faster').strpath,
+        'install',
+        TOP.join('tests/testing/packages/dependant_package').strpath,
+    )
+
+    frozen_requirements = pip_freeze(str(venv)).split('\n')
+    assert set(frozen_requirements) == set([
+        'coverage==4.0.3',
+        'coverage-enable-subprocess==0',
+        'dependant-package==1',
+        'implicit-dependency==1',
+        'many-versions-package==3',
+        'pip-faster==' + __version__,
+        'pure-python-package==0.2.0',
+        'virtualenv==1.11.6',
+        'wheel==0.26.0',
+        '',
+    ])
+
+    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
+    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
+        'coverage',
+        'coverage-enable-subprocess',
+        'implicit-dependency',
+        'many-versions-package',
+        'pure-python-package',
+    ])
 
 
 @pytest.mark.usefixtures('pypi_server')
