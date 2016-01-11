@@ -318,10 +318,12 @@ def trace_requirements(requirements):
     # breadth-first traversal:
     from collections import deque
     queue = deque(requirements)
+    processed_reqs = set()
     errors = set()
     result = []
     while queue:
         req = queue.popleft()
+        processed_reqs.add(req.name)
         logger.debug('tracing: %s', req)
 
         try:
@@ -340,14 +342,16 @@ def trace_requirements(requirements):
         result.append(dist_to_req(dist))
 
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
-            # there really shouldn't be any circular dependencies...
             # temporarily shorten the str(req)
             with pretty_req(req):
                 from pip.req import InstallRequirement
                 dist_req = InstallRequirement(dist_req, str(req))
 
-            logger.debug('adding sub-requirement %s', dist_req)
-            queue.append(dist_req)
+            # in case there are circular dependencies, only process a
+            # requirement once
+            if dist_req.name not in processed_reqs:
+                logger.debug('adding sub-requirement %s', dist_req)
+                queue.append(dist_req)
 
     if errors:
         raise InstallationError('\n'.join(sorted(errors)))
