@@ -239,7 +239,10 @@ def test_args_backward(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
-def test_wrong_wheel(tmpdir):
+def test_wheel_built_for_wrong_python_version(tmpdir):
+    """A wheel built for a different Python version shouldn't be used."""
+    import mock
+    from os import environ
     tmpdir.chdir()
 
     requirements('pure_python_package==0.1.0')
@@ -247,12 +250,13 @@ def test_wrong_wheel(tmpdir):
     # A different python
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
-    other_python = OtherPython()
-    ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter)
+    log_path = tmpdir.join('log')
+    with mock.patch.dict(environ, {'PIP_LOG': log_path.strpath}):
+        venv_update('venv2', '-p' + OtherPython().interpreter)
 
     assert '''
-  SLOW!! no wheel found for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
-''' in ret2out
+  SLOW!! no wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+''' in log_path.read()
 
 
 def flake8_older():
@@ -380,7 +384,7 @@ def test_cant_wheel_package(tmpdir):
 ----------------------------------------
   Failed building wheel for cant-wheel-package
 Failed to build cant-wheel-package
-SLOW!! No wheel found for cant-wheel-package (from -r requirements.txt (line 1))
+SLOW!! no wheel found for cant-wheel-package (from -r requirements.txt (line 1)) after building (couldn't be wheeled?)
 Installing collected packages: cant-wheel-package
   Running setup.py install for cant-wheel-package
 Successfully installed cant-wheel-package

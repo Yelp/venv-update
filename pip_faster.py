@@ -139,7 +139,7 @@ class FasterPackageFinder(PackageFinder):
             # then try an optimistic search for a .whl file:
             link = optimistic_wheel_search(req, self.find_links)
             if link is None:
-                logger.notify('SLOW!! no wheel found for pinned requirement %s', req)
+                logger.debug('SLOW!! no wheel found locally for pinned requirement %s', req)
             else:
                 logger.notify('Faster! Pinned wheel found, without hitting PyPI.')
                 return link
@@ -377,7 +377,7 @@ class FasterRequirementSet(RequirementSet):
         for req in wb.build():
             link = optimistic_wheel_search(req, finder.find_links)
             if link is None:
-                logger.notify('SLOW!! No wheel found for %s', req)
+                logger.notify('SLOW!! no wheel found for %s after building (couldn\'t be wheeled?)', req)
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"
