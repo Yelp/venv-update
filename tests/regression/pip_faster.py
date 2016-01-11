@@ -29,3 +29,53 @@ def test_circular_dependencies(tmpdir):
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert 'circular-dep-a==1.0' in frozen_requirements
     assert 'circular-dep-b==1.0' in frozen_requirements
+
+
+@pytest.mark.usefixtures('pypi_server')
+@pytest.mark.parametrize('reqs', [
+    # old setuptools and old pip
+    ['setuptools==0.6c11', 'pip==1.4.1'],
+    # old setuptools and new pip
+    ['setuptools==0.6c11', 'pip==1.5.6'],
+    # new setuptools and old pip
+    ['setuptools==18.2', 'pip==1.4.1'],
+])
+def test_old_pip_and_setuptools(tmpdir, reqs):
+    """We should be able to use pip-faster's wheel building even if we have
+    ancient pip and setuptools.
+
+    https://github.com/Yelp/pip-faster/issues/33
+    """
+    tmpdir.chdir()
+
+    # 1. Create an empty virtualenv
+    # 2. Install old pip/setuptools that don't support wheel building
+    # 3. Install pip-faster
+    # 4. Install pure-python-package and assert it was wheeled during install.
+    venv = tmpdir.join('venv')
+    run('virtualenv', venv.strpath)
+
+    # We need to add public PyPI as an extra URL since we're installing
+    # packages (setuptools and pip) which aren't available from our PyPI fixture.
+    import mock
+    from os import environ
+    with mock.patch.dict(
+        environ,
+        {'PIP_EXTRA_INDEX_URL': 'https://pypi.python.org/simple/'}
+    ):
+        pip = venv.join('bin/pip').strpath
+        for req in reqs:
+            run(pip, 'install', '--', req)
+        run(pip, 'install', 'pip-faster==' + __version__)
+
+    run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
+
+    # it was installed
+    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
+
+    # it was wheeled
+    from pip.wheel import Wheel
+    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
+    assert 'pure-python-package' in [
+        Wheel(f.basename).name for f in wheelhouse.listdir()
+    ]
