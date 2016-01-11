@@ -82,13 +82,13 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     # We need to install a package from VCS instead of the filesystem because
     # otherwise we aren't testing that editable requirements aren't wheeled
     # (and instead might just be testing that local paths aren't wheeled).
-    requirements('-e git+git://github.com/Yelp/dumb-init.git@a9eadb580c#egg=dumb-init')  # noqa
+    requirements('-e git+git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb-init')  # noqa
 
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
-        '-e git://github.com/Yelp/dumb-init.git@a9eadb580c0d234fc4090c1bf3f19f8d87bff76b#egg=dumb_init-v1.0.0',  # noqa
+        '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init-dev',  # noqa
         'coverage-enable-subprocess==0',
         'coverage==4.0.3',
         'pip-faster==' + __version__,
