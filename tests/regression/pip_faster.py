@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import sys
+
 import pytest
 
 from testing import enable_coverage
@@ -32,6 +34,10 @@ def test_circular_dependencies(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
+@pytest.mark.skipif(
+    sys.version_info > (3, 0),
+    reason='ancient versions are not py3 compatible, even for install',
+)
 @pytest.mark.parametrize('reqs', [
     # old setuptools and old pip
     ['setuptools==0.6c11', 'pip==1.4.1'],
@@ -48,9 +54,9 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     """
     tmpdir.chdir()
 
-    # 1. Create an empty virtualenv
-    # 2. Install old pip/setuptools that don't support wheel building
-    # 3. Install pip-faster
+    # 1. Create an empty virtualenv.
+    # 2. Install old pip/setuptools that don't support wheel building.
+    # 3. Install pip-faster.
     # 4. Install pure-python-package and assert it was wheeled during install.
     venv = tmpdir.join('venv')
     run('virtualenv', venv.strpath)
@@ -66,6 +72,9 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
         pip = venv.join('bin/pip').strpath
         for req in reqs:
             run(pip, 'install', '--', req)
+        # wheel needs argparse but it won't get installed
+        if sys.version_info < (2, 7):
+            run(pip, 'install', 'argparse')
         run(pip, 'install', 'pip-faster==' + __version__)
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
