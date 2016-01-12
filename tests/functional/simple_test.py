@@ -251,8 +251,8 @@ def test_wrong_wheel(tmpdir):
     ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter)
 
     assert '''
-  SLOW!! no wheel found for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
-''' in ret2out
+  [slower] No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+''' in uncolor(ret2out)
 
 
 def flake8_older():
@@ -380,11 +380,13 @@ def test_cant_wheel_package(tmpdir):
 ----------------------------------------
   Failed building wheel for cant-wheel-package
 Failed to build cant-wheel-package
-SLOW!! No wheel found for cant-wheel-package (from -r requirements.txt (line 1))
+[SLOW!] no wheel found for cant-wheel-package (from -r requirements.txt (line 1)) after building (couldn't be wheeled?)
 Installing collected packages: cant-wheel-package
   Running setup.py install for cant-wheel-package
 Successfully installed cant-wheel-package
 Cleaning up...
 ''' in out  # noqa
-
+        assert '''
+  [SLOW!] Installing unpinned requirement cant-wheel-package (from -r requirements.txt (line 1))
+''' in out  # noqa
         assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')

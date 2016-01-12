@@ -133,18 +133,18 @@ class FasterPackageFinder(PackageFinder):
             # if the version is pinned-down by a ==
             # first try to use any installed package that satisfies the req
             if req.satisfied_by:
-                logger.notify('Faster! pinned requirement already installed.')
+                logger.debug('Faster! pinned requirement already installed.')
                 raise BestVersionAlreadyInstalled
 
             # then try an optimistic search for a .whl file:
             link = optimistic_wheel_search(req, self.find_links)
             if link is None:
-                logger.notify('SLOW!! no wheel found for pinned requirement %s', req)
+                logger.notify('\033[1;93m[slower]\033[0m No wheel found locally for pinned requirement %s', req)
             else:
-                logger.notify('Faster! Pinned wheel found, without hitting PyPI.')
+                logger.notify('\033[1;92m[fast]\033[0m Pinned wheel found, without hitting PyPI.')
                 return link
         else:
-            logger.info('slow: full search for unpinned requirement %s', req)
+            logger.notify('\033[1;91m[SLOW!]\033[0m Installing unpinned requirement %s', req)
 
         # otherwise, do the full network search, per usual
         return super(FasterPackageFinder, self).find_requirement(req, upgrade)
@@ -381,7 +381,7 @@ class FasterRequirementSet(RequirementSet):
         for req in wb.build():
             link = optimistic_wheel_search(req, finder.find_links)
             if link is None:
-                logger.notify('SLOW!! No wheel found for %s', req)
+                logger.notify('\033[1;91m[SLOW!]\033[0m no wheel found for %s after building (couldn\'t be wheeled?)', req)
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"
