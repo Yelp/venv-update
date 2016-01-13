@@ -28,7 +28,7 @@ from os.path import join
 
 DEFAULT_VIRTUALENV_PATH = 'venv'
 VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
-__version__ = '1.0rc3'
+__version__ = '1.0rc4'
 
 # This script must not rely on anything other than
 #   stdlib>=2.6 and virtualenv>1.11
