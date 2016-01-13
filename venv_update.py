@@ -129,7 +129,16 @@ def exec_scratch_virtualenv(args):
     python = venv_python(scratch_virtualenv)
     venv_update = join(scratch, 'venv-update')
 
-    if not exists(python):
+    if not exists(python) or not exists(venv_update):
+        if exists(scratch_virtualenv):
+            # The virtualenv directory exists, but either the Python
+            # interpreter or the symlink doesn't.
+            #
+            # We might have crashed in the middle or been partially moved;
+            # let's just start over.
+            from shutil import rmtree
+            rmtree(scratch_virtualenv)
+
         run(('virtualenv', scratch_virtualenv))
         scratch_python = venv_python(scratch_virtualenv)
         # TODO: do we allow user-defined override of which version of virtualenv to install?
@@ -139,7 +148,12 @@ def exec_scratch_virtualenv(args):
         venv_update_library = join(site_packages, 'venv_update.py')
         from shutil import copyfile
         copyfile(dotpy(__file__), venv_update_library)
-        from os import symlink
+
+        # create (or update) the symlink to venv_update inside site-packages
+        from os import remove, symlink
+        from os.path import lexists
+        if lexists(venv_update):
+            remove(venv_update)
         symlink(venv_update_library, venv_update)
 
     assert exists(venv_update), venv_update
