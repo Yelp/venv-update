@@ -151,10 +151,10 @@ def exec_scratch_virtualenv(args):
 
         # create (or update) the symlink to venv_update inside site-packages
         from os import remove, symlink
-        from os.path import lexists
+        from os.path import lexists, relpath
         if lexists(venv_update):
             remove(venv_update)
-        symlink(venv_update_library, venv_update)
+        symlink(relpath(venv_update_library, scratch), venv_update)
 
     assert exists(venv_update), venv_update
     if samefile(dotpy(__file__), venv_update):
