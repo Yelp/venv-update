@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''\
-usage: venv-update [-h] [virtualenv_dir] [requirements [requirements ...]]
+"""\
+usage: venv-update [-h|--help] [-V|--version] [[virtualenv arg] ...] -- [[pip arg] ...]
 
-Update a (possibly non-existant) virtualenv directory using a requirements.txt listing
-When this script completes, the virtualenv should have the same packages as if it were
-removed, then rebuilt.
+Idempotently ensure the existence of a project's virtualenv, and keep it in
+sync with a set of requirements files.
 
-To set the index server, export a PIP_INDEX_URL variable.
-    See also: https://pip.readthedocs.org/en/stable/user_guide/#environment-variables
+This script is designed to make sure that a target virtualenv exactly matches a
+set of requirements files; running venv-update should put your virtualenv in
+the same state as if you had deleted and rebuilt it from scratch, but in far
+less time.
 
-positional arguments:
-  virtualenv_dir  Destination virtualenv directory (default: venv)
-  requirements    Requirements files. (default: requirements.txt)
+A typical invocation looks like:
 
-optional arguments:
-  -h, --help      show this help message and exit
+    ./venv-update venv -- -r requirements.txt -r requirements-dev.txt
 
-Version control at: https://github.com/yelp/pip-faster
-'''
+Arguments before the `--` are passed to virtualenv, while arguments after it
+are passed to pip.
+
+Version control and more details: https://github.com/Yelp/pip-faster
+"""
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -35,10 +36,13 @@ __version__ = '1.0rc5'
 
 
 def parseargs(args):
-    """extremely rudimentary arg parsing to handle --help"""
-    # TODO: show venv-update's version on -V/--version
-    if set(args) & set(('-h', '--help')):
+    """extremely rudimentary arg parsing to handle --help and --version"""
+    args = set(args)
+    if args & set(('-h', '--help')):
         print(__doc__, end='')
+        exit(0)
+    elif args & set(('-V', '--version')):
+        print('venv-update v{0}'.format(__version__))
         exit(0)
 
 
