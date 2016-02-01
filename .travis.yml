@@ -4,6 +4,11 @@ env:
     #   means we start all lints before any tests
     - TOXENV=lint
     - TOXENV=python
+
+os:
+    - linux
+    - osx
+
 python:
     # in order of most-valuable tests first
     - "3.5"
