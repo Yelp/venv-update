@@ -39,7 +39,7 @@ conflicting_package
         '''
 Cleaning up...
 Error: version conflict: many-versions-package 3 (venv/%s)'''
-        ''' <-> many-versions-package<2 (from conflicting-package (from -r requirements.txt (line 3)))
+        ''' <-> many-versions-package<2 (from conflicting-package->-r requirements.txt (line 3))
 Storing debug log for failure in %s/home/.pip/pip.log
 
 Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
@@ -75,11 +75,11 @@ pure_python_package==0.1.0
     assert (
         '''
 Cleaning up...
-Error: unmet dependency: implicit-dependency (from dependant-package (from -r requirements.txt (line 2)))
+Error: unmet dependency: implicit-dependency (from dependant-package->-r requirements.txt (line 2))
 Error: version conflict: many-versions-package 1 (venv/%s)'''
-        ''' <-> many-versions-package>=2,<4 (from dependant-package (from -r requirements.txt (line 2)))
+        ''' <-> many-versions-package>=2,<4 (from dependant-package->-r requirements.txt (line 2))
 Error: version conflict: pure-python-package 0.1.0 (venv/%s)'''
-        ''' <-> pure-python-package>=0.2.0 (from dependant-package (from -r requirements.txt (line 2)))
+        ''' <-> pure-python-package>=0.2.0 (from dependant-package->-r requirements.txt (line 2))
 Storing debug log for failure in %s/home/.pip/pip.log
 
 Something went wrong! Sending 'venv' back in time, so make knows it's invalid.

@@ -9,6 +9,7 @@ import pytest
 from testing import enable_coverage
 from testing import pip_freeze
 from testing import run
+from testing import uncolor
 from venv_update import __version__
 
 
@@ -22,11 +23,23 @@ def test_circular_dependencies(tmpdir):
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
 
-    run(
+    out, err = run(
         venv.join('bin/pip-faster').strpath,
         'install',
+        '-vv',  # show debug logging
         'circular-dep-a',
     )
+    assert err == ''
+    out = uncolor(out)
+    assert out.endswith('''
+tracing: circular-dep-a
+adding sub-requirement circular-dep-b==1.0 (from circular-dep-a)
+tracing: circular-dep-b==1.0 (from circular-dep-a)
+adding sub-requirement circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
+already analyzed: circular-dep-b==1.0 (from circular-dep-a)
+tracing: circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
+Circular dependency! circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
+''')
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert 'circular-dep-a==1.0' in frozen_requirements

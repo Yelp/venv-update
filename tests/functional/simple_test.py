@@ -183,7 +183,7 @@ def pipe_output(read, write):
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
     assert uncolored.endswith('''
 > virtualenv --version
-13.1.2
+14.0.5
 ''')
 
     return result, uncolored
@@ -248,10 +248,10 @@ def test_wrong_wheel(tmpdir):
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
     other_python = OtherPython()
-    ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter)
+    ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter, '--', '-vv', '-r', 'requirements.txt')
 
     assert '''
-  [slower] No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+  No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
 ''' in uncolor(ret2out)
 
 
@@ -347,7 +347,6 @@ pure_python_package
     out = uncolor(out)
     assert ' '.join((
         '\n> venv/bin/python -m pip.__main__ install',
-        '--find-links=file://%s/home/.cache/pip-faster/wheelhouse' % tmpdir,
         '-r requirements.d/venv-update.txt\n',
     )) in out
     expected = ('\nSuccessfully installed pip-1.5.6 pip-faster-%s pure-python-package-0.2.0 virtualenv-1.11.6' % __version__)
@@ -367,7 +366,7 @@ pure_python_package
 def test_cant_wheel_package(tmpdir):
     with tmpdir.as_cwd():
         enable_coverage(tmpdir)
-        requirements('cant-wheel-package')
+        requirements('cant-wheel-package\npure-python-package')
 
         out, err = venv_update()
         assert err == ''
@@ -377,16 +376,16 @@ def test_cant_wheel_package(tmpdir):
         # for unknown reasons, py27 has an extra line with four spaces in this output, where py26 does not.
         out = out.replace('\n    \n', '\n')
         assert '''
+
 ----------------------------------------
-  Failed building wheel for cant-wheel-package
-Failed to build cant-wheel-package
-[SLOW!] no wheel found for cant-wheel-package (from -r requirements.txt (line 1)) after building (couldn't be wheeled?)
-Installing collected packages: cant-wheel-package
+Failed building wheel for cant-wheel-package
+Running setup.py bdist_wheel for pure-python-package
+Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
+SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package (from -r requirements.txt (line 1))
+Installing collected packages: cant-wheel-package, pure-python-package
   Running setup.py install for cant-wheel-package
-Successfully installed cant-wheel-package
+Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
-''' in out  # noqa
-        assert '''
-  [SLOW!] Installing unpinned requirement cant-wheel-package (from -r requirements.txt (line 1))
+> pip uninstall --yes coverage coverage-enable-subprocess
 ''' in out  # noqa
         assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')

@@ -109,10 +109,6 @@ your project (for example, at `bin/venv-update`).
 Then, apply a change like this to your `tox.ini` file:
 
 ```patch
-  [tox]
-  envlist = py27,py34
-+ skipsdist = true
-
   [testenv]
 + venv_update = {toxinidir}/bin/venv-update {envdir} -- -r {toxinidir}/requirements.txt -e {toxinidir}
 - deps = -rrequirements.txt

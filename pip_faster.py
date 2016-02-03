@@ -33,10 +33,10 @@ from pip.index import BestVersionAlreadyInstalled
 from pip.index import PackageFinder
 from pip.wheel import WheelBuilder
 
-from venv_update import CacheOpts
 from venv_update import colorize
 from venv_update import raise_on_failure
 from venv_update import timid_relpath
+from venv_update import user_cache_dir
 
 if True:  # :pragma:nocover:pylint:disable=using-constant-test
     # Debian de-vendorizes the version of pip it ships
@@ -133,22 +133,25 @@ class FasterPackageFinder(PackageFinder):
             # if the version is pinned-down by a ==
             # first try to use any installed package that satisfies the req
             if req.satisfied_by:
-                logger.debug('Faster! pinned requirement already installed.')
+                logger.notify('Faster! pinned requirement already installed.')
                 raise BestVersionAlreadyInstalled
 
             # then try an optimistic search for a .whl file:
             link = optimistic_wheel_search(req, self.find_links)
             if link is None:
-                logger.notify('\033[1;93m[slower]\033[0m No wheel found locally for pinned requirement %s', req)
+                # The wheel will be built during prepare_files
+                logger.debug('No wheel found locally for pinned requirement %s', req)
             else:
-                logger.notify('\033[1;92m[fast]\033[0m Pinned wheel found, without hitting PyPI.')
+                logger.notify('Faster! Pinned wheel found, without hitting PyPI.')
                 return link
         else:
-            logger.notify('\033[1;91m[SLOW!]\033[0m Installing unpinned requirement %s', req)
+            # unpinned requirements aren't very notable. only show with -v
+            logger.info('slow: full search for unpinned requirement %s', req)
 
         # otherwise, do the full network search, per usual
         return super(FasterPackageFinder, self).find_requirement(req, upgrade)
-        # TODO: optimization -- do optimisitic wheel search even for unpinned reqs
+        # Now we know the "best" version, even for unpinned requirements.
+        # TODO: optimization -- for unpinned reqs, convert to == and try an optimisitic wheel search
 
 
 def wheelable(req):
@@ -188,20 +191,8 @@ class FasterWheelBuilder(WheelBuilder):
             'Building wheels for collected packages: %s' %
             ','.join([req.name for req in buildset])
         )
-        logger.indent += 2
-        build_success, build_failure = [], []
         for req in buildset:
-            if self._build_one(req):
-                build_success.append(req)
-            else:
-                build_failure.append(req)
-        logger.indent -= 2
-
-        # notify sucess/failure
-        if build_success:
-            logger.notify('Successfully built %s' % ' '.join([req.name for req in build_success]))
-        if build_failure:
-            logger.notify('Failed to build %s' % ' '.join([req.name for req in build_failure]))
+            self._build_one(req)
 
         return buildset
 
@@ -301,66 +292,95 @@ def fresh_working_set():
     return WorkingSetPlusEditableInstalls()
 
 
+def req_cycle(req):
+    """is this requirement cyclic?"""
+    cls = req.__class__
+    name = req.name
+    while isinstance(req.comes_from, cls):
+        if name == req.comes_from.name:
+            return True
+        req = req.comes_from
+    return False
+
+
 def pretty_req(req):
     """
-    a context that makes the str() of a pip requirement a bit more readable,
-    at the expense of munging its data temporarily
+    return a copy of a pip requirement that is a bit more readable,
+    at the expense of removing some of its data
     """
-    return patched(vars(req), {'url': None, 'satisfied_by': None})
+    from copy import copy
+    req = copy(req)
+    req.url = None
+    req.satisfied_by = None
+    return req
 
 
 def trace_requirements(requirements):
     """given an iterable of pip InstallRequirements,
     return the set of required packages, given their transitive requirements.
     """
+    requirements = tuple(pretty_req(r) for r in requirements)
     working_set = fresh_working_set()
 
     # breadth-first traversal:
     from collections import deque
     queue = deque(requirements)
-    processed_reqs = set()
-    errors = set()
+    seen = set()
+    errors = []
     result = []
     while queue:
         req = queue.popleft()
-        processed_reqs.add(req.name)
+        req_id = str(req)  # InstallRequirement doesn't implement hash/equality, so we compare using str()
+        if req_id in seen:
+            logger.debug('already analyzed: %s', req)
+            continue
+        else:
+            seen.add(req_id)
+
         logger.debug('tracing: %s', req)
+        if req_cycle(req):
+            logger.warn('Circular dependency! %s', req)
+            continue
 
         try:
             dist = working_set.find(req.req)
         except pkg_resources.VersionConflict as conflict:
             dist = conflict.args[0]
-            with pretty_req(req):
-                errors.add('Error: version conflict: %s (%s) <-> %s' % (
-                    dist, timid_relpath(dist.location), req
-                ))
+            errors.append('Error: version conflict: %s (%s) <-> %s' % (
+                dist, timid_relpath(dist.location), req
+            ))
 
         if dist is None:
-            errors.add('Error: unmet dependency: %s' % req)
+            errors.append('Error: unmet dependency: %s' % req)
             continue
 
         result.append(dist_to_req(dist))
 
         for dist_req in sorted(dist.requires(), key=lambda req: req.key):
-            # temporarily shorten the str(req)
-            with pretty_req(req):
-                from pip.req import InstallRequirement
-                dist_req = InstallRequirement(dist_req, str(req))
+            from pip.req import InstallRequirement
+            dist_req = InstallRequirement(dist_req, req)
 
-            # in case there are circular dependencies, only process a
-            # requirement once
-            if dist_req.name not in processed_reqs:
-                logger.debug('adding sub-requirement %s', dist_req)
-                queue.append(dist_req)
+            logger.debug('adding sub-requirement %s', dist_req)
+            queue.append(dist_req)
 
     if errors:
-        raise InstallationError('\n'.join(sorted(errors)))
+        raise InstallationError('\n'.join(errors))
 
     return result
 
 
-def reqnames(reqs):
-    return set(req.name for req in reqs)
+class CacheOpts(object):
+
+    def __init__(self):
+        # We put the cache in the directory that pip already uses.
+        # This has better security characteristics than a machine-wide cache, and is a
+        #   pattern people can use for open-source projects
+        self.pipdir = user_cache_dir() + '/pip-faster'
+        self.wheelhouse = self.pipdir + '/wheelhouse'
+
+        self.pip_options = (
+            '--find-links=file://' + self.wheelhouse,
+        )
 
 
 class FasterRequirementSet(RequirementSet):
@@ -381,7 +401,7 @@ class FasterRequirementSet(RequirementSet):
         for req in wb.build():
             link = optimistic_wheel_search(req, finder.find_links)
             if link is None:
-                logger.notify('\033[1;91m[SLOW!]\033[0m no wheel found for %s after building (couldn\'t be wheeled?)', req)
+                logger.error('SLOW!! no wheel found after building (couldn\'t be wheeled?): %s', req)
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"
@@ -412,6 +432,10 @@ def patched(attrs, updates):
     finally:
         patch(attrs, orig.items())
 # END: pip_faster.patch module
+
+
+def reqnames(reqs):
+    return set(req.name for req in reqs)
 
 
 class FasterInstallCommand(InstallCommand):
