@@ -123,6 +123,15 @@ template. The most important part is running venv-update as the first test
 command and removing the list of `deps` (so that tox will never invalidate
 your virtualenv itself; we want to let venv-update manage that instead).
 
+Users of tox version <2 will want to add this as well, to avoid tox installing
+all your dependencies with pip-slower:
+
+```patch
+  [tox]
+  envlist = py27,py34
++ skipsdist = true
+```
+
 
 ## pip-faster
 

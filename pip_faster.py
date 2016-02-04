@@ -372,9 +372,6 @@ def trace_requirements(requirements):
 class CacheOpts(object):
 
     def __init__(self):
-        # We put the cache in the directory that pip already uses.
-        # This has better security characteristics than a machine-wide cache, and is a
-        #   pattern people can use for open-source projects
         self.pipdir = user_cache_dir() + '/pip-faster'
         self.wheelhouse = self.pipdir + '/wheelhouse'
 
