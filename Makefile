@@ -14,7 +14,7 @@ tox:
 	tox -e lint,test
 
 venv: setup.py requirements.txt requirements.d/* Makefile
-	./venv_update.py --python=python2.7
+	./venv_update.py ==venv --python=python2.7 venv
 	./venv/bin/pre-commit install
 
 .PHONY: clean

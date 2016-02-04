@@ -41,24 +41,21 @@ def assert_python_version(version):
 @pytest.mark.usefixtures('pypi_server')
 def test_python_versions(tmpdir):
     tmpdir.chdir()
+    enable_coverage()
     requirements('project-with-c')
 
-    def run_with_coverage(*options):
-        enable_coverage(tmpdir, options=options)
-        venv_update(*options)
-
     other_python = OtherPython()
-    run_with_coverage('--python=' + other_python.interpreter)
+    venv_update('==venv', '--python=' + other_python.interpreter, 'venv')
     assert_c_extension_runs()
     assert_python_version(other_python.version_prefix)
 
     from sys import executable as python
-    run_with_coverage('--python=' + python)
+    venv_update('==venv', '--python=' + python, 'venv')
     assert_c_extension_runs()
     from sys import version
     assert_python_version(version)
 
-    run_with_coverage('--python=' + other_python.interpreter)
+    venv_update('==venv', '--python=' + other_python.interpreter, 'venv')
     assert_c_extension_runs()
     assert_python_version(other_python.version_prefix)
 
@@ -70,6 +67,7 @@ def test_virtualenv_moved(tmpdir):
     new_path = 'new_dir'
 
     with tmpdir.mkdir(original_path).as_cwd():
+        enable_coverage()
         requirements('project_with_c')
         venv_update()
         assert_c_extension_runs()
@@ -91,6 +89,8 @@ def test_virtualenv_moved(tmpdir):
 @pytest.mark.usefixtures('pypi_server')
 def test_recreate_active_virtualenv(tmpdir):
     with tmpdir.as_cwd():
+        enable_coverage()
+
         run('virtualenv', 'venv')
         run('venv/bin/pip', 'install', '-r', str(TOP / 'requirements.d/coverage.txt'))
 
@@ -104,6 +104,7 @@ def test_recreate_active_virtualenv(tmpdir):
 @pytest.mark.usefixtures('pypi_server')
 def test_update_while_active(tmpdir):
     tmpdir.chdir()
+    enable_coverage()
     requirements('virtualenv<2')
 
     venv_update()
@@ -113,17 +114,21 @@ def test_update_while_active(tmpdir):
     requirements('project_with_c')
 
     venv_update_symlink_pwd()
-    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py')
+    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py ==venv venv --python=venv/bin/python')
     out = uncolor(out)
 
     assert err == ''
-    assert out.startswith('> virtualenv\nKeeping valid virtualenv from previous run.\n')
+    assert out.startswith('''\
+> virtualenv venv --python=venv/bin/python
+Keeping valid virtualenv from previous run.
+''')
     assert 'project-with-c' in pip_freeze()
 
 
 @pytest.mark.usefixtures('pypi_server')
 def test_update_invalidated_while_active(tmpdir):
     tmpdir.chdir()
+    enable_coverage()
     requirements('virtualenv<2')
 
     venv_update()
@@ -133,14 +138,14 @@ def test_update_invalidated_while_active(tmpdir):
     requirements('project-with-c')
 
     venv_update_symlink_pwd()
-    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py --system-site-packages')
+    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py ==venv --system-site-packages venv')
 
     err = strip_pip_warnings(err)
     assert err == ''
     out = uncolor(out)
     assert out.startswith('''\
-> virtualenv --system-site-packages
-Removing invalidated virtualenv.
+> virtualenv --system-site-packages venv
+Removing invalidated virtualenv. (system-site-packages changed, to True)
 ''')
     assert 'project-with-c' in pip_freeze()
 
@@ -153,7 +158,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
 
         # first simulate some unrelated use of venv-update
         # this guards against statefulness in the venv-update scratch dir
-        venv_update('unrelated_venv', '--', '--version')
+        venv_update('==venv', 'unrelated_venv', '==pip-command', 'true')
 
         run('virtualenv', '--python', other_python.interpreter, 'venv')
         initial_version = assert_python_version(other_python.version_prefix)
@@ -164,10 +169,10 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         assert err == ''
         out = uncolor(out)
         assert out.startswith('''\
-> virtualenv
+> virtualenv venv
 Keeping valid virtualenv from previous run.
-> venv/bin/python -m pip.__main__ install pip-faster==%s
-''' % __version__)
+> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse pip-faster==%s
+''' % (tmpdir, __version__))
 
         final_version = assert_python_version(other_python.version_prefix)
         assert final_version == initial_version

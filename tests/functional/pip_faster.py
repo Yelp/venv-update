@@ -3,8 +3,9 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
+from pip.wheel import Wheel
 
-from testing import enable_coverage
+from testing import install_coverage
 from testing import pip_freeze
 from testing import requirements
 from testing import run
@@ -27,9 +28,11 @@ Package Index Options:
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff(tmpdir):
     venv = tmpdir.join('venv')
-    run('virtualenv', str(venv))
+    install_coverage(venv)
 
     assert pip_freeze(str(venv)) == '''\
+coverage==4.0.3
+coverage-enable-subprocess==0
 '''
 
     pip = venv.join('bin/pip').strpath
@@ -38,7 +41,7 @@ def it_installs_stuff(tmpdir):
     assert [
         req.split('==')[0]
         for req in pip_freeze(str(venv)).split()
-    ] == ['pip-faster', 'virtualenv', 'wheel']
+    ] == ['coverage', 'coverage-enable-subprocess', 'pip-faster', 'virtualenv', 'wheel']
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
@@ -47,10 +50,8 @@ def it_installs_stuff(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff_from_requirements_file(tmpdir):
-    tmpdir.chdir()
-
     venv = tmpdir.join('venv')
-    run('virtualenv', str(venv))
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -68,11 +69,8 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
-    from pip.wheel import Wheel
-
-    tmpdir.chdir()
-
-    venv = enable_coverage(tmpdir, 'venv')
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -100,18 +98,13 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     # we shouldn't wheel things installed editable
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
     assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
-        'coverage',
-        'coverage-enable-subprocess',
     ])
 
 
 @pytest.mark.usefixtures('pypi_server')
 def it_doesnt_wheel_local_dirs(tmpdir):
-    from pip.wheel import Wheel
-
-    tmpdir.chdir()
-
-    venv = enable_coverage(tmpdir, 'venv')
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -138,8 +131,6 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
     assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
-        'coverage',
-        'coverage-enable-subprocess',
         'implicit-dependency',
         'many-versions-package',
         'pure-python-package',
@@ -148,9 +139,8 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_can_handle_requirements_already_met(tmpdir):
-    tmpdir.chdir()
-
-    venv = enable_coverage(tmpdir, 'venv')
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)

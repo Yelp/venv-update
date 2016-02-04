@@ -35,7 +35,7 @@ matrix:
         - python: '3.4'
           env: TOXENV=lint
 
-install: ./venv_update.py $VIRTUAL_ENV -- -r requirements.d/travis.txt
+install: ./venv_update.py ==venv $VIRTUAL_ENV ==install -r requirements.d/travis.txt
 script: tox
 after_success:
     - coveralls

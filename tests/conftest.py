@@ -66,7 +66,8 @@ def tmpdir(tmpdir):
     os.environ['HOME'] = str(home)
     os.environ['TMPDIR'] = str(tmp)
 
-    yield tmpdir
+    with tmpdir.as_cwd():  # TODO: remove all the tmpdir.chdir()
+        yield tmpdir
 
     os.environ.clear()
     os.environ.update(orig_environ)

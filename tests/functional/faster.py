@@ -32,6 +32,8 @@ def time_savings(tmpdir, between):
         start = time()
         venv_update(
             PIP_VERBOSE='1',
+            PIP_RETRIES='0',
+            PIP_TIMEOUT='0',
         )
         time1 = time() - start
         expected = '\n'.join((
@@ -57,6 +59,8 @@ def time_savings(tmpdir, between):
         # these are localhost addresses with arbitrary invalid ports
         venv_update(
             PIP_VERBOSE='1',
+            PIP_RETRIES='0',
+            PIP_TIMEOUT='0',
             http_proxy='http://127.0.0.1:111111',
             https_proxy='https://127.0.0.1:222222',
             ftp_proxy='ftp://127.0.0.1:333333',
@@ -72,7 +76,7 @@ def time_savings(tmpdir, between):
         print('%.2fs speedup' % difference)
 
         ratio = time1 / time2
-        percent = (ratio - 1) % 100
+        percent = (ratio - 1) * 100
         print('%.2f%% speedup' % percent)
         return difference
 
@@ -93,7 +97,7 @@ def test_cached_clean_install_faster(tmpdir, pypi_packages):
         assert venv.isdir()
         venv.remove()
         assert not venv.exists()
-        enable_coverage(tmpdir)
+        enable_coverage()
 
         # copy the bootstrap-essential wheels to the wheelhouse where they can be found.
         # FIXME: pip7 has the behavior we want: wheel anything we install

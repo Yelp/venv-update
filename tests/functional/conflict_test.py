@@ -54,6 +54,8 @@ Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
 def test_multiple_issues(tmpdir):
     # Make it a bit worse. The output should show all three issues.
     tmpdir.chdir()
+    T.enable_coverage()
+
     T.requirements('dependant_package\n-r %s/requirements.d/coverage.txt' % T.TOP)
     T.venv_update()
 
@@ -111,9 +113,7 @@ def test_editable_egg_conflict(tmpdir):
         T.run(python, 'setup.py', 'bdist_egg', '--dist-dir', str(conflicting_package))
 
     with tmpdir.as_cwd():
-        T.requirements('-r %s/requirements.d/coverage.txt' % T.TOP)
-        T.venv_update()
-
+        T.enable_coverage()
         T.requirements('-e %s' % conflicting_package)
         with pytest.raises(CalledProcessError) as excinfo:
             T.venv_update()
@@ -121,6 +121,7 @@ def test_editable_egg_conflict(tmpdir):
         out, err = excinfo.value.result
 
         err = T.strip_coverage_warnings(err)
+        err = T.strip_pip_warnings(err)
         assert err == ''
 
         out = T.uncolor(out)

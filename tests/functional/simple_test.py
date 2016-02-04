@@ -26,7 +26,7 @@ PY33 = (version_info >= (3, 3))
 def test_trivial(tmpdir):
     tmpdir.chdir()
     requirements('')
-    enable_coverage(tmpdir)
+    enable_coverage()
     venv_update()
 
 
@@ -39,8 +39,8 @@ def test_install_custom_path_and_requirements(tmpdir):
         'six==1.8.0\n',
         path='requirements2.txt',
     )
-    enable_coverage(tmpdir, 'venv2')
-    venv_update('venv2', '--', '-r', 'requirements2.txt')
+    enable_coverage()
+    venv_update('==venv', 'venv2', '==install', '-r', 'requirements2.txt')
     assert pip_freeze('venv2') == '\n'.join((
         'pip-faster==' + __version__,
         'six==1.8.0',
@@ -54,15 +54,16 @@ def test_install_custom_path_and_requirements(tmpdir):
 def test_arguments_version(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
     tmpdir.chdir()
+    enable_coverage()
 
     # should show virtualenv version, successfully
-    out, err = venv_update('--version')
+    out, err = venv_update('==venv', '--version')
     assert err == ''
 
     out = uncolor(out)
     lines = out.splitlines()
     # 13:py27 14:py35 15:pypy
-    assert len(lines) in (13, 14, 15), repr(lines)
+    assert len(lines) == 9, repr(lines)
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
@@ -72,7 +73,7 @@ def test_arguments_system_packages(tmpdir):
     tmpdir.chdir()
     requirements('')
 
-    venv_update('--system-site-packages')
+    venv_update('==venv', '--system-site-packages', 'venv')
 
     out, err = run('venv/bin/python', '-c', '''\
 import sys
@@ -90,8 +91,7 @@ for p in sys.path:
 def test_eggless_url(tmpdir):
     tmpdir.chdir()
 
-    enable_coverage(tmpdir)
-    assert 'pure-python-package' not in pip_freeze()
+    enable_coverage()
 
     # An arbitrary url requirement.
     requirements('-e file://' + str(TOP / 'tests/testing/packages/pure_python_package'))
@@ -121,7 +121,7 @@ def test_scripts_left_behind(tmpdir):
 def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
-    args = ['--'] + sum([['-r', req] for req in reqs], [])
+    args = ['==install'] + sum([['-r', req] for req in reqs], [])
 
     venv_update(*args)
 
@@ -165,7 +165,7 @@ def pipe_output(read, write):
 
     from subprocess import Popen
     vupdate = Popen(
-        ('venv-update', '--version'),
+        ('venv-update', '==venv', '--version'),
         env=environ,
         stdout=write,
         close_fds=True,
@@ -220,11 +220,12 @@ def test_uncolored_pipe(tmpdir):
 @pytest.mark.usefixtures('pypi_server')
 def test_args_backward(tmpdir):
     tmpdir.chdir()
+    enable_coverage()
     requirements('')
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
-        venv_update('requirements.txt', 'myvenv')
+        venv_update('==venv', 'requirements.txt')
 
     # py26 doesn't have a consistent exit code:
     #   http://bugs.python.org/issue15033
@@ -244,12 +245,12 @@ def test_wrong_wheel(tmpdir):
     tmpdir.chdir()
 
     requirements('pure_python_package==0.1.0')
-    venv_update('venv1')
+    venv_update('==venv', 'venv1')
     # A different python
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
     other_python = OtherPython()
-    ret2out, _ = venv_update('venv2', '-p' + other_python.interpreter, '--', '-vv', '-r', 'requirements.txt')
+    ret2out, _ = venv_update('==venv', 'venv2', '-p' + other_python.interpreter, '==install', '-vv', '-r', 'requirements.txt')
 
     assert '''
   No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
@@ -327,7 +328,7 @@ def test_downgrade(tmpdir):
 @pytest.mark.usefixtures('pypi_server')
 def test_package_name_normalization(tmpdir):
     with tmpdir.as_cwd():
-        enable_coverage(tmpdir)
+        enable_coverage()
         requirements('WEIRD_cAsing-packAge')
 
         venv_update()
@@ -337,6 +338,7 @@ def test_package_name_normalization(tmpdir):
 @pytest.mark.usefixtures('pypi_server')
 def test_override_requirements_file(tmpdir):
     tmpdir.chdir()
+    enable_coverage()
     requirements('')
     Path('.').ensure_dir('requirements.d').join('venv-update.txt').write('''\
 pip-faster==%s
@@ -347,12 +349,12 @@ pure_python_package
     assert err == ''
 
     out = uncolor(out)
-    assert ' '.join((
-        '\n> venv/bin/python -m pip.__main__ install',
-        '-r requirements.d/venv-update.txt\n',
-    )) in out
-    expected = ('\nSuccessfully installed pip-1.5.6 pip-faster-%s pure-python-package-0.2.0 virtualenv-1.11.6' % __version__)
-    assert expected in out
+    assert (
+        '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements.d/venv-update.txt\n' % tmpdir
+    ) in out
+    assert (
+        '\nSuccessfully installed pip-1.5.6 pip-faster-%s pure-python-package-0.2.0 virtualenv-1.11.6' % __version__
+    ) in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
@@ -367,10 +369,11 @@ pure_python_package
 @pytest.mark.usefixtures('pypi_server')
 def test_cant_wheel_package(tmpdir):
     with tmpdir.as_cwd():
-        enable_coverage(tmpdir)
+        enable_coverage()
         requirements('cant-wheel-package\npure-python-package')
 
         out, err = venv_update()
+        err = strip_pip_warnings(err)
         assert err == ''
 
         out = uncolor(out)
@@ -389,6 +392,5 @@ Installing collected packages: cant-wheel-package, pure-python-package
   Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
 Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
-> pip uninstall --yes coverage coverage-enable-subprocess
 ''' in out  # noqa
         assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')

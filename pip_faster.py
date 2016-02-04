@@ -111,6 +111,8 @@ def optimistic_wheel_search(req, find_links):
             if version > best_version:
                 best_version = version
                 best_link = link
+            else:
+                assert False, 'TODO: test coverage'
 
     return best_link
 
