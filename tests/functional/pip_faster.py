@@ -93,7 +93,7 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
         'coverage==4.0.3',
         'pip-faster==' + __version__,
         'virtualenv==1.11.6',
-        'wheel==0.26.0',
+        'wheel==0.29.0',
         '',
     ])
 
@@ -132,7 +132,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
         'pip-faster==' + __version__,
         'pure-python-package==0.2.0',
         'virtualenv==1.11.6',
-        'wheel==0.26.0',
+        'wheel==0.29.0',
         '',
     ])
 

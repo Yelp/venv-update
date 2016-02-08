@@ -13,6 +13,7 @@ from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import strip_coverage_warnings
+from testing import strip_pip_warnings
 from testing import TOP
 from testing import uncolor
 from testing import venv_update
@@ -44,7 +45,7 @@ def test_install_custom_path_and_requirements(tmpdir):
         'pip-faster==' + __version__,
         'six==1.8.0',
         'virtualenv==1.11.6',
-        'wheel==0.26.0',
+        'wheel==0.29.0',
         ''
     ))
 
@@ -183,7 +184,7 @@ def pipe_output(read, write):
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
     assert uncolored.endswith('''
 > virtualenv --version
-14.0.5
+14.0.6
 ''')
 
     return result, uncolored
@@ -277,7 +278,7 @@ pep8<=1.5.7
         'pip-faster==' + __version__,
         'pyflakes==0.7.3',
         'virtualenv==1.11.6',
-        'wheel==0.26.0',
+        'wheel==0.29.0',
         ''
     ))
 
@@ -304,7 +305,7 @@ pep8<=1.5.7
         'pip-faster==' + __version__,
         'pyflakes==0.8.1',
         'virtualenv==1.11.6',
-        'wheel==0.26.0',
+        'wheel==0.29.0',
         ''
     ))
 
@@ -342,6 +343,7 @@ pip-faster==%s
 pure_python_package
 ''' % __version__)
     out, err = venv_update()
+    err = strip_pip_warnings(err)
     assert err == ''
 
     out = uncolor(out)
@@ -356,7 +358,7 @@ pure_python_package
     expected = '\n'.join((
         'pip-faster==%s' % __version__,
         'virtualenv==1.11.6',
-        'wheel==0.26.0',
+        'wheel==0.29.0',
         ''
     ))
     assert pip_freeze() == expected
@@ -384,6 +386,7 @@ Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
 SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package (from -r requirements.txt (line 1))
 Installing collected packages: cant-wheel-package, pure-python-package
   Running setup.py install for cant-wheel-package
+  Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
 Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
 > pip uninstall --yes coverage coverage-enable-subprocess

@@ -32,6 +32,7 @@ conflicting_package
     out, err = excinfo.value.result
 
     err = T.strip_coverage_warnings(err)
+    err = T.strip_pip_warnings(err)
     assert err == ''
 
     out = T.uncolor(out)

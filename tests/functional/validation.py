@@ -10,6 +10,7 @@ from testing import Path
 from testing import pip_freeze
 from testing import requirements
 from testing import run
+from testing import strip_pip_warnings
 from testing import TOP
 from testing import uncolor
 from testing import venv_update
@@ -134,6 +135,7 @@ def test_update_invalidated_while_active(tmpdir):
     venv_update_symlink_pwd()
     out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py --system-site-packages')
 
+    err = strip_pip_warnings(err)
     assert err == ''
     out = uncolor(out)
     assert out.startswith('''\

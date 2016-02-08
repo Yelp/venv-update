@@ -8,6 +8,5 @@
 # "tests of (and fixes for) Config.fromdictargs"
 -e git+git://github.com/bukzor/pytest.git@eabf2f9#egg=pytest
 
-mock
 pip<2
 six

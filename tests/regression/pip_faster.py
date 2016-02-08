@@ -76,12 +76,9 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
 
     # We need to add public PyPI as an extra URL since we're installing
     # packages (setuptools and pip) which aren't available from our PyPI fixture.
-    import mock
     from os import environ
-    with mock.patch.dict(
-        environ,
-        {'PIP_EXTRA_INDEX_URL': 'https://pypi.python.org/simple/'}
-    ):
+    environ['PIP_EXTRA_INDEX_URL'] = 'https://pypi.python.org/simple/'
+    try:
         pip = venv.join('bin/pip').strpath
         for req in reqs:
             run(pip, 'install', '--', req)
@@ -89,6 +86,8 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
         if sys.version_info < (2, 7):
             run(pip, 'install', 'argparse')
         run(pip, 'install', 'pip-faster==' + __version__)
+    finally:
+        del environ['PIP_EXTRA_INDEX_URL']
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 

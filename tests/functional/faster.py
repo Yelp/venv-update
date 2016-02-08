@@ -45,7 +45,7 @@ def time_savings(tmpdir, between):
             'pure-python-package==0.2.0',
             'slow-python-package==0.1.0',
             'virtualenv==1.11.6',
-            'wheel==0.26.0',
+            'wheel==0.29.0',
             ''
         ))
         assert pip_freeze() == expected

@@ -83,6 +83,16 @@ def strip_coverage_warnings(stderr):
     return coverage_warnings_regex.sub('', stderr)
 
 
+def strip_pip_warnings(stderr):
+    return stderr.replace(
+        ''.join((
+            'DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. ',
+            'A future version of pip will drop support for Python 2.6\n',
+        )),
+        '',
+    )
+
+
 def uncolor(text):
     # the colored_tty, uncolored_pipe tests cover this pretty well.
     from re import sub
