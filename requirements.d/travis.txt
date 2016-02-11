@@ -1,4 +1,4 @@
 # minimal set of packages for travis to run our test suites
 tox
 coverage
-coveralls
+codecov
