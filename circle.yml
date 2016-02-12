@@ -1,0 +1,14 @@
+
+dependencies:
+    cache_directories:
+        - ~/.pre-commit
+        - ~/.cache
+    override:
+        # we'll handle dependencies in our CI script.
+        - /bin/true
+
+test:
+    override:
+        # see https://circleci.com/docs/parallel-manual-setup
+        - CI/circle:
+            parallel: true

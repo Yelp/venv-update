@@ -1,0 +1,41 @@
+#!/bin/bash
+set -eux
+
+lsb_release -a
+ls -l /usr/bin/python*
+
+test $CIRCLE_NODE_TOTAL -eq 4
+
+sudo apt-get install python2.7-dev python3.4-dev
+sudo add-apt-repository ppa:fkrull/deadsnakes -y
+sudo apt-get update
+
+pip install --upgrade -r requirements.d/travis.txt
+function runtox() {
+    tox -e "$1" -- --junit-xml=$CIRCLE_TEST_REPORTS/pytest.0.py27 --junit-prefix=py27:
+}
+
+export PATH=$PWD/bin:$PATH
+case $CIRCLE_NODE_INDEX in
+0)
+    virtualenv ./lint
+    ./lint/bin/pip install -r requirements.d/lint.txt
+    ./lint/bin/make lint
+    runtox py27
+    ;;
+1)
+    virtualenv ./lint --python python3.4
+    ./lint/bin/pip install -r requirements.d/lint.txt
+    ./lint/bin/make lint
+    runtox py34
+    ;;
+2)
+    sudo apt-get install pypy
+    runtox pypy
+    ;;
+3)
+    sudo apt-get install pypy3
+    runtox pypy3
+    ;;
+esac
+codecov
