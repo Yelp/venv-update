@@ -18,15 +18,15 @@ function runtox() {
 export PATH=$PWD/bin:$PATH
 case $CIRCLE_NODE_INDEX in
 0)
-    virtualenv ./lint
-    ./lint/bin/pip install -r requirements.d/lint.txt
-    ./lint/bin/make lint
+    virtualenv lint
+    inenv lint pip install -r requirements.d/lint.txt
+    inenv lint make lint
     runtox py27
     ;;
 1)
-    virtualenv ./lint --python python3.4
-    ./lint/bin/pip install -r requirements.d/lint.txt
-    ./lint/bin/make lint
+    virtualenv lint --python python3.4
+    inenv lint pip install -r requirements.d/lint.txt
+    inenv lint make lint
     runtox py34
     ;;
 2)
