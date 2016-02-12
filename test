@@ -22,6 +22,9 @@ coverage-report() {
     python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
 
     coverage report --fail-under 89  # FIXME: should be 100
+    if ${CI:-false}; then
+        ./CI/coverage
+    fi
 }
 fail() {
     if ! $PYPY; then coverage-report; fi

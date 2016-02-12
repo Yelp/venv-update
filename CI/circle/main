@@ -1,32 +1,41 @@
 #!/bin/bash
-set -eux
+set -eu
+
+### definitions
 export PATH=$PWD/bin:$PATH
-
-lsb_release -a
-ls -l /usr/bin/python*
-
-test $CIRCLE_NODE_TOTAL -eq 4
-
-# dependencies
-sudo apt-get install python2.7-dev python3.4-dev
-pip install --upgrade -r CI/requirements.txt
-
-# test
+timestamp() { date +"%F %T.%N"; }
 function runtox() {
     export TOXENV="$1"
     PYTEST_OPTIONS="
         --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$1.xml
         --junit-prefix=$1:
     " tox
-    ./CI/coverage
+    timestamp
 }
 function runlint() {
     rm -rf lint
     virtualenv lint --python="$1"
     inenv lint pip install -r requirements.d/lint.txt
     inenv lint make lint
+    timestamp
 }
+trap timestamp EXIT
 
+### main
+set -x
+timestamp
+
+### machine
+lsb_release -a
+test $CIRCLE_NODE_TOTAL -eq 4
+timestamp
+
+### dependencies
+sudo apt-get install python2.7-dev python3.4-dev
+pip install --upgrade -r CI/requirements.txt
+timestamp
+
+### test
 case "$CIRCLE_NODE_INDEX" in
 0)
     runlint python2.7
