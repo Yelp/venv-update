@@ -30,12 +30,17 @@ fail() {
 trap fail ERR
 
 
-if [ -z "$*" ]; then
+if [ "$*" ]; then
+    set -- -n0 "$@"
+else
     # default arguments
-    set $TOP/tests $SITEPACKAGES/{venv_update,pip_faster}.py
+    set -- $TOP/tests $SITEPACKAGES/{venv_update,pip_faster}.py
 fi
 
+
 set -x
+# unquoted is intentional. we want to expand words.
+set -- ${PYTEST_OPTIONS:-} "$@"
 if $PYPY; then
     # coverage under pypy takes too dang long:
     #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182

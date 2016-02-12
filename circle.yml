@@ -10,5 +10,5 @@ dependencies:
 test:
     override:
         # see https://circleci.com/docs/parallel-manual-setup
-        - CI/circle:
+        - CI/circle/main:
             parallel: true

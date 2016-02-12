@@ -1,0 +1,15 @@
+#!/bin/bash
+set -eu
+# e.g. pypy-4.0.1-linux64
+PYPY="$1"
+CACHE="$HOME/.cache/install-pypy"
+DIR="$CACHE/$PYPY"
+
+set -x
+if [[ ! -d "$DIR" ]]; then
+    mkdir -p "$CACHE"
+    wget https://bitbucket.org/pypy/pypy/downloads/"$PYPY.tar.bz2" -O "$DIR.tbz"
+    tar -C "$CACHE" -xf "$DIR.tbz"
+fi
+
+ln -sf "$DIR"/bin/* ./bin/

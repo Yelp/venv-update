@@ -9,4 +9,5 @@
 -e git+git://github.com/bukzor/pytest.git@eabf2f9#egg=pytest
 
 pip<2
+wheel
 six

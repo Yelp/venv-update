@@ -1,0 +1,47 @@
+#!/bin/bash
+set -eux
+export PATH=$PWD/bin:$PATH
+
+lsb_release -a
+ls -l /usr/bin/python*
+
+test $CIRCLE_NODE_TOTAL -eq 4
+
+# dependencies
+sudo apt-get install python2.7-dev python3.4-dev
+pip install --upgrade -r CI/requirements.txt
+
+# test
+function runtox() {
+    export TOXENV="$1"
+    PYTEST_OPTIONS="
+        --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$1.xml
+        --junit-prefix=$1:
+    " tox
+    ./CI/coverage
+}
+function runlint() {
+    rm -rf lint
+    virtualenv lint --python="$1"
+    inenv lint pip install -r requirements.d/lint.txt
+    inenv lint make lint
+}
+
+case "$CIRCLE_NODE_INDEX" in
+0)
+    runlint python2.7
+    runtox py27
+    ;;
+1)
+    runlint python3.4
+    runtox py34
+    ;;
+2)
+    ./CI/circle/install-pypy pypy-4.0.1-linux64
+    runtox pypy
+    ;;
+3)
+    ./CI/circle/install-pypy pypy3-2.4.0-linux64
+    runtox pypy3
+    ;;
+esac
