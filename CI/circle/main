@@ -42,10 +42,10 @@ case "$CIRCLE_NODE_INDEX" in
     runtox py27
     ;;
 1)
-    runlint python3.4
     runtox py34
     ;;
 2)
+    runlint python3.4
     ./CI/circle/install-pypy pypy-4.0.1-linux64
     runtox pypy
     ;;
