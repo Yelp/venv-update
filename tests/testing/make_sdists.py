@@ -126,13 +126,68 @@ def download_sdist(source, destination):
         ))
 
 
-def make_sdists(sources, destination):
+def do_build(sources, destination):
     build_all(sources, destination)
     wheel('virtualenv', destination)
     wheel('argparse', destination)
     wheel('coverage-enable-subprocess', destination)
     download_sdist('coverage', destination)
     download_sdist('coverage-enable-subprocess', destination)
+
+
+def random_string():
+    """return a short suffix that shouldn't collide with any subsequent calls"""
+    import os
+    import base64
+
+    return '.'.join((
+        str(os.getpid()),
+        base64.urlsafe_b64encode(os.urandom(3)).decode('US-ASCII'),
+    ))
+
+
+def flock(path, blocking=True):
+    import os
+    fd = os.open(path, os.O_CREAT)
+
+    import fcntl
+    flags = fcntl.LOCK_EX  # exclusive
+    if not blocking:
+        flags |= fcntl.LOCK_NB  # non-blocking
+
+    try:
+        fcntl.flock(fd, flags)
+    except IOError as error:
+        if error.errno == 11:  # EAGAIN: lock held
+            return None
+    else:
+        return fd
+
+
+def make_sdists(sources, destination):
+    destination.dirpath().ensure(dir=True)
+
+    lock = destination.new(ext='lock')
+    if flock(lock.strpath, blocking=False) is None:
+        print('lock held; waiting for other thread...')
+        flock(lock.strpath, blocking=True)
+        return
+
+    staging = destination.new(ext=random_string() + '.tmp')
+    staging.ensure(dir=True)
+
+    do_build(sources, staging)
+    if destination.islink():
+        old = destination.readlink()
+    else:
+        old = None
+
+    link = staging.new(ext='ln')
+    link.mksymlinkto(staging, absolute=False)
+    link.rename(destination)
+
+    if old is not None:
+        destination.dirpath(old).remove()
 
 
 def main():

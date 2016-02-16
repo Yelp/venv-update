@@ -74,8 +74,8 @@ def tmpdir(tmpdir):
 
 
 @pytest.yield_fixture(scope='session')
-def pypi_packages(tmpdir_factory):
-    package_temp = tmpdir_factory.ensuretemp('venv-update-packages')
+def pypi_packages():
+    package_temp = TOP.join('build/test-packages')
     with TOP.as_cwd():
         run(
             sys.executable,

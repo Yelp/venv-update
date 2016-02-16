@@ -5,35 +5,34 @@ set -eu
 export PATH=$PWD/bin:$PATH
 timestamp() { date +"%F %T.%N"; }
 function runtox() {
+    timestamp
     export TOXENV="$1"
     PYTEST_OPTIONS="
         --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$1.xml
         --junit-prefix=$1:
     " tox
-    timestamp
 }
 function runlint() {
+    timestamp
     rm -rf lint
     virtualenv lint --python="$1"
     inenv lint pip install -r requirements.d/lint.txt
     inenv lint make lint
-    timestamp
 }
 trap timestamp EXIT
 
 ### main
 set -x
-timestamp
 
 ### machine
+timestamp
 lsb_release -a
 test $CIRCLE_NODE_TOTAL -eq 4
-timestamp
 
 ### dependencies
+timestamp
 sudo apt-get install python2.7-dev python3.4-dev
 pip install --upgrade -r CI/requirements.txt
-timestamp
 
 ### test
 case "$CIRCLE_NODE_INDEX" in
