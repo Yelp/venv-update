@@ -136,23 +136,25 @@ def pypi_server_with_fallback(pypi_packages, pypi_port):
         yield
 
 
+def ioerror_to_errno(error):  # :pragma:nocover:  all of these cases are exceptional and quite rare
+    if isinstance(error.errno, int):
+        return error.errno
+    # urllib throws an IOError with a string in the errno slot -.-
+    elif len(error.args) > 1 and isinstance(error.args[1], socket.error):
+        return error.args[1].errno
+    elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
+        return error.args[0].errno
+    else:
+        raise ValueError('Could not find error number: %r' % error)
+
+
 def service_up(port):
     try:
         return six.moves.urllib.request.urlopen(
             'http://localhost:{0}'.format(port)
         ).getcode() == 200
     except IOError as error:
-        if isinstance(error.errno, int):  # pragma:nocover:
-            errno = error.errno
-        # urllib throws an IOError with a string in the errno slot -.-
-        elif len(error.args) > 1 and isinstance(error.args[1], socket.error):  # pragma:nocover:
-            errno = error.args[1].errno
-        elif len(error.args) == 1 and isinstance(error.args[0], socket.error):  # pragma:nocover:
-            errno = error.args[0].errno
-        else:
-            raise ValueError('Could not find error number: %r' % error)
-
-        if errno == ECONNREFUSED:
+        if ioerror_to_errno(error) == ECONNREFUSED:
             return False
         else:
             raise

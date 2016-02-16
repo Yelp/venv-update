@@ -71,7 +71,7 @@ def main():
                 'universal': 1,
             }
         },
-    )  # pragma: no cover: covered by tox
+    )  # :pragma:nocover: covered by tox
 
 if __name__ == '__main__':
     exit(main())
