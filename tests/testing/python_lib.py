@@ -8,3 +8,6 @@ import sys
 from distutils.sysconfig import get_python_lib  # pylint:disable=import-error
 
 PYTHON_LIB = os.path.relpath(get_python_lib(), sys.prefix)
+
+if __name__ == '__main__':
+    print(PYTHON_LIB)

@@ -34,9 +34,10 @@ def reserve(ip=LOCALHOST):
     # these three are necessary just to get the port into a TIME_WAIT state
     client = socket()
     client.connect(sockname)
-    server.accept()
+    conn, _ = server.accept()
 
     server.close()
+    conn.close()
     client.close()
 
     return sockname[1]
