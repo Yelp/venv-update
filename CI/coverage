@@ -1,6 +1,4 @@
 #!/bin/sh
 set -eux
-TOP=$PWD coverage xml
-exec codecov \
-    --file coverage.xml \
-    -e USER TRAVIS_PYTHON_VERSION TOXENV CIRCLE_NODE_INDEX \
+export TOP=$PWD
+codecov -e USER TRAVIS_PYTHON_VERSION TOXENV CIRCLE_NODE_INDEX

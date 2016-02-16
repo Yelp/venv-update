@@ -80,9 +80,6 @@ def build_all(sources, dst):
         if build_one(source, dst):
             continue
         for source in sorted(source.listdir()):
-            if not source.check(dir=True):
-                continue
-
             build_one(source, dst)
 
 
@@ -160,6 +157,8 @@ def flock(path, blocking=True):
     except IOError as error:
         if error.errno == 11:  # EAGAIN: lock held
             return None
+        else:
+            raise
     else:
         return fd
 
@@ -177,7 +176,7 @@ def make_sdists(sources, destination):
     staging.ensure(dir=True)
 
     do_build(sources, staging)
-    if destination.islink():
+    if destination.islink():  # pragma:nocover:
         old = destination.readlink()
     else:
         old = None
@@ -186,7 +185,7 @@ def make_sdists(sources, destination):
     link.mksymlinkto(staging, absolute=False)
     link.rename(destination)
 
-    if old is not None:
+    if old is not None:  # pragma:nocover:
         destination.dirpath(old).remove()
 
 

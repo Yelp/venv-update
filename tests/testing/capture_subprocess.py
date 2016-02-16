@@ -25,17 +25,6 @@ else:
         pass
 
 
-def fdclosed(fd):
-    """close a file descriptor, idempotently"""
-    try:
-        os.close(fd)
-    except OSError as err:
-        if err.errno == 9:  # bad file descriptor
-            pass  # it's already closed: ok
-        else:
-            raise
-
-
 class Pipe(object):
     """a convenience object, wrapping os.pipe()"""
 
@@ -47,7 +36,7 @@ class Pipe(object):
 
     def readonly(self):
         """close the write end of the pipe. idempotent."""
-        fdclosed(self.write)
+        os.close(self.write)
 
 
 def pty_normalize_newlines(fd):
