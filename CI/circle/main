@@ -23,6 +23,7 @@ trap timestamp EXIT
 
 ### main
 set -x
+export TOX_TESTENV_PASSENV="CI $(env | grep ^CIRCLE | sed 's/=.*//')"
 
 ### machine
 timestamp
