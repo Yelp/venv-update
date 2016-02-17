@@ -21,8 +21,8 @@ coverage-report() {
     # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
     python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
 
+    coverage report --fail-under 90
     coverage report --fail-under 100 venv_update.py pip_faster.py
-    coverage report --fail-under 97
     if ${CI:-false}; then
         ./CI/coverage
     fi
