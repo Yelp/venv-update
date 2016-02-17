@@ -14,7 +14,6 @@ test tests: venv
 
 venv: setup.py requirements.txt requirements.d/* Makefile
 	./venv_update.py venv= --python=$(PYTHON) venv install= -r $(REQUIREMENTS)
-	./venv/bin/pre-commit install
 
 .PHONY: clean
 clean:
