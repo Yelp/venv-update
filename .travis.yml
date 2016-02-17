@@ -36,8 +36,9 @@ matrix:
           env: TOXENV=lint
 
 install: ./venv_update.py ==venv $VIRTUAL_ENV ==install -r CI/requirements.txt
-script: TOX_TESTENV_PASSENV="CI $(env | grep ^TRAVIS | sed 's/=.*//')" tox
-after_success: ./CI/coverage
+script:
+    - . CI/env
+    - tox
 
 
 # sudo:false gives us the new, faster cluster and enables caches for public repos

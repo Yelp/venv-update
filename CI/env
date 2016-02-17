@@ -1,0 +1,2 @@
+#!/not/executable/bash
+export TOX_TESTENV_PASSENV="CI $(env | grep -Po '^(CIRCLE|TRAVIS|COVERALLS)[^=]*')"

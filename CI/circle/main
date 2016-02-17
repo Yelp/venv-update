@@ -3,6 +3,7 @@ set -eu
 
 ### definitions
 export PATH=$PWD/bin:$PATH
+. CI/env
 timestamp() { date +"%F %T.%N"; }
 function runtox() {
     timestamp
@@ -23,7 +24,7 @@ trap timestamp EXIT
 
 ### main
 set -x
-export TOX_TESTENV_PASSENV="CI $(env | grep ^CIRCLE | sed 's/=.*//')"
+: $TOX_TESTENV_PASSENV
 
 ### machine
 timestamp
