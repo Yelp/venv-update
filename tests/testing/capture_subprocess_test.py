@@ -56,7 +56,7 @@ def test_capture_subprocess(tmpdir):
     assert stderr.strip('%\n') == ''
 
 
-def cli():
+def test_cli():
     from venv_update import check_output
     from sys import executable
     from testing.capture_subprocess import __file__ as script

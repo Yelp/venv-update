@@ -11,7 +11,7 @@ test tests: venv
 
 .PHONY: tox
 tox:
-	tox -e lint,test
+	tox -e lint,py27
 
 venv: setup.py requirements.txt requirements.d/* Makefile
 	./venv_update.py ==venv --python=python2.7 venv
