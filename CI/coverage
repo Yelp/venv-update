@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eux
 export TOP=$PWD
-codecov -e USER TRAVIS_PYTHON_VERSION TOXENV CIRCLE_NODE_INDEX
+codecov -e CIRCLECI TRAVIS PYTHON

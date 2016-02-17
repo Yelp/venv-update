@@ -16,18 +16,18 @@ def fixed_environment_variables():
     pass
 
 
-@pytest.mark.skipif('TOXENV' not in environ, reason='$TOXENV not set')
+@pytest.mark.skipif('PYTHON' not in environ, reason='$PYTHON not set')
 def test_python_version():
-    python_version = environ['TOXENV'].lower()
+    python_version = environ['PYTHON'].lower()
     if python_version == 'pypy':  # :pragma:nocover: coverage under pypy is too slow.
         assert platform.python_implementation() == PYPY
         expected_version = (2, 7)
     elif python_version == 'pypy3':  # :pragma:nocover: coverage under pypy is too slow.
         assert platform.python_implementation() == PYPY
         expected_version = (3, 2)
-    else:  # eg py34
-        major, minor = python_version[2:4]
-        expected_version = (int(major), int(minor))
+    else:  # eg python3.4
+        expected_version = python_version.replace('python', '').split('.')
+        expected_version = tuple(int(part) for part in expected_version)
 
     from sys import version_info
     assert expected_version == version_info[:2]

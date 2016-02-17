@@ -1,5 +1,5 @@
-PYTHON?=python2.7
-REQUIREMENTS?=requirements.txt
+export PYTHON?=python2.7
+export REQUIREMENTS?=requirements.txt
 
 .PHONY: all
 all: lint test
