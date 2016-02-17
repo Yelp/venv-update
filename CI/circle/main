@@ -5,20 +5,18 @@ set -eu
 export PATH=$PWD/bin:$PATH
 . CI/env
 timestamp() { date +"%F %T.%N"; }
-function runtox() {
+function runtest() {
     timestamp
-    export TOXENV="$1"
+    touch Makefile
     PYTEST_OPTIONS="
-        --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$1.xml
-        --junit-prefix=$1:
-    " tox
+        --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$PYTHON.xml
+        --junit-prefix=$PYTHON:
+    " REQUIREMENTS=requirements.d/test.txt make test
 }
 function runlint() {
     timestamp
-    rm -rf tox
-    virtualenv venv --python="$1"
-    ./tox/bin/pip install -r requirements.d/lint.txt
-    make lint
+    touch Makefile
+    REQUIREMENTS=requirements.d/lint.txt make lint
 }
 trap timestamp EXIT
 
@@ -39,19 +37,20 @@ pip install --upgrade -r CI/requirements.txt
 ### test
 case "$CIRCLE_NODE_INDEX" in
 0)
-    runlint python2.7
-    runtox py27
+    export PYTHON=python2.7
+    runlint
     ;;
 1)
-    runtox py34
+    export PYTHON=python3.4
+    runlint
     ;;
 2)
-    runlint python3.4
+    export PYTHON=pypy
     ./CI/circle/install-pypy pypy-4.0.1-linux64
-    runtox pypy
     ;;
 3)
+    export PYTHON=pypy3
     ./CI/circle/install-pypy pypy3-2.4.0-linux64
-    runtox pypy3
     ;;
 esac
+runtest
