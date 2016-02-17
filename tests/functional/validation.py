@@ -45,17 +45,17 @@ def test_python_versions(tmpdir):
     requirements('project-with-c')
 
     other_python = OtherPython()
-    venv_update('==venv', '--python=' + other_python.interpreter, 'venv')
+    venv_update('venv=', '--python=' + other_python.interpreter, 'venv')
     assert_c_extension_runs()
     assert_python_version(other_python.version_prefix)
 
     from sys import executable as python
-    venv_update('==venv', '--python=' + python, 'venv')
+    venv_update('venv=', '--python=' + python, 'venv')
     assert_c_extension_runs()
     from sys import version
     assert_python_version(version)
 
-    venv_update('==venv', '--python=' + other_python.interpreter, 'venv')
+    venv_update('venv=', '--python=' + other_python.interpreter, 'venv')
     assert_c_extension_runs()
     assert_python_version(other_python.version_prefix)
 
@@ -114,7 +114,7 @@ def test_update_while_active(tmpdir):
     requirements('project_with_c')
 
     venv_update_symlink_pwd()
-    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py ==venv venv --python=venv/bin/python')
+    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py venv= venv --python=venv/bin/python')
     out = uncolor(out)
 
     assert err == ''
@@ -138,7 +138,7 @@ def test_update_invalidated_while_active(tmpdir):
     requirements('project-with-c')
 
     venv_update_symlink_pwd()
-    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py ==venv --system-site-packages venv')
+    out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py venv= --system-site-packages venv')
 
     err = strip_pip_warnings(err)
     assert err == ''
@@ -158,7 +158,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
 
         # first simulate some unrelated use of venv-update
         # this guards against statefulness in the venv-update scratch dir
-        venv_update('==venv', 'unrelated_venv', '==pip-command', 'true')
+        venv_update('venv=', 'unrelated_venv', 'pip-command=', 'true')
 
         run('virtualenv', '--python', other_python.interpreter, 'venv')
         initial_version = assert_python_version(other_python.version_prefix)

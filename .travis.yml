@@ -35,7 +35,7 @@ matrix:
         - python: '3.4'
           env: TOXENV=lint
 
-install: ./venv_update.py ==venv $VIRTUAL_ENV ==install -r CI/requirements.txt
+install: ./venv_update.py venv= $VIRTUAL_ENV install= -r CI/requirements.txt
 script:
     - . CI/env
     - tox

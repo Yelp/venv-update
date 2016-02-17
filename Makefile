@@ -3,7 +3,7 @@ all: lint test
 
 .PHONY: lint
 lint: venv
-	./venv/bin/pre-commit run --all-files
+	tox -e lint
 
 .PHONY: test tests
 test tests: venv
@@ -14,7 +14,7 @@ tox:
 	tox -e lint,py27
 
 venv: setup.py requirements.txt requirements.d/* Makefile
-	./venv_update.py ==venv --python=python2.7 venv
+	./venv_update.py venv= --python=python2.7 venv
 	./venv/bin/pre-commit install
 
 .PHONY: clean

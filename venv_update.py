@@ -7,36 +7,36 @@ Update a (possibly non-existant) virtualenv directory using a pip requirements
 file.  When this script completes, the virtualenv directory should contain the
 same packages as if it were deleted then rebuilt.
 
-venv-update uses "double equal" options (e.g. ==venv) to delimit groups of
+venv-update uses "trailing equal" options (e.g. venv=) to delimit groups of
 (conventional, dashed) options to pass to wrapped commands (virtualenv and pip).
 
 Options:
-    ==venv          parameters are passed to virtualenv
-                    default: {==venv}
-    ==install       options to pip-command
-                    default: {==install}
-    ==pip-command   is run after the virtualenv directory is bootstrapped
-                    default: {==pip-command}
+    venv=          parameters are passed to virtualenv
+                    default: {venv=}
+    install=       options to pip-command
+                    default: {install=}
+    pip-command=   is run after the virtualenv directory is bootstrapped
+                    default: {pip-command=}
 
 Examples:
     # install requirements.txt to "venv"
     venv-update
 
     # install requirements.txt to "myenv"
-    venv-update ==venv myenv
+    venv-update venv= myenv
 
     # install myreqs.txt to "venv"
-    venv-update ==install -r myreqs.txt
+    venv-update install= -r myreqs.txt
 
     # install requirements.txt to "venv", verbosely
-    venv-update ==venv venv -vvv ==install -r requirements.txt -vvv
+    venv-update venv= venv -vvv install= -r requirements.txt -vvv
 
     # install requirements.txt to "venv", without pip-faster --update --prune
-    venv-update ==pip-command pip install
+    venv-update pip-command= pip install
 
-We strongly recommend that you keep the default value of ==pip-command in order
+We strongly recommend that you keep the default value of pip-command= in order
 to quickly and reproducibly install your requirements. You can override the
-packages installed during bootstrapping, prior to ==pip-command, by creating a
+packages installed during bootstrapping, prior to pip-command=, by creating a
 `{VENV_UPDATE_REQS_OVERRIDE}` file.
 
 Pip options are also controllable via environment variables.
@@ -57,9 +57,9 @@ __version__ = '1.0rc6.dev4'
 DEFAULT_VIRTUALENV_PATH = 'venv'
 VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
 DEFAULT_OPTION_VALUES = {
-    '==venv': (DEFAULT_VIRTUALENV_PATH,),
-    '==install': ('-r', 'requirements.txt',),
-    '==pip-command': ('pip-faster', 'install', '--upgrade', '--prune'),
+    'venv=': (DEFAULT_VIRTUALENV_PATH,),
+    'install=': ('-r', 'requirements.txt',),
+    'pip-command=': ('pip-faster', 'install', '--upgrade', '--prune'),
 }
 __doc__ = __doc__.format(  # pylint:disable=redefined-builtin
     VENV_UPDATE_REQS_OVERRIDE=VENV_UPDATE_REQS_OVERRIDE,
@@ -372,9 +372,9 @@ class CacheOpts(object):
 
 
 def venv_update(
-        venv=DEFAULT_OPTION_VALUES['==venv'],
-        install=DEFAULT_OPTION_VALUES['==install'],
-        pip_command=DEFAULT_OPTION_VALUES['==pip-command'],
+        venv=DEFAULT_OPTION_VALUES['venv='],
+        install=DEFAULT_OPTION_VALUES['install='],
+        pip_command=DEFAULT_OPTION_VALUES['pip-command='],
 ):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 

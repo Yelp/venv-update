@@ -41,7 +41,7 @@ def test_install_custom_path_and_requirements(tmpdir):
         path='requirements2.txt',
     )
     enable_coverage()
-    venv_update('==venv', 'venv2', '==install', '-r', 'requirements2.txt')
+    venv_update('venv=', 'venv2', 'install=', '-r', 'requirements2.txt')
     assert pip_freeze('venv2') == '\n'.join((
         'pip-faster==' + __version__,
         'six==1.8.0',
@@ -58,7 +58,7 @@ def test_arguments_version(tmpdir):
     enable_coverage()
 
     # should show virtualenv version, successfully
-    out, err = venv_update('==venv', '--version')
+    out, err = venv_update('venv=', '--version')
     assert err == ''
 
     out = uncolor(out)
@@ -74,7 +74,7 @@ def test_arguments_system_packages(tmpdir):
     tmpdir.chdir()
     requirements('')
 
-    venv_update('==venv', '--system-site-packages', 'venv')
+    venv_update('venv=', '--system-site-packages', 'venv')
 
     out, err = run('venv/bin/python', '-c', '''\
 import sys
@@ -122,7 +122,7 @@ def test_scripts_left_behind(tmpdir):
 def assert_timestamps(*reqs):
     firstreq = Path(reqs[0])
     lastreq = Path(reqs[-1])
-    args = ['==install'] + sum([['-r', req] for req in reqs], [])
+    args = ['install='] + sum([['-r', req] for req in reqs], [])
 
     venv_update(*args)
 
@@ -166,7 +166,7 @@ def pipe_output(read, write):
 
     from subprocess import Popen
     vupdate = Popen(
-        ('venv-update', '==venv', '--version'),
+        ('venv-update', 'venv=', '--version'),
         env=environ,
         stdout=write,
         close_fds=True,
@@ -226,7 +226,7 @@ def test_args_backward(tmpdir):
 
     from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
-        venv_update('==venv', 'requirements.txt')
+        venv_update('venv=', 'requirements.txt')
 
     # py26 doesn't have a consistent exit code:
     #   http://bugs.python.org/issue15033
@@ -246,12 +246,12 @@ def test_wrong_wheel(tmpdir):
     tmpdir.chdir()
 
     requirements('pure_python_package==0.1.0')
-    venv_update('==venv', 'venv1')
+    venv_update('venv=', 'venv1')
     # A different python
     # Before fixing, this would install argparse using the `py2-none-any`
     # wheel, even on py3
     other_python = OtherPython()
-    ret2out, _ = venv_update('==venv', 'venv2', '-p' + other_python.interpreter, '==install', '-vv', '-r', 'requirements.txt')
+    ret2out, _ = venv_update('venv=', 'venv2', '-p' + other_python.interpreter, 'install=', '-vv', '-r', 'requirements.txt')
 
     assert '''
   No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))

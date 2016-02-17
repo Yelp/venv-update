@@ -15,10 +15,10 @@ function runtox() {
 }
 function runlint() {
     timestamp
-    rm -rf lint
-    virtualenv lint --python="$1"
-    inenv lint pip install -r requirements.d/lint.txt
-    inenv lint make lint
+    rm -rf tox
+    virtualenv venv --python="$1"
+    ./tox/bin/pip install -r requirements.d/lint.txt
+    make lint
 }
 trap timestamp EXIT
 
