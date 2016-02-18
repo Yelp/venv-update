@@ -4,5 +4,3 @@
 pytest-xdist
 
 pypiserver
-
-codecov

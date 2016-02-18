@@ -2,22 +2,8 @@
 set -eu
 
 ### definitions
-export PATH=$PWD/bin:$PATH
-. CI/env
-timestamp() { date +"%F %T.%N"; }
-function runtest() {
-    timestamp
-    touch Makefile
-    PYTEST_OPTIONS="
-        --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$PYTHON.xml
-        --junit-prefix=$PYTHON:
-    " REQUIREMENTS=requirements.d/test.txt make test
-}
-function runlint() {
-    timestamp
-    touch Makefile
-    REQUIREMENTS=requirements.d/lint.txt make lint
-}
+source CI/env
+PATH=$PWD/CI/circle:$PATH
 trap timestamp EXIT
 
 ### main
@@ -25,32 +11,41 @@ set -x
 : $TOX_TESTENV_PASSENV
 
 ### machine
-timestamp
 lsb_release -a
 test $CIRCLE_NODE_TOTAL -eq 4
 
-### dependencies
 timestamp
 sudo apt-get install python2.7-dev python3.4-dev
-pip install --upgrade -r CI/requirements.txt
 
-### test
-case "$CIRCLE_NODE_INDEX" in
-0)
-    export PYTHON=python2.7
-    runlint
+### per-node actions
+timestamp
+case $CIRCLE_NODE_INDEX in
+0)  ## 13m
+    ./CI/circle/install-python 2.7.10
+    PYTHON=python2.7 runtest  # 6m
+
+    ./CI/circle/install-python 2.6.8
+    PYTHON=python2.6 runtest  # 7m
     ;;
-1)
-    export PYTHON=python3.4
-    runlint
+1)  ## 13.5m
+    # using python3.4.3 from the system
+    PYTHON=python3.4 runtest  # 6m
+
+    ./CI/circle/install-python 3.5.0
+    PYTHON=python3.5 runtest  # 7.5m
     ;;
-2)
-    export PYTHON=pypy
-    ./CI/circle/install-pypy pypy-4.0.1-linux64
+2)  ## 10.5m
+    # using python3.4.3 from the system
+    PYTHON=python3.4 runlint  # 40s
+
+    ./CI/circle/install-python 2.7.10
+    PYTHON=python2.7 runlint  # 40s
+
+    ./CI/circle/install-python pypy-4.0.1
+    PYTHON=pypy runtest  # 9m
     ;;
-3)
-    export PYTHON=pypy3
-    ./CI/circle/install-pypy pypy3-2.4.0-linux64
+3)  ## 11m
+    ./CI/circle/install-python pypy3-2.4.0
+    PYTHON=pypy3 runtest  # 11m
     ;;
 esac
-runtest

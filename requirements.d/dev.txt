@@ -5,3 +5,4 @@
 -r CI.txt
 
 pudb
+codecov

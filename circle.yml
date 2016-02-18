@@ -1,14 +1,13 @@
-
 dependencies:
+    # the cache will only save files created during this stage
     cache_directories:
         - ~/.pre-commit
         - ~/.cache
     override:
-        # we'll handle dependencies in our CI script.
-        - /bin/true
+        - true dun need no stinkin deps
 
 test:
     override:
         # see https://circleci.com/docs/parallel-manual-setup
-        - CI/circle/main:
+        - ./CI/circle/main:
             parallel: true

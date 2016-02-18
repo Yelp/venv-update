@@ -1,0 +1,18 @@
+#!/bin/bash
+set -eu
+PYTHON="$1"
+PYENV="$HOME/.pyenv"
+CACHE="$HOME/.cache/pyenv"
+
+set -x
+if ! [ -d $CACHE/$PYTHON ]; then
+    mkdir -p $CACHE/
+    if [ -d $PYENV/versions/$PYTHON ]; then
+        ln -sf  $PYENV/versions/$PYTHON $CACHE/$PYTHON
+    else
+        $PYENV/plugins/python-build/bin/python-build $PYTHON $CACHE/$PYTHON
+    fi
+fi
+
+ln -sf $CACHE/$PYTHON/bin/* ./bin/
+rm -f ./bin/virtualenv* ./bin/pip*

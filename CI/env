@@ -1,6 +1,8 @@
 #!/not/executable/bash
-export TOX_TESTENV_PASSENV="CI $(env | grep -Po '^(CIRCLE|TRAVIS|COVERALLS)[^=]*')"
+export TOX_TESTENV_PASSENV="CI $(env | grep -Po '^(CIRCLE|TRAVIS)[^=]*')"
+export PATH=$PWD/bin:$PATH
+export PYTHON
 
 if [[ "${TOXENV:-}" = "python" && "${TRAVIS_PYTHON_VERSION:-}" ]]; then
-    export PYTHON="$(sed 's/^[0-9]/python&/' <<< "$TRAVIS_PYTHON_VERSION")"
+    PYTHON="$(sed 's/^[0-9]/python&/' <<< "$TRAVIS_PYTHON_VERSION")"
 fi
