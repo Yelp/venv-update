@@ -2,7 +2,11 @@
 set -eux
 timestamp
 touch Makefile
-PYTEST_OPTIONS="
-    --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.$PYTHON.xml
-    --junit-prefix=$PYTHON:
-" REQUIREMENTS=requirements.d/test.txt exec make test
+# gives better labelling in codecov.io
+export CIRCLE_NODE_INDEX="$CIRCLE_NODE_INDEX:$PYTHON"
+export PYTEST_OPTIONS="
+    --junit-xml=$CIRCLE_TEST_REPORTS/pytest/$CIRCLE_NODE_INDEX.xml
+    --junit-prefix=$CIRCLE_NODE_INDEX:
+"
+export REQUIREMENTS=requirements.d/test.txt
+exec make test
