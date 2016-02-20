@@ -45,11 +45,6 @@ class Pipe(object):
         set_inheritable(self.read, True)
         set_inheritable(self.write, True)
 
-    def closed(self):
-        """close both ends of the pipe. idempotent."""
-        fdclosed(self.read)
-        fdclosed(self.write)
-
     def readonly(self):
         """close the write end of the pipe. idempotent."""
         fdclosed(self.write)
@@ -166,11 +161,10 @@ def capture_subprocess(cmd, encoding='UTF-8', **popen_kwargs):
     exit_code = outputter.wait()
     result = (stdout_tee.join(), stderr_tee.join())
 
-    if encoding is not None:
-        result = tuple(
-            bytestring.decode(encoding)
-            for bytestring in result
-        )
+    result = tuple(
+        bytestring.decode(encoding)
+        for bytestring in result
+    )
 
     if exit_code == 0:
         return result

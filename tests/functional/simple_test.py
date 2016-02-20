@@ -8,6 +8,7 @@ import pytest
 from py._path.local import LocalPath as Path
 
 from testing import enable_coverage
+from testing import install_coverage
 from testing import OtherPython
 from testing import pip_freeze
 from testing import requirements
@@ -370,6 +371,7 @@ pure_python_package
 def test_cant_wheel_package(tmpdir):
     with tmpdir.as_cwd():
         enable_coverage()
+        install_coverage()
         requirements('cant-wheel-package\npure-python-package')
 
         out, err = venv_update()
@@ -386,10 +388,9 @@ def test_cant_wheel_package(tmpdir):
 Failed building wheel for cant-wheel-package
 Running setup.py bdist_wheel for pure-python-package
 Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
-SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package (from -r requirements.txt (line 1))
+SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package==0.1.0
 Installing collected packages: cant-wheel-package, pure-python-package
   Running setup.py install for cant-wheel-package
-  Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
 Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
 ''' in out  # noqa

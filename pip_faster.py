@@ -78,46 +78,31 @@ def is_local_directory(url):
 
 
 def optimistic_wheel_search(req, find_links):
-    from os.path import join, exists
+    assert req_is_pinned(req), req
 
-    best_version = pkg_resources.parse_version('')
-    best_link = None
+    # this matches the name-munging done in pip.wheel:
+    reqname = req.project_name.replace('-', '_')
+    reqname = ignorecase_glob(reqname)
+    reqname = reqname + '-*.whl'
+
     for findlink in find_links:
         if findlink.startswith('file:'):
             findlink = findlink[5:]
-        elif not exists(findlink):
-            assert False, 'findlink not file: coverage: %r' % findlink
-            continue  # TODO: test coverage
-        # this matches the name-munging done in pip.wheel:
-        reqname = req.name.replace('-', '_')
-
-        reqname = ignorecase_glob(reqname)
-        reqname = join(findlink, reqname + '-*.whl')
-        logger.debug('wheel glob: %s', reqname)
+        from os.path import join
+        findlink = join(findlink, reqname)
+        logger.debug('wheel glob: %s', findlink)
         from glob import glob
-        for link in glob(reqname):
+        for link in glob(findlink):
             from pip.index import Link
-            link = Link('file://' + link)
+            link = Link('file:' + link)
             from pip.wheel import Wheel
             wheel = Wheel(link.filename)
             logger.debug('Candidate wheel: %s', link.filename)
-            if wheel.version not in req.req:
-                continue
-
-            if not wheel.supported():
-                continue
-
-            version = pkg_resources.parse_version(wheel.version)
-            if version > best_version:
-                best_version = version
-                best_link = link
-            else:
-                assert False, 'TODO: test coverage'
-
-    return best_link
+            if wheel.version in req and wheel.supported():
+                return link
 
 
-def req_is_absolute(requirement):
+def req_is_pinned(requirement):
     if not requirement:
         # url-style requirement
         return False
@@ -131,7 +116,7 @@ def req_is_absolute(requirement):
 class FasterPackageFinder(PackageFinder):
 
     def find_requirement(self, req, upgrade):
-        if req_is_absolute(req.req):
+        if req_is_pinned(req.req):
             # if the version is pinned-down by a ==
             # first try to use any installed package that satisfies the req
             if req.satisfied_by:
@@ -139,7 +124,7 @@ class FasterPackageFinder(PackageFinder):
                 raise BestVersionAlreadyInstalled
 
             # then try an optimistic search for a .whl file:
-            link = optimistic_wheel_search(req, self.find_links)
+            link = optimistic_wheel_search(req.req, self.find_links)
             if link is None:
                 # The wheel will be built during prepare_files
                 logger.debug('No wheel found locally for pinned requirement %s', req)
@@ -398,9 +383,11 @@ class FasterRequirementSet(RequirementSet):
         )
         # TODO-TEST: we only incur the build cost once on uncached install
         for req in wb.build():
-            link = optimistic_wheel_search(req, finder.find_links)
+            # create a pinned req, matching the source we have.
+            pinned = pkg_resources.Requirement(req.name, [('==', req.pkg_info()['version'])], ())
+            link = optimistic_wheel_search(pinned, finder.find_links)
             if link is None:
-                logger.error('SLOW!! no wheel found after building (couldn\'t be wheeled?): %s', req)
+                logger.error('SLOW!! no wheel found after building (couldn\'t be wheeled?): %s', pinned)
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"

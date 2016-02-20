@@ -19,8 +19,7 @@ def merge_coverage(coverage_data, from_path, to_path):
         result_filename = result_filename.lstrip('/')
         result_filename = os.path.join(to_path, result_filename)
         result_filename = os.path.abspath(result_filename)
-        if not os.path.exists(result_filename):
-            continue
+        assert os.path.exists(result_filename), result_filename
 
         coverage_data.add_arcs(
             {result_filename: coverage_data.arcs(filename)}

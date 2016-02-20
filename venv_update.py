@@ -251,7 +251,6 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, opti
         return 'system-site-packages changed, to %s' % options.system_site_packages
 
     if source_python is None:
-        info('SOURCE_PYTHON: %s' % source_python)
         return
     destination_version = get_python_version(destination_python)
     source_version = get_python_version(source_python)

@@ -52,21 +52,7 @@ def venv_update_symlink_pwd():
     # symlink so that we get coverage, where possible
     venv_update_path = Path(dotpy(venv_update_path))
     local_vu = Path(venv_update_path.basename)
-    if local_vu.exists():
-        local_vu.remove()
     local_vu.mksymlinkto(venv_update_path)
-
-
-def venv_update_script(pyscript, venv='venv'):
-    """Run a python script that imports venv_update"""
-
-    # symlink so that we get coverage, where possible
-    venv_update_symlink_pwd()
-
-    # write it to a file so we get more-reasonable stack traces
-    testscript = Path('testscript.py')
-    testscript.write(pyscript)
-    return run('%s/bin/python' % venv, testscript.strpath)
 
 
 # coverage.py adds some helpful warnings to stderr, with no way to quiet them.
@@ -124,7 +110,7 @@ def pip_freeze(venv='venv'):
     return out
 
 
-def install_coverage(venv):
+def install_coverage(venv='venv'):
     venv = Path(venv)
     if not venv.exists():
         run('virtualenv', str(venv))

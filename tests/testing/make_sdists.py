@@ -91,12 +91,11 @@ class public_pypi_enabled(object):
 
     def __enter__(self):
         from os import environ
-        self.orig = environ.pop('PIP_INDEX_URL', None)
+        self.orig = environ.pop('PIP_INDEX_URL')
 
     def __exit__(self, value, type_, traceback):
         from os import environ
-        if self.orig is not None:
-            environ['PIP_INDEX_URL'] = self.orig
+        environ['PIP_INDEX_URL'] = self.orig
 
 
 def wheel(src, dst):

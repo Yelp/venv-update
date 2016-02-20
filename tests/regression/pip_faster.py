@@ -7,6 +7,7 @@ import sys
 import pytest
 
 from testing import enable_coverage
+from testing import install_coverage
 from testing import Path
 from testing import pip_freeze
 from testing import run
@@ -22,6 +23,7 @@ def test_circular_dependencies(tmpdir):
     enable_coverage()
     venv = Path('venv')
     run('virtualenv', venv.strpath)
+    install_coverage(venv.strpath)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)

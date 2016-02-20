@@ -10,6 +10,7 @@ from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import TOP
+from testing import uncolor
 from venv_update import __version__
 
 
@@ -152,3 +153,42 @@ def it_can_handle_requirements_already_met(tmpdir):
 
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
     assert 'many-versions-package==1\n' in pip_freeze(str(venv))
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_gives_proper_error_without_requirements(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster==' + __version__)
+
+    out, err = run(str(venv.join('bin/pip-faster')), 'install')
+    out = uncolor(out)
+    assert out.startswith('You must give at least one requirement to install')
+    assert err == ''
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_can_handle_a_bad_findlink(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster==' + __version__)
+
+    out, err = run(
+        str(venv.join('bin/pip-faster')),
+        'install', '-vvv',
+        '--find-links', 'git+wat://not/a/thing',
+        'pure-python-package',
+    )
+    out = uncolor(out)
+
+    assert '''
+Candidate wheel: pure_python_package-0.2.0-py2.py3-none-any.whl
+Installing collected packages: pure-python-package
+Successfully installed pure-python-package
+''' in out
+    assert err == ''
+    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')

@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 import pytest
 
 from testing import enable_coverage
+from testing import install_coverage
 from testing import pip_freeze
 from testing import requirements
-from testing import TOP
 from testing import venv_update
 from venv_update import __version__
 
@@ -16,6 +16,8 @@ from venv_update import __version__
 def time_savings(tmpdir, between):
     """install twice, and the second one should be faster, due to whl caching"""
     with tmpdir.as_cwd():
+        enable_coverage()
+        install_coverage()
 
         requirements('\n'.join((
             'project_with_c',
@@ -23,7 +25,6 @@ def time_savings(tmpdir, between):
             'slow_python_package==0.1.0',
             'dependant_package',
             'many_versions_package>=2,<3',
-            '-r %s/requirements.d/coverage.txt' % TOP,
             ''
         )))
 
@@ -37,8 +38,6 @@ def time_savings(tmpdir, between):
         )
         time1 = time() - start
         expected = '\n'.join((
-            'coverage==4.0.3',
-            'coverage-enable-subprocess==0',
             'dependant-package==1',
             'implicit-dependency==1',
             'many-versions-package==2.1',
@@ -53,6 +52,7 @@ def time_savings(tmpdir, between):
         assert pip_freeze() == expected
 
         between()
+        install_coverage()
 
         start = time()
         # second install should also need no network access

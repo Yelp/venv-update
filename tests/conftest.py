@@ -142,12 +142,12 @@ def service_up(port):
             'http://localhost:{0}'.format(port)
         ).getcode() == 200
     except IOError as error:
-        if isinstance(error.errno, int):
+        if isinstance(error.errno, int):  # pragma:nocover:
             errno = error.errno
         # urllib throws an IOError with a string in the errno slot -.-
-        elif len(error.args) > 1 and isinstance(error.args[1], socket.error):
+        elif len(error.args) > 1 and isinstance(error.args[1], socket.error):  # pragma:nocover:
             errno = error.args[1].errno
-        elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
+        elif len(error.args) == 1 and isinstance(error.args[0], socket.error):  # pragma:nocover:
             errno = error.args[0].errno
         else:
             raise ValueError('Could not find error number: %r' % error)
@@ -158,7 +158,7 @@ def service_up(port):
             raise
 
 
-def pytest_assertrepr_compare(config, op, left, right):
+def pytest_assertrepr_compare(config, op, left, right):  # TODO: unit-test :pragma:nocover:
     if op == 'in' and '\n' in left:
         # Convert 'in' comparisons to '==' comparisons, for more usable error messaging.
         # Truncate the right-hand-side such that it has the longest common prefix with the LHS,
