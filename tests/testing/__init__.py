@@ -9,6 +9,7 @@ from re import MULTILINE
 from py._path.local import LocalPath as Path
 
 TOP = Path(__file__) / '../../..'
+COVERAGE_REQS = TOP.join('requirements.d/coverage.txt')
 
 
 def requirements(reqs, path='requirements.txt'):
@@ -51,21 +52,7 @@ def venv_update_symlink_pwd():
     # symlink so that we get coverage, where possible
     venv_update_path = Path(dotpy(venv_update_path))
     local_vu = Path(venv_update_path.basename)
-    if local_vu.exists():
-        local_vu.remove()
     local_vu.mksymlinkto(venv_update_path)
-
-
-def venv_update_script(pyscript, venv='venv'):
-    """Run a python script that imports venv_update"""
-
-    # symlink so that we get coverage, where possible
-    venv_update_symlink_pwd()
-
-    # write it to a file so we get more-reasonable stack traces
-    testscript = Path('testscript.py')
-    testscript.write(pyscript)
-    return run('%s/bin/python' % venv, testscript.strpath)
 
 
 # coverage.py adds some helpful warnings to stderr, with no way to quiet them.
@@ -83,14 +70,21 @@ def strip_coverage_warnings(stderr):
     return coverage_warnings_regex.sub('', stderr)
 
 
+# pip adds some helpful warnings to stderr, with no way to quiet them.
+pip_warnings_regex = Regex(
+    '|'.join((
+        (
+            r'^DEPRECATION: Python 2\.6 is no longer supported by the Python core team, please upgrade your Python\. '
+            r'A future version of pip will drop support for Python 2\.6\n'
+        ),
+        r"^  Url '[^']*/\.cache/pip-faster/wheelhouse' is ignored: it is neither a file nor a directory\.\n",
+    )),
+    flags=MULTILINE,
+)
+
+
 def strip_pip_warnings(stderr):
-    return stderr.replace(
-        ''.join((
-            'DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. ',
-            'A future version of pip will drop support for Python 2.6\n',
-        )),
-        '',
-    )
+    return pip_warnings_regex.sub('', stderr)
 
 
 def uncolor(text):
@@ -116,12 +110,16 @@ def pip_freeze(venv='venv'):
     return out
 
 
-def enable_coverage(tmpdir, venv='venv', options=()):
-    venv = tmpdir.join(venv)
-    options += ('--', '-r', str(TOP.join('requirements.d/coverage.txt')))
-    venv_update(str(venv), *options)
+def install_coverage(venv='venv'):
+    venv = Path(venv)
+    if not venv.exists():
+        run('virtualenv', str(venv))
+    run(str(venv.join('bin/python')), '-m', 'pip.__main__', 'install', '-r', str(COVERAGE_REQS))
 
-    return venv
+
+def enable_coverage():
+    from venv_update import Scratch
+    install_coverage(Scratch().venv)
 
 
 class OtherPython(object):

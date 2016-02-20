@@ -10,7 +10,7 @@ from setuptools import setup
 
 class build(_build):
 
-    def run(self):
+    def run(self):  # I actually don't know why coverage doesn't see this :pragma:nocover:
         # Simulate a slow package
         import time
         time.sleep(5)

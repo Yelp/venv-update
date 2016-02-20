@@ -7,6 +7,8 @@ import sys
 import pytest
 
 from testing import enable_coverage
+from testing import install_coverage
+from testing import Path
 from testing import pip_freeze
 from testing import run
 from testing import uncolor
@@ -18,7 +20,10 @@ def test_circular_dependencies(tmpdir):
     """pip-faster should be able to install packages with circular
     dependencies."""
     tmpdir.chdir()
-    venv = enable_coverage(tmpdir, 'venv')
+    enable_coverage()
+    venv = Path('venv')
+    run('virtualenv', venv.strpath)
+    install_coverage(venv.strpath)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -71,7 +76,8 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     # 2. Install old pip/setuptools that don't support wheel building.
     # 3. Install pip-faster.
     # 4. Install pure-python-package and assert it was wheeled during install.
-    venv = tmpdir.join('venv')
+    tmpdir.join('venv')
+    venv = Path('venv')
     run('virtualenv', venv.strpath)
 
     # We need to add public PyPI as an extra URL since we're installing

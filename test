@@ -21,7 +21,11 @@ coverage-report() {
     # for unknown reasons, I have to do the fixup again after stopping profiling to avoid stray test results
     python ./tests/testing/fix_coverage.py '/site-packages/' $TOP
 
-    coverage report --fail-under 89  # FIXME: should be 100
+    if ${CI:-false}; then
+        ./CI/coverage
+    fi
+    coverage report --fail-under 90
+    coverage report --fail-under 100 venv_update.py pip_faster.py
 }
 fail() {
     if ! $PYPY; then coverage-report; fi
@@ -30,16 +34,21 @@ fail() {
 trap fail ERR
 
 
-if [ -z "$*" ]; then
+if [ "$*" ]; then
+    set -- -n0 "$@"
+else
     # default arguments
-    set $TOP/tests $SITEPACKAGES/{venv_update,pip_faster}.py
+    set -- $TOP/tests $SITEPACKAGES/{venv_update,pip_faster}.py
 fi
 
+
 set -x
+# unquoted is intentional. we want to expand words.
+set -- ${PYTEST_OPTIONS:-} "$@"
 if $PYPY; then
     # coverage under pypy takes too dang long:
     #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182
-    # Having issues with memory, let's try reducing CPUs by half
+    # pypy can oom on travis; let's use less workers
     py.test -n $((NCPU / 5)) "$@"
 else
     # clean up anything left behind from before:

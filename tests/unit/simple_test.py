@@ -163,14 +163,14 @@ def test_shellescape_relpath_longer(tmpdir):
         True,
     )
 ])
-def test_req_is_absolute(req, expected):
+def test_req_is_pinned(req, expected):
     from pkg_resources import Requirement
     req = Requirement.parse(req)
-    assert pip_faster.req_is_absolute(req) is expected
+    assert pip_faster.req_is_pinned(req) is expected
 
 
-def test_req_is_absolute_null():
-    assert pip_faster.req_is_absolute(None) is False
+def test_req_is_pinned_null():
+    assert pip_faster.req_is_pinned(None) is False
 
 
 def test_wait_for_all_subprocesses(monkeypatch):

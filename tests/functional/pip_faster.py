@@ -3,12 +3,14 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
+from pip.wheel import Wheel
 
-from testing import enable_coverage
+from testing import install_coverage
 from testing import pip_freeze
 from testing import requirements
 from testing import run
 from testing import TOP
+from testing import uncolor
 from venv_update import __version__
 
 
@@ -27,9 +29,11 @@ Package Index Options:
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff(tmpdir):
     venv = tmpdir.join('venv')
-    run('virtualenv', str(venv))
+    install_coverage(venv)
 
     assert pip_freeze(str(venv)) == '''\
+coverage==4.0.3
+coverage-enable-subprocess==0
 '''
 
     pip = venv.join('bin/pip').strpath
@@ -38,7 +42,7 @@ def it_installs_stuff(tmpdir):
     assert [
         req.split('==')[0]
         for req in pip_freeze(str(venv)).split()
-    ] == ['pip-faster', 'virtualenv', 'wheel']
+    ] == ['coverage', 'coverage-enable-subprocess', 'pip-faster', 'virtualenv', 'wheel']
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
@@ -47,10 +51,8 @@ def it_installs_stuff(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff_from_requirements_file(tmpdir):
-    tmpdir.chdir()
-
     venv = tmpdir.join('venv')
-    run('virtualenv', str(venv))
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -68,11 +70,8 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
-    from pip.wheel import Wheel
-
-    tmpdir.chdir()
-
-    venv = enable_coverage(tmpdir, 'venv')
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -100,18 +99,13 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     # we shouldn't wheel things installed editable
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
     assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
-        'coverage',
-        'coverage-enable-subprocess',
     ])
 
 
 @pytest.mark.usefixtures('pypi_server')
 def it_doesnt_wheel_local_dirs(tmpdir):
-    from pip.wheel import Wheel
-
-    tmpdir.chdir()
-
-    venv = enable_coverage(tmpdir, 'venv')
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -138,8 +132,6 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
     wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
     assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
-        'coverage',
-        'coverage-enable-subprocess',
         'implicit-dependency',
         'many-versions-package',
         'pure-python-package',
@@ -148,9 +140,8 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
 @pytest.mark.usefixtures('pypi_server')
 def it_can_handle_requirements_already_met(tmpdir):
-    tmpdir.chdir()
-
-    venv = enable_coverage(tmpdir, 'venv')
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'pip-faster==' + __version__)
@@ -162,3 +153,42 @@ def it_can_handle_requirements_already_met(tmpdir):
 
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
     assert 'many-versions-package==1\n' in pip_freeze(str(venv))
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_gives_proper_error_without_requirements(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster==' + __version__)
+
+    out, err = run(str(venv.join('bin/pip-faster')), 'install')
+    out = uncolor(out)
+    assert out.startswith('You must give at least one requirement to install')
+    assert err == ''
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_can_handle_a_bad_findlink(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'pip-faster==' + __version__)
+
+    out, err = run(
+        str(venv.join('bin/pip-faster')),
+        'install', '-vvv',
+        '--find-links', 'git+wat://not/a/thing',
+        'pure-python-package',
+    )
+    out = uncolor(out)
+
+    assert '''
+Candidate wheel: pure_python_package-0.2.0-py2.py3-none-any.whl
+Installing collected packages: pure-python-package
+Successfully installed pure-python-package
+''' in out
+    assert err == ''
+    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')

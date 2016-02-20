@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eux
+export TOP=$PWD
+
+coverage xml
+
+pip-faster install codecov  # pending https://github.com/codecov/codecov-python/pull/57
+codecov -e CIRCLECI TRAVIS PYTHON --file coverage.xml

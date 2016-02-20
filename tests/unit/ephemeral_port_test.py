@@ -48,3 +48,12 @@ def test_localhost():
 def test_fqdn():
     fqip = socket.gethostbyname(getfqdn())
     assert_ip(fqip)
+
+
+def test_cli():
+    from venv_update import check_output
+    from sys import executable
+    from testing.ephemeral_port_reserve import __file__ as script
+    output = check_output((executable, script))
+    port = int(output.strip())
+    assert 1024 <= port < 2**16
