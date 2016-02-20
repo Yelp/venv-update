@@ -2,6 +2,7 @@
 -e .
 -r test.txt
 -r _lint.txt
+-r CI.txt
 
-tox
 pudb
+codecov

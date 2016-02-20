@@ -25,17 +25,6 @@ else:
         pass
 
 
-def fdclosed(fd):
-    """close a file descriptor, idempotently"""
-    try:
-        os.close(fd)
-    except OSError as err:
-        if err.errno == 9:  # bad file descriptor
-            pass  # it's already closed: ok
-        else:
-            raise
-
-
 class Pipe(object):
     """a convenience object, wrapping os.pipe()"""
 
@@ -45,14 +34,9 @@ class Pipe(object):
         set_inheritable(self.read, True)
         set_inheritable(self.write, True)
 
-    def closed(self):
-        """close both ends of the pipe. idempotent."""
-        fdclosed(self.read)
-        fdclosed(self.write)
-
     def readonly(self):
         """close the write end of the pipe. idempotent."""
-        fdclosed(self.write)
+        os.close(self.write)
 
 
 def pty_normalize_newlines(fd):
@@ -166,11 +150,10 @@ def capture_subprocess(cmd, encoding='UTF-8', **popen_kwargs):
     exit_code = outputter.wait()
     result = (stdout_tee.join(), stderr_tee.join())
 
-    if encoding is not None:
-        result = tuple(
-            bytestring.decode(encoding)
-            for bytestring in result
-        )
+    result = tuple(
+        bytestring.decode(encoding)
+        for bytestring in result
+    )
 
     if exit_code == 0:
         return result

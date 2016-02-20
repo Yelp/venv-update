@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 import pytest
 
 from testing import enable_coverage
+from testing import install_coverage
 from testing import pip_freeze
 from testing import requirements
-from testing import TOP
 from testing import venv_update
 from venv_update import __version__
 
@@ -16,6 +16,8 @@ from venv_update import __version__
 def time_savings(tmpdir, between):
     """install twice, and the second one should be faster, due to whl caching"""
     with tmpdir.as_cwd():
+        enable_coverage()
+        install_coverage()
 
         requirements('\n'.join((
             'project_with_c',
@@ -23,7 +25,6 @@ def time_savings(tmpdir, between):
             'slow_python_package==0.1.0',
             'dependant_package',
             'many_versions_package>=2,<3',
-            '-r %s/requirements.d/coverage.txt' % TOP,
             ''
         )))
 
@@ -32,11 +33,11 @@ def time_savings(tmpdir, between):
         start = time()
         venv_update(
             PIP_VERBOSE='1',
+            PIP_RETRIES='0',
+            PIP_TIMEOUT='0',
         )
         time1 = time() - start
         expected = '\n'.join((
-            'coverage==4.0.3',
-            'coverage-enable-subprocess==0',
             'dependant-package==1',
             'implicit-dependency==1',
             'many-versions-package==2.1',
@@ -51,12 +52,15 @@ def time_savings(tmpdir, between):
         assert pip_freeze() == expected
 
         between()
+        install_coverage()
 
         start = time()
         # second install should also need no network access
         # these are localhost addresses with arbitrary invalid ports
         venv_update(
             PIP_VERBOSE='1',
+            PIP_RETRIES='0',
+            PIP_TIMEOUT='0',
             http_proxy='http://127.0.0.1:111111',
             https_proxy='https://127.0.0.1:222222',
             ftp_proxy='ftp://127.0.0.1:333333',
@@ -72,7 +76,7 @@ def time_savings(tmpdir, between):
         print('%.2fs speedup' % difference)
 
         ratio = time1 / time2
-        percent = (ratio - 1) % 100
+        percent = (ratio - 1) * 100
         print('%.2f%% speedup' % percent)
         return difference
 
@@ -93,7 +97,7 @@ def test_cached_clean_install_faster(tmpdir, pypi_packages):
         assert venv.isdir()
         venv.remove()
         assert not venv.exists()
-        enable_coverage(tmpdir)
+        enable_coverage()
 
         # copy the bootstrap-essential wheels to the wheelhouse where they can be found.
         # FIXME: pip7 has the behavior we want: wheel anything we install

@@ -2,7 +2,7 @@ pip-faster
 --------
 [![PyPI version](https://badge.fury.io/py/pip-faster.svg)](https://pypi.python.org/pypi/pip-faster)
 [![Build Status](https://travis-ci.org/Yelp/pip-faster.svg?branch=master)](https://travis-ci.org/Yelp/pip-faster)
-[![Coverage Status](https://img.shields.io/coveralls/Yelp/pip-faster.svg?branch=master)](https://coveralls.io/r/Yelp/pip-faster)
+[![Coverage Status](https://codecov.io/github/Yelp/pip-faster/coverage.svg?branch=master)](https://codecov.io/github/Yelp/pip-faster?branch=master)
 
 pip-faster is like [pip][pip], but faster.
 

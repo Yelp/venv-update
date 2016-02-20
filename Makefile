@@ -1,21 +1,19 @@
+export PYTHON?=python2.7
+export REQUIREMENTS?=requirements.txt
+
 .PHONY: all
 all: lint test
 
 .PHONY: lint
 lint: venv
-	./venv/bin/pre-commit run --all-files
+	. venv/bin/activate && pre-commit run --all-files
 
 .PHONY: test tests
 test tests: venv
 	. venv/bin/activate && ./test $(ARGS)
 
-.PHONY: tox
-tox:
-	tox -e lint,test
-
 venv: setup.py requirements.txt requirements.d/* Makefile
-	./venv_update.py --python=python2.7
-	./venv/bin/pre-commit install
+	./venv_update.py venv= --python=$(PYTHON) venv install= -r $(REQUIREMENTS)
 
 .PHONY: clean
 clean:

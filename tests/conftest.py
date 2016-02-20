@@ -66,15 +66,16 @@ def tmpdir(tmpdir):
     os.environ['HOME'] = str(home)
     os.environ['TMPDIR'] = str(tmp)
 
-    yield tmpdir
+    with tmpdir.as_cwd():  # TODO: remove all the tmpdir.chdir()
+        yield tmpdir
 
     os.environ.clear()
     os.environ.update(orig_environ)
 
 
 @pytest.yield_fixture(scope='session')
-def pypi_packages(tmpdir_factory):
-    package_temp = tmpdir_factory.ensuretemp('venv-update-packages')
+def pypi_packages():
+    package_temp = TOP.join('build/test-packages')
     with TOP.as_cwd():
         run(
             sys.executable,
@@ -135,29 +136,31 @@ def pypi_server_with_fallback(pypi_packages, pypi_port):
         yield
 
 
+def ioerror_to_errno(error):  # :pragma:nocover:  all of these cases are exceptional and quite rare
+    if isinstance(error.errno, int):
+        return error.errno
+    # urllib throws an IOError with a string in the errno slot -.-
+    elif len(error.args) > 1 and isinstance(error.args[1], socket.error):
+        return error.args[1].errno
+    elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
+        return error.args[0].errno
+    else:
+        raise ValueError('Could not find error number: %r' % error)
+
+
 def service_up(port):
     try:
         return six.moves.urllib.request.urlopen(
             'http://localhost:{0}'.format(port)
         ).getcode() == 200
     except IOError as error:
-        if isinstance(error.errno, int):
-            errno = error.errno
-        # urllib throws an IOError with a string in the errno slot -.-
-        elif len(error.args) > 1 and isinstance(error.args[1], socket.error):
-            errno = error.args[1].errno
-        elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
-            errno = error.args[0].errno
-        else:
-            raise ValueError('Could not find error number: %r' % error)
-
-        if errno == ECONNREFUSED:
+        if ioerror_to_errno(error) == ECONNREFUSED:
             return False
         else:
             raise
 
 
-def pytest_assertrepr_compare(config, op, left, right):
+def pytest_assertrepr_compare(config, op, left, right):  # TODO: unit-test :pragma:nocover:
     if op == 'in' and '\n' in left:
         # Convert 'in' comparisons to '==' comparisons, for more usable error messaging.
         # Truncate the right-hand-side such that it has the longest common prefix with the LHS,
