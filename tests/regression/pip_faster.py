@@ -38,11 +38,8 @@ def test_circular_dependencies(tmpdir):
     out = uncolor(out)
     assert out.endswith('''
 tracing: circular-dep-a
-adding sub-requirement circular-dep-b==1.0 (from circular-dep-a)
+already queued: circular-dep-b==1.0 (from circular-dep-a)
 tracing: circular-dep-b==1.0 (from circular-dep-a)
-adding sub-requirement circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
-already analyzed: circular-dep-b==1.0 (from circular-dep-a)
-tracing: circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
 Circular dependency! circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
 ''')
 
