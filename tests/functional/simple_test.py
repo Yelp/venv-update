@@ -43,8 +43,8 @@ def test_install_custom_path_and_requirements(tmpdir):
     enable_coverage()
     venv_update('venv=', 'venv2', 'install=', '-r', 'requirements2.txt')
     assert pip_freeze('venv2') == '\n'.join((
-        'pip-faster==' + __version__,
         'six==1.8.0',
+        'venv-update==' + __version__,
         'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
@@ -277,8 +277,8 @@ pep8<=1.5.7
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
-        'pip-faster==' + __version__,
         'pyflakes==0.7.3',
+        'venv-update==' + __version__,
         'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
@@ -304,8 +304,8 @@ pep8<=1.5.7
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
-        'pip-faster==' + __version__,
         'pyflakes==0.8.1',
+        'venv-update==' + __version__,
         'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
@@ -342,7 +342,7 @@ def test_override_requirements_file(tmpdir):
     enable_coverage()
     requirements('')
     Path('.').ensure_dir('requirements.d').join('venv-update.txt').write('''\
-pip-faster==%s
+venv-update==%s
 pure_python_package
 ''' % __version__)
     out, err = venv_update()
@@ -354,12 +354,12 @@ pure_python_package
         '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements.d/venv-update.txt\n' % tmpdir
     ) in out
     assert (
-        '\nSuccessfully installed pip-1.5.6 pip-faster-%s pure-python-package-0.2.0 virtualenv-1.11.6' % __version__
+        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.0 venv-update-%s virtualenv-1.11.6' % __version__
     ) in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
-        'pip-faster==%s' % __version__,
+        'venv-update==%s' % __version__,
         'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''

@@ -16,7 +16,7 @@ positional arguments:
 optional arguments:
   -h, --help      show this help message and exit
 
-Version control at: https://github.com/yelp/pip-faster
+Version control at: https://github.com/yelp/venv-update
 '''
 from __future__ import absolute_import
 from __future__ import print_function
@@ -481,8 +481,8 @@ class FasterInstallCommand(InstallCommand):
             reqnames(previously_installed) -
             reqnames(required) -
             reqnames(successfully_installed) -
-            # TODO: instead of this, add `pip-faster` to the `required`, and let trace-requirements do its work
-            set(['pip-faster', 'virtualenv', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
+            # TODO: instead of this, add `venv-update` to the `required`, and let trace-requirements do its work
+            set(['venv-update', 'virtualenv', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
         )
 
         if extraneous:

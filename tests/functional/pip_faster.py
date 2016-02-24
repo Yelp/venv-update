@@ -37,12 +37,12 @@ coverage-enable-subprocess==0
 '''
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     assert [
         req.split('==')[0]
         for req in pip_freeze(str(venv)).split()
-    ] == ['coverage', 'coverage-enable-subprocess', 'pip-faster', 'virtualenv', 'wheel']
+    ] == ['coverage', 'coverage-enable-subprocess', 'venv-update', 'virtualenv', 'wheel']
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
@@ -55,7 +55,7 @@ def it_installs_stuff_from_requirements_file(tmpdir):
     install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     # An arbitrary small package: pure_python_package
     requirements('pure_python_package\nproject_with_c')
@@ -74,7 +74,7 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     # Install a package from git with no extra dependencies in editable mode.
     #
@@ -90,7 +90,7 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
         '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init-dev',  # noqa
         'coverage-enable-subprocess==0',
         'coverage==4.0.3',
-        'pip-faster==' + __version__,
+        'venv-update==' + __version__,
         'virtualenv==1.11.6',
         'wheel==0.29.0',
         '',
@@ -108,7 +108,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
     install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     run(
         venv.join('bin/pip-faster').strpath,
@@ -123,8 +123,8 @@ def it_doesnt_wheel_local_dirs(tmpdir):
         'dependant-package==1',
         'implicit-dependency==1',
         'many-versions-package==3',
-        'pip-faster==' + __version__,
         'pure-python-package==0.2.0',
+        'venv-update==' + __version__,
         'virtualenv==1.11.6',
         'wheel==0.29.0',
         '',
@@ -144,7 +144,7 @@ def it_can_handle_requirements_already_met(tmpdir):
     install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     requirements('many-versions-package==1')
 
@@ -161,7 +161,7 @@ def it_gives_proper_error_without_requirements(tmpdir):
     install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     out, err = run(str(venv.join('bin/pip-faster')), 'install')
     out = uncolor(out)
@@ -175,7 +175,7 @@ def it_can_handle_a_bad_findlink(tmpdir):
     install_coverage(venv)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     out, err = run(
         str(venv.join('bin/pip-faster')),
