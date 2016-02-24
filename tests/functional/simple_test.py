@@ -45,7 +45,6 @@ def test_install_custom_path_and_requirements(tmpdir):
     assert pip_freeze('venv2') == '\n'.join((
         'six==1.8.0',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -279,7 +278,6 @@ pep8<=1.5.7
         'pep8==1.5.7',
         'pyflakes==0.7.3',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -306,7 +304,6 @@ pep8<=1.5.7
         'pep8==1.5.7',
         'pyflakes==0.8.1',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -354,13 +351,12 @@ pure_python_package
         '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements.d/venv-update.txt\n' % tmpdir
     ) in out
     assert (
-        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.0 venv-update-%s virtualenv-1.11.6' % __version__
+        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.0 venv-update-%s' % __version__
     ) in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
         'venv-update==%s' % __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))

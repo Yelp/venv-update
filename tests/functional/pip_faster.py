@@ -42,7 +42,7 @@ coverage-enable-subprocess==0
     assert [
         req.split('==')[0]
         for req in pip_freeze(str(venv)).split()
-    ] == ['coverage', 'coverage-enable-subprocess', 'venv-update', 'virtualenv', 'wheel']
+    ] == ['coverage', 'coverage-enable-subprocess', 'venv-update', 'wheel']
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
@@ -91,7 +91,6 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
         'coverage-enable-subprocess==0',
         'coverage==4.0.3',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         '',
     ])
@@ -125,7 +124,6 @@ def it_doesnt_wheel_local_dirs(tmpdir):
         'many-versions-package==3',
         'pure-python-package==0.2.0',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         '',
     ])
