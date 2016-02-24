@@ -214,3 +214,11 @@ pseudoxml:
 	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
+
+port:
+	../tests/testing/ephemeral_port_reserve.py > port
+
+.PHONY: serve
+serve: HOST := $(shell hostname -f)
+serve: port
+	sphinx-autobuild -a -s 1 -r ".*~" -r '\..*\.sw[a-z]' source/ build/html/ -H $(HOST) -p $(shell cat port)

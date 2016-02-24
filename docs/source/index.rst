@@ -4,105 +4,122 @@ pip-faster: it's pip, just faster!
 `Github <https://github.com/yelp/pip-faster>`_ |
 `PyPI <https://pypi.python.org/pypi/pip-faster/>`_
 
-Release v\ |version| (:ref:`Installation <install>`)
+Release v\ |release| (:ref:`Installation`)
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+
+   venv-update
+   pip-faster
+   internal-pypi
 
 Introduction
 ------------
 
-``pip-faster`` is an `MIT Licensed
-<https://github.com/Yelp/pgctl/blob/master/COPYING>`_ tool to install your
+``pip-faster`` is an `MIT Licensed`_ tool to install your
 python dependencies, a bit faster than pip does.
 
 
+This project ships as two separable components: pip-faster and venv-update.
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
-
-This project ships two distinct components:
-
-* **venv-update**, a small script designed to keep a virtualenv in sync with a
-  changing list of requirements.
-
-  Given a list of ``requirements.txt`` files, venv-update makes sure the
-  virtualenv state is exactly the same as if you deleted and regenerated the
-  virtualenv (but does so *much* more quickly).
-
-  venv-update can also be used by tools like tox_ during testing.
-
-* **pip-faster**, a drop-in replacement for pip which tries hard to make package
-  installation as fast as possible while preserving pip's semantics.
-
-Both components are designed for use on large projects with hundreds of
-requirements and are used daily by Yelp_ engineers.
+Both are designed for use on large projects with hundreds of requirements and
+are used daily by Yelp_ engineers.
 
 
-venv-update
------------
+Why?
+----
 
-venv-update is a small script whose job is to idempotently ensure the existence
-of a project's virtualenv based on a set of requirements files.
+In a large application, best practice is to "pin" versions, with requirements
+like ``package-x==1.2.3`` in order to ensure that dev, staging, test, and
+production will all use the same code. Currently ``pip`` will always reach out
+to PyPI to list the versions of ``package-x`` regardless of whether the package
+is already installed, or whether its `wheel`_ can be found in the local cache.
+``pip-faster`` adds these optimizations and others.
 
-We like to call venv-update from our Makefiles to create and maintain a
-virtualenv. It does the following:
+Further, generating a repeatable build of a virtualenv has many edge cases. If
+a requirement is removed, it should be uninstalled when the virtualenv is
+updated. If the version of python has changed, the only reliable solution is to
+re-build the virtualenv from scratch. Our initial implementation would always
+completely remove the virtualenv and re-build it, but this slows things down
+terribly. ``venv-update`` handles all of these edge cases and more, without
+completely starting from scratch (in the usual case).
 
-* Ensures a virtualenv exists at the specified location with the specified
-  Python version, and that it is valid. It will create or recreate a virtualenv
-  as necessary to ensure that one venv-update invocation is all that's needed.
 
-* Calculates the difference in packages derived from the ``requirements.txt``
-  files and the installed packages. Packages will be uninstalled, upgraded, or
-  installed as necessary.
+`How much` faster?
+------------------
 
-  The goal is that venv-update will put you in the same state as if you wipe
-  away your virtualenv and rebuild it with ``pip install``, but much more
-  quickly.
 
-* Takes advantage of ``pip-faster`` for package installation (see below) to
-  avoid network access and rebuilding packages as much as possible.
 
-For reference, a project with 250 dependencies which are all pinned can run a
-no-op venv-update in ~2 seconds with no network access. The running time when
-changes are needed is dominated by the time it takes to download and install
-packages, but is generally quite fast (on the order of ~10 seconds).
+``pip-faster``
+--------------
 
+pip-faster is a drop-in replacement for pip. You should find that pip-faster
+gives the same results as pip, just more quickly, especially in the case of
+pinned requirements (e.g. package-x==1.2.3).
+
+If you're also using venv-update (which we heartily recommend!), you can view
+pip-faster as an implementation detail. For more, see :ref:`pip-faster-details`.
+
+
+.. _venv-update:
+
+``venv-update``
+---------------
+
+A small script designed to keep a virtualenv in sync with a changing list of
+requirements. Given a list of ``requirements.txt`` files, venv-update makes
+sure the virtualenv state is exactly the same as if you deleted and regenerated
+the virtualenv (but does so *much* more quickly).
+
+The needs of venv-update are what drove the development of pip-faster.
+For more, see :ref:`venv-update-details`.
+
+
+
+
+
+.. _installation:
 
 Installation
 ~~~~~~~~~~~~
 
-Because this tool is meant to be the entry-point for handling requirements and
-dependencies, it's not meant to be installed via pip; that would require
-developers to first create a virtualenv, which defeats the entire purpose of
-the project.
+Because ``venv-update`` is meant to be the entry-point for creating your
+virtualenv_ directory and installing your packages, it's not meant to be
+installed via pip; that would require a virtualenv to already exist!
 
-Instead, the ``venv_update.py`` script is designed to be vendored (directly
-checked in) to your project, and has no dependencies besides virtualenv and the
-standard Python library.
+Instead, the script is designed to be `vendored` (directly checked in) to your
+project, and has no dependencies besides virtualenv and the standard Python
+library.
+
+.. sourcecode:: shell
+
+ mkdir -p bin
+ cd bin
+ curl -O https://raw.githubusercontent.com/Yelp/pip-faster/master/venv_update.py
+ mv venv_update.py venv-update
+ chmod 755 venv-update
+ git add venv-update
+ git commit venv-update -m 'added bin/venv-update'
 
 
 Usage
 ~~~~~
 
-Simply running ``venv_update.py`` will create a virtualenv named ``venv`` in the
-current directory, using ``requirements.txt`` in the current directory. You can
-pass additional options to both ``virtualenv`` and ``pip``. A typical invocation
-looks something like this:
+By default, running ``venv-update`` will create a virtualenv named ``venv`` in the
+current directory, using ``requirements.txt`` in the current directory. This
+should be the desired default for most projects.
 
-::
+If you need more control, you can pass additional options to both
+``virtualenv`` and ``pip``. The command-line help gives more detail:
 
-    ./venv_update.py venv-name -- -r requirements.txt -r requirements-dev.txt
-
-Arguments to ``virtualenv`` should go before the ``--``; arguments to ``pip``
-should go after it.
-
+.. automodule:: venv_update
 
 ... in your ``Makefile``
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 venv-update is a good fit for use with make because it is idempotent and should
-never normally fail. Here's an example Makefile:
+never fail, under normal circumstances. Here's an example Makefile:
 
 .. sourcecode:: make
 
@@ -130,18 +147,21 @@ Then, apply a change like this to your ``tox.ini`` file:
 
 .. sourcecode:: diff
 
-     [testenv]
-   + venv_update = {toxinidir}/bin/venv-update {envdir} -- -r {toxinidir}/requirements.txt -e {toxinidir}
-   - deps = -rrequirements.txt
-     commands =
-   +     {[testenv]venv_update}
-         py.test tests/
-         pre-commit run --all-files
+   [testenv]
+ + venv_update =
+ +     {toxinidir}/bin/venv-update \
+ +        venv= {envdir} \
+ +        install= -r {toxinidir}/requirements.txt -e {toxinidir}
+ - deps = -rrequirements.txt
+   commands =
+ +     {[testenv]venv_update}
+       py.test tests/
+       pre-commit run --all-files
 
-The exact changes will vary slightly by project, but the above is a general
-template. The most important part is running venv-update as the first test
-command and removing the list of ``deps`` (so that tox will never invalidate
-your virtualenv itself; we want to let venv-update manage that instead).
+The exact changes will of course vary, but above is a general template. The
+two changes are: running venv-update as the first test command, and
+removing the list of ``deps`` (so that tox will never invalidate your
+virtualenv itself; we want to let venv-update manage that instead).
 
 Users of tox version <2 will want to add this as well, to avoid tox installing
 all your dependencies with pip-slower:
@@ -153,80 +173,11 @@ all your dependencies with pip-slower:
    + skipsdist = true
 
 
-pip-faster
-----------
-
-pip-faster is designed to act as a drop-in replacement for pip. It supports all
-of the same arguments as pip (calling pip internally for most tasks).
-
-Package installation is the most heavily-optimized area:
-
-* We've taken great pains to reduce the number of round-trips to PyPI, which
-  makes up the majority of time spent on what should be a no-op update. For
-  example, if you're installing a specific version of a package which we
-  already have cached, there's no need to talk to PyPI, but vanilla pip will.
-
-* Packages are downloaded and `wheeled`_ before installation (if they
-  aren't available from PyPI as wheels). If the virtualenv needs to be rebuilt,
-  or you use the same requirement in another project, the wheel can be reused.
-  This greatly speeds up installation of projects like lxml or numpy which have
-  a slow-to-compile binary component.
-
-One behavior difference between stock pip is that pip-faster will refuse to
-installing package versions which conflict (we generally consider this a
-feature); stock pip, on the other hand, will happily install conflicting
-packages.
-
-
-pip-faster installation
-~~~~~~~~~~~~~~~~~~~~~~~
-
-For interactive use, you can normally just ``pip install pip-faster`` the same
-way you would any other Python tool.
-
-If you're only using venv-update, it's not necessary to install pip-faster; the
-venv-update script will install the correct version inside your virtualenv for
-you.
-
-
-Using with an internal PyPI server (recommended)
-------------------------------------------------
-
-In almost all cases, performance will be much better if you use an internal
-PyPI server instead of the `public PyPI`_.
-
-Besides the potentially lesser latency, an internal PyPI server allows for
-uploading binary wheels compiled for Linux. Unlike OS X or Windows, installing
-projects like lxml on Linux is normally extremely slow since they will need to
-be compiled during every installation.
-
-pip-faster improves this by only compiling on the first installation for each
-user (this is also the default behavior for pip >= 6), but this doesn't help
-for the first run.
-
-Using an internal PyPI server which allows uploading of Linux wheels can
-improve speed greatly. Unfortunately, these wheels are guaranteed compatible
-only with the same Linux distribution they were compiled on, so this only works
-if your developers work in very homogeneous environments.
-
-For both venv-update and pip-faster, you can specify an index server by setting
-the ``$PIP_INDEX_URL`` environment variable (or ``$PIP_EXTRA_INDEX_URL`` if you
-want to supplement but not replace the default PyPI). For pip-faster you can
-also use ``-i`` or ``-e``, just like in regular pip.
-
-
+.. _MIT Licensed: https://github.com/Yelp/pip-faster/blob/master/COPYING
 .. _pip: https://pip.pypa.io/en/stable/
-.. _public PyPI: https://pypi.python.org/pypi
+.. _virtualenv: https://virtualenv.readthedocs.org/en/latest/
+.. _wheel: https://wheel.readthedocs.org/en/latest/
 .. _tox: https://tox.readthedocs.org/en/latest/
-.. _wheeled: https://wheel.readthedocs.org/en/latest/
 .. _yelp: https://www.yelp.com/
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 .. vim:textwidth=79:shiftwidth=3:noshiftround:

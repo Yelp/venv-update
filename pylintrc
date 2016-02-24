@@ -44,6 +44,9 @@ max-module-lines=532
 ignored-classes=pytest,LocalPath,RootLogger
 ignored-modules=distutils,py
 
+[VARIABLES]
+dummy-variables-rgx=_$|dummy|unused_
+
 [SIMILARITIES]
 ignore-imports=yes
 

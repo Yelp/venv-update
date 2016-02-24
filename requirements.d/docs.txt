@@ -1,0 +1,3 @@
+# packages necessary to build, view and/or upload our documentation
+sphinx
+sphinx-autobuild

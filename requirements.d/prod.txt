@@ -1,2 +1,0 @@
-# minimal set of packages for end-users
-virtualenv<2
