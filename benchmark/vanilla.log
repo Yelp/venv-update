@@ -1,0 +1,474 @@
+2016-02-24 13:23:17.247605865
+
+START -- cold
++ rm -rf venv cache
++ virtualenv venv
+New python executable in venv/bin/python
+Installing setuptools, pip...done.
++ source ./setup
+++ source ./env
++++ export HOMEBREW=/nail/home/buck/prefices/brew
++++ HOMEBREW=/nail/home/buck/prefices/brew
++++ export LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ export CPATH=/nail/home/buck/prefices/brew/include
++++ CPATH=/nail/home/buck/prefices/brew/include
++++ export XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
++++ XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
+++ set +ux
+++ ./venv/bin/pip install --upgrade pip wheel setuptools
+Downloading/unpacking pip from https://pypi.python.org/packages/py2.py3/p/pip/pip-8.0.2-py2.py3-none-any.whl#md5=2056f553d5b593d3a970296f229c1b79
+Downloading/unpacking wheel
+Downloading/unpacking setuptools from https://pypi.python.org/packages/3.5/s/setuptools/setuptools-20.1.1-py2.py3-none-any.whl#md5=9c0765fbbe30368494ec7eb72702c67e
+Downloading/unpacking argparse (from wheel)
+  Downloading argparse-1.4.0-py2.py3-none-any.whl
+Installing collected packages: pip, wheel, setuptools, argparse
+  Found existing installation: pip 1.5.5
+    Uninstalling pip:
+      Successfully uninstalled pip
+  Found existing installation: setuptools 3.4.4
+    Uninstalling setuptools:
+      Successfully uninstalled setuptools
+Successfully installed pip wheel setuptools argparse
+Cleaning up...
+++ venv-update --version
+./setup: line 8: venv-update: command not found
+++ true
+++ pip --version
+pip 8.0.2 from /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages (python 2.6)
+++ python -c 'import wheel; print wheel.__version__'
+0.29.0
+++ python -c 'import setuptools; print setuptools.__version__'
+20.1.1
++ pip install --pre plone
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
+Collecting plone
+/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:315: SNIMissingWarning: An HTTPS request has been made, but the SNI (Subject Name Indication) extension to TLS is not available on this platform. This may cause the server to present an incorrect TLS certificate, which can cause validation failures. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#snimissingwarning.
+  SNIMissingWarning
+/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:120: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
+  InsecurePlatformWarning
+  Downloading Plone-5.0.2.tar.gz
+Requirement already satisfied (use --upgrade to upgrade): setuptools in ./venv/lib/python2.6/site-packages (from plone)
+Collecting Products.Archetypes (from plone)
+  Downloading Products.Archetypes-1.10.12.tar.gz (821kB)
+Collecting Products.ATContentTypes>=2.1.3 (from plone)
+  Downloading Products.ATContentTypes-2.2.11.tar.gz (313kB)
+... <snip!> ...
+Collecting zope.error (from zope.app.publication->zope.app.file->plone.namedfile[scales]>=1.0b5dev-r36016->plone.app.dexterity->plone)
+  Downloading zope.error-4.2.0.tar.gz
+Collecting linecache2 (from traceback2->unittest2->python-gettext>=0.6->Products.PlacelessTranslationService->Products.Archetypes->plone)
+  Downloading linecache2-1.0.0-py2.py3-none-any.whl
+Building wheels for collected packages: plone, Products.Archetypes, Products.ATContentTypes, Products.CMFPlacefulWorkflow, Products.CMFPlone, plone.app.caching, plone.app.dexterity, plone.app.iterate, plone.app.openid, plone.app.upgrade, zope.component, zope.contenttype, zope.datetime, zope.deferredimport, zope.i18n, zope.i18nmessageid, zope.interface, zope.lifecycleevent, zope.publisher, zope.schema, zope.site, zope.tal, zope.viewlet, Products.CMFCore, Products.CMFFormController, Products.CMFQuickInstallerTool, Products.DCWorkflow, Products.GenericSetup, Products.MimetypesRegistry, Products.PlacelessTranslationService, Products.PortalTransforms, Products.ZSQLMethods, Products.statusmessages, Products.validation, plone.folder, plone.uuid, plone.app.folder, Acquisition, DateTime, ExtensionClass, transaction, ZODB3, Zope2, plone.app.widgets, plone.i18n, plone.memoize, plone.app.blob, plone.app.collection, plone.app.layout, Products.CMFDynamicViewFTI, ZConfig, Pillow, Products.CMFDiffTool, Products.CMFEditions, Products.CMFUid, Products.ExtendedPathIndex, Products.ExternalEditor, Products.PasswordResetTool, Products.PlonePAS, Products.PluggableAuthService, Products.PluginRegistry, Products.ResourceRegistries, Products.contentmigration, borg.localrole, cssmin, five.customerize, five.localsitemanager, five.pt, mockup, plone.api, plone.app.content, plone.app.contentlisting, plone.app.contentmenu, plone.app.contentrules, plone.app.contenttypes, plone.app.controlpanel, plone.app.customerize, plone.app.discussion, plone.app.i18n, plone.app.multilingual, plone.app.linkintegrity, plone.app.locales, plone.app.portlets, plone.app.redirector, plone.app.registry, plone.app.theming, plone.app.users, plone.app.uuid, plone.app.viewletmanager, plone.app.vocabularies, plone.app.workflow, plone.batching, plone.browserlayer, plone.contentrules, plone.indexer, plone.intelligenttext, plone.locking, plone.outputfilters, plone.portlet.collection, plone.portlet.static, plone.portlets, plone.protect, plone.registry, plone.schema, plone.session, plone.theme, plonetheme.barceloneta, slimit, z3c.autoinclude, zope.app.locales, zope.cachedescriptors, zope.container, zope.deprecation, zope.dottedname, zope.location, zope.pagetemplate, zope.structuredtext, zope.tales, zope.traversing, plone.caching, plone.cachepurging, zope.browserresource, plone.app.z3cform, z3c.form, z3c.zcmlhook, plone.app.textfield, plone.behavior, plone.dexterity, plone.formwidget.namedfile, plone.namedfile, plone.rfc822, plone.schemaeditor, lxml, plone.autoform, plone.supermodel, plone.z3cform, zope.browserpage, zope.annotation, plone.openid, zope.ramcache, Products.SecureMailHost, Products.ZCatalog, zope.proxy, zope.browser, zope.configuration, zope.exceptions, zope.security, ordereddict, zope.contentprovider, five.globalrequest, Products.BTreeFolder2, Products.MailHost, Products.PythonScripts, Products.ExternalMethod, zope.formlib, python-gettext, Markdown, Missing, Persistence, Record, ZEO, ZODB, persistent, BTrees, AccessControl, DocumentTemplate, MultiMapping, Products.OFSP, Products.ZCTextIndex, RestrictedPython, ZopeUndo, docutils, initgroups, tempstorage, zdaemon, zExceptions, zLOG, zope.browsermenu, zope.processlifetime, zope.ptresource, zope.sendmail, zope.sequencesort, zope.size, zope.testbrowser, zope.testing, Products.MIMETools, Products.StandardCacheManagers, Unidecode, archetypes.schemaextender, plone.app.imaging, plone.scale, plone.formwidget.querystring, zope.copy, Products.ZopeVersionControl, zope.componentvocabulary, sourcecodegen, z3c.pt, Chameleon, zope.globalrequest, plone.stringinterp, plone.app.event, plone.app.querystring, plone.app.relationfield, plone.app.versioningbehavior, plone.app.lockingbehavior, archetypes.multilingual, z3c.relationfield, plone.app.intid, feedparser, diazo, plone.resource, plone.resourceeditor, plone.subrequest, plone.transformchain, repoze.xmliter, roman, plone.keyring, collective.monkeypatcher, ply, odict, zope.filerepresentation, z3c.caching, z3c.formwidget.query, plone.alterego, plone.synchronize, zope.app.file, python-openid, zc.lockfile, mechanize, Products.DateRecurringIndex, collective.elephantvocabulary, icalendar, plone.event, plone.formwidget.recurrence, zope.intid, five.intid, z3c.objpath, zc.relation, cssselect, future, zope.app.publication, zope.dublincore, zope.keyreference, importlib, zope.authentication, zope.error
+  Running setup.py bdist_wheel for plone: started
+[?25l  Running setup.py bdist_wheel for plone: finished with status 'done'
+[?25h  Stored in directory: /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip/wheels/b6/85/cf/61c9044d5d144eb3ba0e27845771172eb454b279623678f5a1
+... <snip!> ...
+  Running setup.py bdist_wheel for zope.error: started
+[?25l  Running setup.py bdist_wheel for zope.error: finished with status 'done'
+[?25h  Stored in directory: /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip/wheels/6c/9a/c3/17b3394d81f9d5ed59510928e1e808d971ab5659e790b84523
+Successfully built plone Products.Archetypes Products.ATContentTypes Products.CMFPlacefulWorkflow Products.CMFPlone plone.app.caching plone.app.dexterity plone.app.iterate plone.app.openid plone.app.upgrade zope.component zope.contenttype zope.datetime zope.deferredimport zope.i18n zope.i18nmessageid zope.interface zope.lifecycleevent zope.publisher zope.schema zope.site zope.tal zope.viewlet Products.CMFCore Products.CMFFormController Products.CMFQuickInstallerTool Products.DCWorkflow Products.GenericSetup Products.MimetypesRegistry Products.PlacelessTranslationService Products.PortalTransforms Products.ZSQLMethods Products.statusmessages Products.validation plone.folder plone.uuid plone.app.folder Acquisition DateTime ExtensionClass transaction ZODB3 Zope2 plone.app.widgets plone.i18n plone.memoize plone.app.blob plone.app.collection plone.app.layout Products.CMFDynamicViewFTI ZConfig Pillow Products.CMFDiffTool Products.CMFEditions Products.CMFUid Products.ExtendedPathIndex Products.ExternalEditor Products.PasswordResetTool Products.PlonePAS Products.PluggableAuthService Products.PluginRegistry Products.ResourceRegistries Products.contentmigration borg.localrole cssmin five.customerize five.localsitemanager five.pt mockup plone.api plone.app.content plone.app.contentlisting plone.app.contentmenu plone.app.contentrules plone.app.contenttypes plone.app.controlpanel plone.app.customerize plone.app.discussion plone.app.i18n plone.app.multilingual plone.app.linkintegrity plone.app.locales plone.app.portlets plone.app.redirector plone.app.registry plone.app.theming plone.app.users plone.app.uuid plone.app.viewletmanager plone.app.vocabularies plone.app.workflow plone.batching plone.browserlayer plone.contentrules plone.indexer plone.intelligenttext plone.locking plone.outputfilters plone.portlet.collection plone.portlet.static plone.portlets plone.protect plone.registry plone.schema plone.session plone.theme plonetheme.barceloneta slimit z3c.autoinclude zope.app.locales zope.cachedescriptors zope.container zope.deprecation zope.dottedname zope.location zope.pagetemplate zope.structuredtext zope.tales zope.traversing plone.caching plone.cachepurging zope.browserresource plone.app.z3cform z3c.form z3c.zcmlhook plone.app.textfield plone.behavior plone.dexterity plone.formwidget.namedfile plone.namedfile plone.rfc822 plone.schemaeditor lxml plone.autoform plone.supermodel plone.z3cform zope.browserpage zope.annotation plone.openid zope.ramcache Products.SecureMailHost Products.ZCatalog zope.proxy zope.browser zope.configuration zope.exceptions zope.security ordereddict zope.contentprovider five.globalrequest Products.BTreeFolder2 Products.MailHost Products.PythonScripts Products.ExternalMethod zope.formlib python-gettext Markdown Missing Persistence Record ZEO ZODB persistent BTrees AccessControl DocumentTemplate MultiMapping Products.OFSP Products.ZCTextIndex RestrictedPython ZopeUndo docutils initgroups tempstorage zdaemon zExceptions zLOG zope.browsermenu zope.processlifetime zope.ptresource zope.sendmail zope.sequencesort zope.size zope.testbrowser zope.testing Products.MIMETools Products.StandardCacheManagers Unidecode archetypes.schemaextender plone.app.imaging plone.scale plone.formwidget.querystring zope.copy Products.ZopeVersionControl zope.componentvocabulary sourcecodegen z3c.pt Chameleon zope.globalrequest plone.stringinterp plone.app.event plone.app.querystring plone.app.relationfield plone.app.versioningbehavior plone.app.lockingbehavior archetypes.multilingual z3c.relationfield plone.app.intid feedparser diazo plone.resource plone.resourceeditor plone.subrequest plone.transformchain repoze.xmliter roman plone.keyring collective.monkeypatcher ply odict zope.filerepresentation z3c.caching z3c.formwidget.query plone.alterego plone.synchronize zope.app.file python-openid zc.lockfile mechanize Products.DateRecurringIndex collective.elephantvocabulary icalendar plone.event plone.formwidget.recurrence zope.intid five.intid z3c.objpath zc.relation cssselect future zope.app.publication zope.dublincore zope.keyreference importlib zope.authentication zope.error
+Installing collected packages: zope.interface, zope.event, zope.component, zope.contenttype, zope.datetime, zope.proxy, zope.deferredimport, pytz, ordereddict, zope.schema, zope.i18nmessageid, zope.i18n, zope.lifecycleevent, six, zope.browser, zope.configuration, zope.exceptions, zope.location, zope.security, zope.publisher, zope.annotation, zope.dottedname, zope.filerepresentation, zope.size, transaction, zope.traversing, persistent, BTrees, zope.container, zope.site, zope.tal, zope.tales, zope.pagetemplate, zope.browserpage, zope.contentprovider, zope.viewlet, ExtensionClass, Acquisition, DateTime, Persistence, Record, RestrictedPython, zExceptions, ZConfig, zc.lockfile, zdaemon, ZODB, ZEO, ZODB3, zope.testing, AccessControl, zope.sequencesort, zope.structuredtext, DocumentTemplate, Missing, MultiMapping, Products.OFSP, Products.ZCTextIndex, Products.ZCatalog, ZopeUndo, docutils, initgroups, tempstorage, zLOG, zope.browsermenu, zope.browserresource, zope.processlifetime, zope.ptresource, zope.sendmail, mechanize, zope.testbrowser, Products.BTreeFolder2, Products.ExternalMethod, Products.MailHost, Products.MIMETools, Products.PythonScripts, Products.StandardCacheManagers, Zope2, zope.globalrequest, five.globalrequest, five.localsitemanager, zope.formlib, Products.GenericSetup, Products.ZSQLMethods, Products.CMFCore, Products.CMFFormController, Products.CMFQuickInstallerTool, Products.DCWorkflow, Products.MimetypesRegistry, linecache2, traceback2, unittest2, python-gettext, zope.deprecation, Products.PlacelessTranslationService, plone.intelligenttext, Pillow, Markdown, Products.PortalTransforms, Products.statusmessages, Products.validation, zope.ramcache, plone.memoize, plone.folder, plone.uuid, plone.keyring, plone.transformchain, lxml, importlib, future, repoze.xmliter, collective.monkeypatcher, plone.protect, Products.CMFDiffTool, Products.CMFDynamicViewFTI, zope.copy, Products.CMFUid, Products.ZopeVersionControl, Products.CMFEditions, Products.ExtendedPathIndex, Products.ExternalEditor, Products.PasswordResetTool, Unidecode, plone.i18n, Products.PluginRegistry, Products.PluggableAuthService, plone.session, Products.PlonePAS, Products.contentmigration, borg.localrole, cssmin, plone.portlets, zope.componentvocabulary, five.customerize, sourcecodegen, Chameleon, z3c.pt, five.pt, mockup, decorator, plone.indexer, plone.app.uuid, plone.api, plone.app.contentlisting, plone.locking, plone.app.contentmenu, plone.contentrules, plone.stringinterp, z3c.zcmlhook, plone.supermodel, plone.batching, z3c.form, plone.z3cform, plone.autoform, plone.registry, python-dateutil, plone.app.querystring, plone.app.vocabularies, plone.app.contentrules, plone.event, Products.DateRecurringIndex, collective.elephantvocabulary, icalendar, plone.app.textfield, plone.behavior, plone.alterego, plone.rfc822, plone.synchronize, plone.dexterity, zope.authentication, zope.error, zope.app.publication, zope.dublincore, zope.app.file, plone.scale, plone.namedfile, plone.formwidget.namedfile, zope.cachedescriptors, plone.schemaeditor, plone.app.dexterity, plone.app.i18n, feedparser, plone.app.portlets, plone.browserlayer, plone.formwidget.recurrence, plone.app.event, zope.keyreference, zope.intid, five.intid, plone.app.intid, z3c.objpath, zc.relation, z3c.relationfield, z3c.formwidget.query, plone.app.relationfield, plone.app.linkintegrity, plone.app.versioningbehavior, plone.app.locales, plone.app.lockingbehavior, plone.app.contenttypes, plone.app.controlpanel, plone.app.customerize, plone.app.discussion, archetypes.schemaextender, z3c.caching, plone.app.imaging, plone.app.blob, plone.formwidget.querystring, plone.app.collection, Products.ATContentTypes, archetypes.multilingual, plone.app.multilingual, plone.app.redirector, cssselect, diazo, plone.caching, plone.resource, plone.resourceeditor, plone.subrequest, roman, plone.app.theming, plone.schema, plone.app.users, plone.app.viewletmanager, plone.app.workflow, plone.outputfilters, plone.portlet.collection, plone.portlet.static, plone.theme, plonetheme.barceloneta, ply, odict, slimit, zc.buildout, z3c.autoinclude, zope.app.locales, Products.CMFPlone, plone.app.z3cform, plone.app.registry, Products.ResourceRegistries, plone.app.widgets, plone.app.content, plone.app.layout, plone.app.folder, Products.Archetypes, Products.CMFPlacefulWorkflow, plone.cachepurging, plone.app.caching, plone.app.iterate, python-openid, plone.openid, plone.app.openid, Products.SecureMailHost, plone.app.upgrade, plone
+Successfully installed AccessControl-3.0.12 Acquisition-4.2.2 BTrees-4.2.0 Chameleon-2.24 DateTime-4.0.1 DocumentTemplate-2.13.2 ExtensionClass-4.1.2 Markdown-2.6.5 Missing-3.0 MultiMapping-2.13.0 Persistence-3.0a1 Pillow-3.1.1 Products.ATContentTypes-2.2.11 Products.Archetypes-1.10.12 Products.BTreeFolder2-2.14.0 Products.CMFCore-2.3.0 Products.CMFDiffTool-3.0.3 Products.CMFDynamicViewFTI-4.1.3 Products.CMFEditions-2.2.19 Products.CMFFormController-3.0.5 Products.CMFPlacefulWorkflow-1.6.5 Products.CMFPlone-5.0.2 Products.CMFQuickInstallerTool-3.0.13 Products.CMFUid-2.3.0b0 Products.DCWorkflow-2.3.0b0 Products.DateRecurringIndex-2.1 Products.ExtendedPathIndex-3.1 Products.ExternalEditor-2.0.0 Products.ExternalMethod-2.13.1 Products.GenericSetup-1.8.1 Products.MIMETools-2.13.0 Products.MailHost-2.13.2 Products.MimetypesRegistry-2.0.8 Products.OFSP-2.13.2 Products.PasswordResetTool-2.2.1 Products.PlacelessTranslationService-2.0.5 Products.PlonePAS-5.0.8 Products.PluggableAuthService-1.10.0 Products.PluginRegistry-1.3 Products.PortalTransforms-2.2.0 Products.PythonScripts-2.13.2 Products.ResourceRegistries-3.0.3 Products.SecureMailHost-1.1.2 Products.StandardCacheManagers-2.13.1 Products.ZCTextIndex-2.13.5 Products.ZCatalog-3.1 Products.ZSQLMethods-2.13.4 Products.ZopeVersionControl-1.1.3 Products.contentmigration-2.1.11 Products.statusmessages-4.0 Products.validation-2.0.1 Record-3.0 RestrictedPython-3.6.0 Unidecode-0.4.19 ZConfig-3.1.0 ZEO-4.2.0b1 ZODB-4.2.0 ZODB3-3.11.0 Zope2-2.13.23 ZopeUndo-4.0 archetypes.multilingual-3.0.1 archetypes.schemaextender-2.1.5 borg.localrole-3.1.1 collective.elephantvocabulary-0.2.5 collective.monkeypatcher-1.1.1 cssmin-0.2.0 cssselect-0.9.1 decorator-4.0.9 diazo-1.2.2 docutils-0.12 feedparser-5.2.1 five.customerize-1.1 five.globalrequest-1.0 five.intid-1.1.0 five.localsitemanager-2.0.5 five.pt-2.2.3 future-0.15.2 icalendar-3.9.2 importlib-1.0.3 initgroups-2.13.0 linecache2-1.0.0 lxml-3.5.0 mechanize-0.2.5 mockup-2.1.2 odict-1.5.1 ordereddict-1.1 persistent-4.1.1 plone-5.0.2 plone.alterego-1.0 plone.api-1.5 plone.app.blob-1.6.1 plone.app.caching-1.2.9 plone.app.collection-2.0b5 plone.app.content-3.0.18 plone.app.contentlisting-1.2.4 plone.app.contentmenu-2.1.7 plone.app.contentrules-4.0.10 plone.app.contenttypes-1.2.9 plone.app.controlpanel-3.0.4 plone.app.customerize-1.3.4 plone.app.dexterity-2.1.17 plone.app.discussion-2.4.10 plone.app.event-2.0.6 plone.app.folder-1.2.0 plone.app.i18n-3.0.2 plone.app.imaging-2.0.3 plone.app.intid-1.1.0 plone.app.iterate-3.1.4 plone.app.layout-2.5.18 plone.app.linkintegrity-3.0.4 plone.app.locales-5.0.7 plone.app.lockingbehavior-1.0.3 plone.app.multilingual-3.0.13 plone.app.openid-2.1.0 plone.app.portlets-3.1.3 plone.app.querystring-1.3.14 plone.app.redirector-1.3.1 plone.app.registry-1.3.9 plone.app.relationfield-1.3.2 plone.app.textfield-1.2.6 plone.app.theming-1.2.17 plone.app.upgrade-1.3.20 plone.app.users-2.3.5 plone.app.uuid-1.1 plone.app.versioningbehavior-1.2.7 plone.app.viewletmanager-2.0.9 plone.app.vocabularies-2.2.1 plone.app.widgets-2.0.3 plone.app.workflow-2.2.4 plone.app.z3cform-1.1.8 plone.autoform-1.6.2 plone.batching-1.1.0 plone.behavior-1.1 plone.browserlayer-2.1.6 plone.cachepurging-1.0.11 plone.caching-1.0.1 plone.contentrules-2.0.4 plone.dexterity-2.4.0 plone.event-1.3 plone.folder-1.0.7 plone.formwidget.namedfile-1.0.14 plone.formwidget.querystring-1.1.5 plone.formwidget.recurrence-2.0.2 plone.i18n-3.0.3 plone.indexer-1.0.3 plone.intelligenttext-2.1.0 plone.keyring-3.0.1 plone.locking-2.1.1 plone.memoize-1.2.0 plone.namedfile-3.0.7 plone.openid-2.0.4 plone.outputfilters-2.1.2 plone.portlet.collection-3.0.6 plone.portlet.static-3.0.2 plone.portlets-2.2.2 plone.protect-3.0.17 plone.registry-1.0.2 plone.resource-1.0.4 plone.resourceeditor-2.0.4 plone.rfc822-1.1.2 plone.scale-1.4.1 plone.schema-1.0a1 plone.schemaeditor-2.0.9 plone.session-3.5.6 plone.stringinterp-1.1.2 plone.subrequest-1.6.11 plone.supermodel-1.2.7 plone.synchronize-1.0.1 plone.theme-3.0.0 plone.transformchain-1.1.0 plone.uuid-1.0.3 plone.z3cform-0.8.1 plonetheme.barceloneta-1.6.16 ply-3.8 python-dateutil-2.4.2 python-gettext-3.0 python-openid-2.2.5 pytz-2015.7 repoze.xmliter-0.6 roman-2.0.0 six-1.10.0 slimit-0.8.1 sourcecodegen-0.6.14 tempstorage-2.12.2 traceback2-1.4.0 transaction-1.4.4 unittest2-1.1.0 z3c.autoinclude-0.3.6 z3c.caching-2.0a1 z3c.form-3.2.9 z3c.formwidget.query-0.12 z3c.objpath-1.1 z3c.pt-3.0.0a1 z3c.relationfield-0.7 z3c.zcmlhook-1.0b1 zExceptions-2.13.0 zLOG-2.12.0 zc.buildout-2.5.0 zc.lockfile-1.1.0 zc.relation-1.0 zdaemon-4.1.0 zope.annotation-4.4.1 zope.app.file-3.6.1 zope.app.locales-3.7.4 zope.app.publication-4.0.0a1.dev0 zope.authentication-4.2.1 zope.browser-2.1.0 zope.browsermenu-4.1.1 zope.browserpage-4.1.0 zope.browserresource-4.1.0 zope.cachedescriptors-4.1.0 zope.component-4.2.2 zope.componentvocabulary-2.0.0 zope.configuration-4.0.3 zope.container-4.1.0 zope.contentprovider-4.0.0 zope.contenttype-4.1.0 zope.copy-4.0.3 zope.datetime-4.1.0 zope.deferredimport-4.1.0 zope.deprecation-4.1.2 zope.dottedname-4.1.0 zope.dublincore-4.1.1 zope.error-4.2.0 zope.event-4.2.0 zope.exceptions-4.0.8 zope.filerepresentation-4.1.0 zope.formlib-4.3.0 zope.globalrequest-1.1 zope.i18n-4.1.0 zope.i18nmessageid-4.0.3 zope.interface-4.1.3 zope.intid-4.1.0 zope.keyreference-4.1.0 zope.lifecycleevent-4.1.0 zope.location-4.0.3 zope.pagetemplate-4.2.1 zope.processlifetime-2.1.0 zope.proxy-4.1.6 zope.ptresource-4.0.0 zope.publisher-4.2.2 zope.ramcache-2.1.0 zope.schema-4.4.2 zope.security-4.0.3 zope.sendmail-4.0.1 zope.sequencesort-4.0.1 zope.site-4.0.0 zope.size-4.1.0 zope.structuredtext-4.1.0 zope.tal-4.1.1 zope.tales-4.1.1 zope.testbrowser-4.0.4 zope.testing-4.5.0 zope.traversing-4.0.0 zope.viewlet-4.0.0
+/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:120: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
+  InsecurePlatformWarning
+
+real	4m39.717s
+user	4m9.089s
+sys	0m34.520s
++ pip freeze
++ sort
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
++ cat requirements.txt
+AccessControl==3.0.12
+Acquisition==4.2.2
+archetypes.multilingual==3.0.1
+archetypes.schemaextender==2.1.5
+argparse==1.4.0
+borg.localrole==3.1.1
+BTrees==4.2.0
+Chameleon==2.24
+collective.elephantvocabulary==0.2.5
+collective.monkeypatcher==1.1.1
+cssmin==0.2.0
+cssselect==0.9.1
+DateTime==4.0.1
+decorator==4.0.9
+diazo==1.2.2
+DocumentTemplate==2.13.2
+docutils==0.12
+ExtensionClass==4.1.2
+feedparser==5.2.1
+five.customerize==1.1
+five.globalrequest==1.0
+five.intid==1.1.0
+five.localsitemanager==2.0.5
+five.pt==2.2.3
+future==0.15.2
+icalendar==3.9.2
+importlib==1.0.3
+initgroups==2.13.0
+linecache2==1.0.0
+lxml==3.5.0
+Markdown==2.6.5
+mechanize==0.2.5
+Missing==3.0
+mockup==2.1.2
+MultiMapping==2.13.0
+odict==1.5.1
+ordereddict==1.1
+Persistence==3.0a1
+persistent==4.1.1
+Pillow==3.1.1
+Plone==5.0.2
+plone.alterego==1.0
+plone.api==1.5
+plone.app.blob==1.6.1
+plone.app.caching==1.2.9
+plone.app.collection==2.0b5
+plone.app.content==3.0.18
+plone.app.contentlisting==1.2.4
+plone.app.contentmenu==2.1.7
+plone.app.contentrules==4.0.10
+plone.app.contenttypes==1.2.9
+plone.app.controlpanel==3.0.4
+plone.app.customerize==1.3.4
+plone.app.dexterity==2.1.17
+plone.app.discussion==2.4.10
+plone.app.event==2.0.6
+plone.app.folder==1.2.0
+plone.app.i18n==3.0.2
+plone.app.imaging==2.0.3
+plone.app.intid==1.1.0
+plone.app.iterate==3.1.4
+plone.app.layout==2.5.18
+plone.app.linkintegrity==3.0.4
+plone.app.locales==5.0.7
+plone.app.lockingbehavior==1.0.3
+plone.app.multilingual==3.0.13
+plone.app.openid==2.1.0
+plone.app.portlets==3.1.3
+plone.app.querystring==1.3.14
+plone.app.redirector==1.3.1
+plone.app.registry==1.3.9
+plone.app.relationfield==1.3.2
+plone.app.textfield==1.2.6
+plone.app.theming==1.2.17
+plone.app.upgrade==1.3.20
+plone.app.users==2.3.5
+plone.app.uuid==1.1
+plone.app.versioningbehavior==1.2.7
+plone.app.viewletmanager==2.0.9
+plone.app.vocabularies==2.2.1
+plone.app.widgets==2.0.3
+plone.app.workflow==2.2.4
+plone.app.z3cform==1.1.8
+plone.autoform==1.6.2
+plone.batching==1.1.0
+plone.behavior==1.1
+plone.browserlayer==2.1.6
+plone.cachepurging==1.0.11
+plone.caching==1.0.1
+plone.contentrules==2.0.4
+plone.dexterity==2.4.0
+plone.event==1.3
+plone.folder==1.0.7
+plone.formwidget.namedfile==1.0.14
+plone.formwidget.querystring==1.1.5
+plone.formwidget.recurrence==2.0.2
+plone.i18n==3.0.3
+plone.indexer==1.0.3
+plone.intelligenttext==2.1.0
+plone.keyring==3.0.1
+plone.locking==2.1.1
+plone.memoize==1.2.0
+plone.namedfile==3.0.7
+plone.openid==2.0.4
+plone.outputfilters==2.1.2
+plone.portlet.collection==3.0.6
+plone.portlets==2.2.2
+plone.portlet.static==3.0.2
+plone.protect==3.0.17
+plone.registry==1.0.2
+plone.resource==1.0.4
+plone.resourceeditor==2.0.4
+plone.rfc822==1.1.2
+plone.scale==1.4.1
+plone.schema==1.0a1
+plone.schemaeditor==2.0.9
+plone.session==3.5.6
+plone.stringinterp==1.1.2
+plone.subrequest==1.6.11
+plone.supermodel==1.2.7
+plone.synchronize==1.0.1
+plone.theme==3.0.0
+plonetheme.barceloneta==1.6.16
+plone.transformchain==1.1.0
+plone.uuid==1.0.3
+plone.z3cform==0.8.1
+ply==3.8
+Products.Archetypes==1.10.12
+Products.ATContentTypes==2.2.11
+Products.BTreeFolder2==2.14.0
+Products.CMFCore==2.3.0
+Products.CMFDiffTool==3.0.3
+Products.CMFDynamicViewFTI==4.1.3
+Products.CMFEditions==2.2.19
+Products.CMFFormController==3.0.5
+Products.CMFPlacefulWorkflow==1.6.5
+Products.CMFPlone==5.0.2
+Products.CMFQuickInstallerTool==3.0.13
+Products.CMFUid==2.3.0b0
+Products.contentmigration==2.1.11
+Products.DateRecurringIndex==2.1
+Products.DCWorkflow==2.3.0b0
+Products.ExtendedPathIndex==3.1
+Products.ExternalEditor==2.0.0
+Products.ExternalMethod==2.13.1
+Products.GenericSetup==1.8.1
+Products.MailHost==2.13.2
+Products.MIMETools==2.13.0
+Products.MimetypesRegistry==2.0.8
+Products.OFSP==2.13.2
+Products.PasswordResetTool==2.2.1
+Products.PlacelessTranslationService==2.0.5
+Products.PlonePAS==5.0.8
+Products.PluggableAuthService==1.10.0
+Products.PluginRegistry==1.3
+Products.PortalTransforms==2.2.0
+Products.PythonScripts==2.13.2
+Products.ResourceRegistries==3.0.3
+Products.SecureMailHost==1.1.2
+Products.StandardCacheManagers==2.13.1
+Products.statusmessages==4.0
+Products.validation==2.0.1
+Products.ZCatalog==3.1
+Products.ZCTextIndex==2.13.5
+Products.ZopeVersionControl==1.1.3
+Products.ZSQLMethods==2.13.4
+python-dateutil==2.4.2
+python-gettext==3.0
+python-openid==2.2.5
+pytz==2015.7
+Record==3.0
+repoze.xmliter==0.6
+RestrictedPython==3.6.0
+roman==2.0.0
+six==1.10.0
+slimit==0.8.1
+sourcecodegen==0.6.14
+tempstorage==2.12.2
+traceback2==1.4.0
+transaction==1.4.4
+Unidecode==0.4.19
+unittest2==1.1.0
+wheel==0.29.0
+z3c.autoinclude==0.3.6
+z3c.caching==2.0a1
+z3c.form==3.2.9
+z3c.formwidget.query==0.12
+z3c.objpath==1.1
+z3c.pt==3.0.0a1
+z3c.relationfield==0.7
+z3c.zcmlhook==1.0b1
+zc.buildout==2.5.0
+zc.lockfile==1.1.0
+ZConfig==3.1.0
+zc.relation==1.0
+zdaemon==4.1.0
+ZEO==4.2.0b1
+zExceptions==2.13.0
+zLOG==2.12.0
+ZODB3==3.11.0
+ZODB==4.2.0
+Zope2==2.13.23
+zope.annotation==4.4.1
+zope.app.file==3.6.1
+zope.app.locales==3.7.4
+zope.app.publication==4.0.0a1.dev0
+zope.authentication==4.2.1
+zope.browser==2.1.0
+zope.browsermenu==4.1.1
+zope.browserpage==4.1.0
+zope.browserresource==4.1.0
+zope.cachedescriptors==4.1.0
+zope.component==4.2.2
+zope.componentvocabulary==2.0.0
+zope.configuration==4.0.3
+zope.container==4.1.0
+zope.contentprovider==4.0.0
+zope.contenttype==4.1.0
+zope.copy==4.0.3
+zope.datetime==4.1.0
+zope.deferredimport==4.1.0
+zope.deprecation==4.1.2
+zope.dottedname==4.1.0
+zope.dublincore==4.1.1
+zope.error==4.2.0
+zope.event==4.2.0
+zope.exceptions==4.0.8
+zope.filerepresentation==4.1.0
+zope.formlib==4.3.0
+zope.globalrequest==1.1
+zope.i18n==4.1.0
+zope.i18nmessageid==4.0.3
+zope.interface==4.1.3
+zope.intid==4.1.0
+zope.keyreference==4.1.0
+zope.lifecycleevent==4.1.0
+zope.location==4.0.3
+zope.pagetemplate==4.2.1
+zope.processlifetime==2.1.0
+zope.proxy==4.1.6
+zope.ptresource==4.0.0
+zope.publisher==4.2.2
+zope.ramcache==2.1.0
+zope.schema==4.4.2
+zope.security==4.0.3
+zope.sendmail==4.0.1
+zope.sequencesort==4.0.1
+zope.site==4.0.0
+zope.size==4.1.0
+zope.structuredtext==4.1.0
+zope.tal==4.1.1
+zope.tales==4.1.1
+zope.testbrowser==4.0.4
+zope.testing==4.5.0
+zope.traversing==4.0.0
+ZopeUndo==4.0
+zope.viewlet==4.0.0
+END -- cold
+
+real	4m45.597s
+user	4m13.456s
+sys	0m35.896s
+2016-02-24 13:28:02.845576013
+
+START -- noop
++ source ./setup
+++ source ./env
++++ export HOMEBREW=/nail/home/buck/prefices/brew
++++ HOMEBREW=/nail/home/buck/prefices/brew
++++ export LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ export CPATH=/nail/home/buck/prefices/brew/include
++++ CPATH=/nail/home/buck/prefices/brew/include
++++ export XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
++++ XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
+++ set +ux
+++ ./venv/bin/pip install --upgrade pip wheel setuptools
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
+/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:315: SNIMissingWarning: An HTTPS request has been made, but the SNI (Subject Name Indication) extension to TLS is not available on this platform. This may cause the server to present an incorrect TLS certificate, which can cause validation failures. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#snimissingwarning.
+  SNIMissingWarning
+/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip/_vendor/requests/packages/urllib3/util/ssl_.py:120: InsecurePlatformWarning: A true SSLContext object is not available. This prevents urllib3 from configuring SSL appropriately and may cause certain SSL connections to fail. For more information, see https://urllib3.readthedocs.org/en/latest/security.html#insecureplatformwarning.
+  InsecurePlatformWarning
+Requirement already up-to-date: pip in ./venv/lib/python2.6/site-packages
+Requirement already up-to-date: wheel in ./venv/lib/python2.6/site-packages
+Requirement already up-to-date: setuptools in ./venv/lib/python2.6/site-packages
+Requirement already up-to-date: argparse in ./venv/lib/python2.6/site-packages (from wheel)
+++ venv-update --version
+./setup: line 8: venv-update: command not found
+++ true
+++ pip --version
+pip 8.0.2 from /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages (python 2.6)
+++ python -c 'import wheel; print wheel.__version__'
+0.29.0
+++ python -c 'import setuptools; print setuptools.__version__'
+20.1.1
++ pip install --upgrade -r requirements.txt
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
+Requirement already up-to-date: AccessControl==3.0.12 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 1))
+Requirement already up-to-date: Acquisition==4.2.2 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 2))
+... <snip!> ...
+Requirement already up-to-date: zope.viewlet==4.0.0 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 257))
+Requirement already up-to-date: setuptools in ./venv/lib/python2.6/site-packages (from archetypes.multilingual==3.0.1->-r requirements.txt (line 3))
+
+real	0m7.436s
+user	0m6.736s
+sys	0m0.163s
++ diff -us requirements.txt /dev/fd/63
+++ sort
+++ pip freeze
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
+Files requirements.txt and /dev/fd/63 are identical
+END -- noop
+
+real	0m10.909s
+user	0m9.818s
+sys	0m0.529s
+2016-02-24 13:28:13.755829696
+
+START -- warm
++ rm -rf venv
++ virtualenv venv
+New python executable in venv/bin/python
+Installing setuptools, pip...done.
++ ./noop
++ source ./setup
+++ source ./env
++++ export HOMEBREW=/nail/home/buck/prefices/brew
++++ HOMEBREW=/nail/home/buck/prefices/brew
++++ export LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ export CPATH=/nail/home/buck/prefices/brew/include
++++ CPATH=/nail/home/buck/prefices/brew/include
++++ export XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
++++ XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
+++ set +ux
+++ ./venv/bin/pip install --upgrade pip wheel setuptools
+Downloading/unpacking pip from https://pypi.python.org/packages/py2.py3/p/pip/pip-8.0.2-py2.py3-none-any.whl#md5=2056f553d5b593d3a970296f229c1b79
+Downloading/unpacking wheel
+Downloading/unpacking setuptools from https://pypi.python.org/packages/3.5/s/setuptools/setuptools-20.1.1-py2.py3-none-any.whl#md5=9c0765fbbe30368494ec7eb72702c67e
+Downloading/unpacking argparse (from wheel)
+  Downloading argparse-1.4.0-py2.py3-none-any.whl
+Installing collected packages: pip, wheel, setuptools, argparse
+  Found existing installation: pip 1.5.5
+    Uninstalling pip:
+      Successfully uninstalled pip
+  Found existing installation: setuptools 3.4.4
+    Uninstalling setuptools:
+      Successfully uninstalled setuptools
+Successfully installed pip wheel setuptools argparse
+Cleaning up...
+++ venv-update --version
+./setup: line 8: venv-update: command not found
+++ true
+++ pip --version
+pip 8.0.2 from /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages (python 2.6)
+++ python -c 'import wheel; print wheel.__version__'
+0.29.0
+++ python -c 'import setuptools; print setuptools.__version__'
+20.1.1
++ pip install --upgrade -r requirements.txt
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
+Collecting AccessControl==3.0.12 (from -r requirements.txt (line 1))
+Collecting Acquisition==4.2.2 (from -r requirements.txt (line 2))
+Collecting archetypes.multilingual==3.0.1 (from -r requirements.txt (line 3))
+Collecting archetypes.schemaextender==2.1.5 (from -r requirements.txt (line 4))
+Requirement already up-to-date: argparse==1.4.0 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 5))
+Collecting borg.localrole==3.1.1 (from -r requirements.txt (line 6))
+Collecting BTrees==4.2.0 (from -r requirements.txt (line 7))
+... <snip!> ...
+Collecting ZopeUndo==4.0 (from -r requirements.txt (line 256))
+Collecting zope.viewlet==4.0.0 (from -r requirements.txt (line 257))
+Requirement already up-to-date: setuptools in ./venv/lib/python2.6/site-packages (from archetypes.multilingual==3.0.1->-r requirements.txt (line 3))
+Installing collected packages: zope.interface, transaction, zc.lockfile, six, persistent, BTrees, ZConfig, zdaemon, ZODB, ZEO, ZODB3, zope.proxy, zope.deferredimport, ExtensionClass, zope.event, ordereddict, zope.schema, zope.i18nmessageid, zope.configuration, zope.component, RestrictedPython, zope.location, zope.security, zope.browser, pytz, zope.i18n, zope.contenttype, zope.exceptions, zope.publisher, zExceptions, Persistence, Record, Acquisition, zope.testing, DateTime, AccessControl, zope.annotation, zope.lifecycleevent, zope.size, zope.filerepresentation, zope.traversing, zope.dottedname, zope.container, zope.site, zope.tal, zope.tales, zope.pagetemplate, zope.browserresource, zope.ptresource, Missing, zope.contentprovider, MultiMapping, zope.browsermenu, zope.sendmail, docutils, zLOG, Products.BTreeFolder2, zope.browserpage, zope.viewlet, zope.processlifetime, zope.structuredtext, zope.sequencesort, DocumentTemplate, Products.OFSP, Products.MailHost, Products.PythonScripts, Products.ZCTextIndex, Products.ZCatalog, Products.StandardCacheManagers, mechanize, zope.testbrowser, Products.ExternalMethod, tempstorage, Products.MIMETools, ZopeUndo, initgroups, Zope2, five.localsitemanager, Products.ZSQLMethods, zope.datetime, zope.formlib, Products.GenericSetup, zope.globalrequest, five.globalrequest, Products.CMFCore, Products.CMFFormController, Products.MimetypesRegistry, Products.validation, Unidecode, plone.i18n, plone.transformchain, collective.monkeypatcher, plone.keyring, importlib, future, lxml, repoze.xmliter, plone.protect, Products.statusmessages, plone.app.contentlisting, plone.batching, python-dateutil, feedparser, zope.componentvocabulary, zope.ramcache, plone.memoize, plone.portlets, five.customerize, plone.app.i18n, Products.PluginRegistry, Products.PluggableAuthService, Products.CMFDynamicViewFTI, plone.app.portlets, plone.app.viewletmanager, zope.copy, Products.CMFDiffTool, Products.CMFUid, Products.ZopeVersionControl, Products.CMFEditions, zope.deprecation, plone.registry, plone.app.content, plone.app.layout, plone.app.querystring, plone.app.vocabularies, plone.portlet.collection, plone.locking, plone.rfc822, plone.synchronize, z3c.zcmlhook, plone.supermodel, z3c.form, plone.z3cform, plone.autoform, plone.folder, plone.uuid, plone.alterego, plone.behavior, plone.dexterity, plone.app.locales, plone.app.lockingbehavior, zope.keyreference, zope.intid, five.intid, plone.app.intid, zope.cachedescriptors, plone.schemaeditor, z3c.formwidget.query, zc.relation, z3c.objpath, z3c.relationfield, plone.app.textfield, plone.app.z3cform, plone.app.relationfield, collective.elephantvocabulary, plone.event, plone.formwidget.recurrence, plone.indexer, Products.DateRecurringIndex, zope.error, zope.authentication, zope.app.publication, zope.dublincore, zope.app.file, plone.namedfile, plone.formwidget.namedfile, plone.contentrules, plone.app.uuid, plone.app.dexterity, plone.browserlayer, icalendar, plone.app.event, plone.app.versioningbehavior, plone.app.contentmenu, plone.app.linkintegrity, plone.app.contenttypes, Products.ExtendedPathIndex, cssmin, plone.session, Products.PlonePAS, Products.ExternalEditor, odict, ply, slimit, Markdown, plone.intelligenttext, Pillow, Products.PortalTransforms, plone.outputfilters, linecache2, traceback2, unittest2, python-gettext, Products.PlacelessTranslationService, cssselect, diazo, roman, z3c.caching, plone.caching, plone.resource, plone.resourceeditor, plone.subrequest, plone.app.theming, decorator, plone.api, Products.PasswordResetTool, plone.theme, borg.localrole, Products.CMFQuickInstallerTool, plone.app.controlpanel, mockup, plone.portlet.static, plonetheme.barceloneta, zope.app.locales, plone.schema, plone.app.users, plone.app.multilingual, Products.DCWorkflow, Products.contentmigration, Chameleon, z3c.pt, sourcecodegen, five.pt, plone.app.folder, plone.app.customerize, plone.app.redirector, zc.buildout, z3c.autoinclude, plone.stringinterp, plone.app.contentrules, plone.app.discussion, plone.app.workflow, Products.CMFPlone, plone.app.registry, Products.ResourceRegistries, plone.app.widgets, Products.Archetypes, plone.formwidget.querystring, plone.app.collection, archetypes.schemaextender, plone.scale, plone.app.imaging, plone.app.blob, Products.ATContentTypes, archetypes.multilingual, python-openid, plone.openid, plone.app.openid, Products.CMFPlacefulWorkflow, plone.cachepurging, plone.app.caching, plone.app.iterate, Products.SecureMailHost, plone.app.upgrade, Plone
+Successfully installed AccessControl-3.0.12 Acquisition-4.2.2 BTrees-4.2.0 Chameleon-2.24 DateTime-4.0.1 DocumentTemplate-2.13.2 ExtensionClass-4.1.2 Markdown-2.6.5 Missing-3.0 MultiMapping-2.13.0 Persistence-3.0a1 Pillow-3.1.1 Plone-5.0.2 Products.ATContentTypes-2.2.11 Products.Archetypes-1.10.12 Products.BTreeFolder2-2.14.0 Products.CMFCore-2.3.0 Products.CMFDiffTool-3.0.3 Products.CMFDynamicViewFTI-4.1.3 Products.CMFEditions-2.2.19 Products.CMFFormController-3.0.5 Products.CMFPlacefulWorkflow-1.6.5 Products.CMFPlone-5.0.2 Products.CMFQuickInstallerTool-3.0.13 Products.CMFUid-2.3.0b0 Products.DCWorkflow-2.3.0b0 Products.DateRecurringIndex-2.1 Products.ExtendedPathIndex-3.1 Products.ExternalEditor-2.0.0 Products.ExternalMethod-2.13.1 Products.GenericSetup-1.8.1 Products.MIMETools-2.13.0 Products.MailHost-2.13.2 Products.MimetypesRegistry-2.0.8 Products.OFSP-2.13.2 Products.PasswordResetTool-2.2.1 Products.PlacelessTranslationService-2.0.5 Products.PlonePAS-5.0.8 Products.PluggableAuthService-1.10.0 Products.PluginRegistry-1.3 Products.PortalTransforms-2.2.0 Products.PythonScripts-2.13.2 Products.ResourceRegistries-3.0.3 Products.SecureMailHost-1.1.2 Products.StandardCacheManagers-2.13.1 Products.ZCTextIndex-2.13.5 Products.ZCatalog-3.1 Products.ZSQLMethods-2.13.4 Products.ZopeVersionControl-1.1.3 Products.contentmigration-2.1.11 Products.statusmessages-4.0 Products.validation-2.0.1 Record-3.0 RestrictedPython-3.6.0 Unidecode-0.4.19 ZConfig-3.1.0 ZEO-4.2.0b1 ZODB-4.2.0 ZODB3-3.11.0 Zope2-2.13.23 ZopeUndo-4.0 archetypes.multilingual-3.0.1 archetypes.schemaextender-2.1.5 borg.localrole-3.1.1 collective.elephantvocabulary-0.2.5 collective.monkeypatcher-1.1.1 cssmin-0.2.0 cssselect-0.9.1 decorator-4.0.9 diazo-1.2.2 docutils-0.12 feedparser-5.2.1 five.customerize-1.1 five.globalrequest-1.0 five.intid-1.1.0 five.localsitemanager-2.0.5 five.pt-2.2.3 future-0.15.2 icalendar-3.9.2 importlib-1.0.3 initgroups-2.13.0 linecache2-1.0.0 lxml-3.5.0 mechanize-0.2.5 mockup-2.1.2 odict-1.5.1 ordereddict-1.1 persistent-4.1.1 plone.alterego-1.0 plone.api-1.5 plone.app.blob-1.6.1 plone.app.caching-1.2.9 plone.app.collection-2.0b5 plone.app.content-3.0.18 plone.app.contentlisting-1.2.4 plone.app.contentmenu-2.1.7 plone.app.contentrules-4.0.10 plone.app.contenttypes-1.2.9 plone.app.controlpanel-3.0.4 plone.app.customerize-1.3.4 plone.app.dexterity-2.1.17 plone.app.discussion-2.4.10 plone.app.event-2.0.6 plone.app.folder-1.2.0 plone.app.i18n-3.0.2 plone.app.imaging-2.0.3 plone.app.intid-1.1.0 plone.app.iterate-3.1.4 plone.app.layout-2.5.18 plone.app.linkintegrity-3.0.4 plone.app.locales-5.0.7 plone.app.lockingbehavior-1.0.3 plone.app.multilingual-3.0.13 plone.app.openid-2.1.0 plone.app.portlets-3.1.3 plone.app.querystring-1.3.14 plone.app.redirector-1.3.1 plone.app.registry-1.3.9 plone.app.relationfield-1.3.2 plone.app.textfield-1.2.6 plone.app.theming-1.2.17 plone.app.upgrade-1.3.20 plone.app.users-2.3.5 plone.app.uuid-1.1 plone.app.versioningbehavior-1.2.7 plone.app.viewletmanager-2.0.9 plone.app.vocabularies-2.2.1 plone.app.widgets-2.0.3 plone.app.workflow-2.2.4 plone.app.z3cform-1.1.8 plone.autoform-1.6.2 plone.batching-1.1.0 plone.behavior-1.1 plone.browserlayer-2.1.6 plone.cachepurging-1.0.11 plone.caching-1.0.1 plone.contentrules-2.0.4 plone.dexterity-2.4.0 plone.event-1.3 plone.folder-1.0.7 plone.formwidget.namedfile-1.0.14 plone.formwidget.querystring-1.1.5 plone.formwidget.recurrence-2.0.2 plone.i18n-3.0.3 plone.indexer-1.0.3 plone.intelligenttext-2.1.0 plone.keyring-3.0.1 plone.locking-2.1.1 plone.memoize-1.2.0 plone.namedfile-3.0.7 plone.openid-2.0.4 plone.outputfilters-2.1.2 plone.portlet.collection-3.0.6 plone.portlet.static-3.0.2 plone.portlets-2.2.2 plone.protect-3.0.17 plone.registry-1.0.2 plone.resource-1.0.4 plone.resourceeditor-2.0.4 plone.rfc822-1.1.2 plone.scale-1.4.1 plone.schema-1.0a1 plone.schemaeditor-2.0.9 plone.session-3.5.6 plone.stringinterp-1.1.2 plone.subrequest-1.6.11 plone.supermodel-1.2.7 plone.synchronize-1.0.1 plone.theme-3.0.0 plone.transformchain-1.1.0 plone.uuid-1.0.3 plone.z3cform-0.8.1 plonetheme.barceloneta-1.6.16 ply-3.8 python-dateutil-2.4.2 python-gettext-3.0 python-openid-2.2.5 pytz-2015.7 repoze.xmliter-0.6 roman-2.0.0 six-1.10.0 slimit-0.8.1 sourcecodegen-0.6.14 tempstorage-2.12.2 traceback2-1.4.0 transaction-1.4.4 unittest2-1.1.0 z3c.autoinclude-0.3.6 z3c.caching-2.0a1 z3c.form-3.2.9 z3c.formwidget.query-0.12 z3c.objpath-1.1 z3c.pt-3.0.0a1 z3c.relationfield-0.7 z3c.zcmlhook-1.0b1 zExceptions-2.13.0 zLOG-2.12.0 zc.buildout-2.5.0 zc.lockfile-1.1.0 zc.relation-1.0 zdaemon-4.1.0 zope.annotation-4.4.1 zope.app.file-3.6.1 zope.app.locales-3.7.4 zope.app.publication-4.0.0a1.dev0 zope.authentication-4.2.1 zope.browser-2.1.0 zope.browsermenu-4.1.1 zope.browserpage-4.1.0 zope.browserresource-4.1.0 zope.cachedescriptors-4.1.0 zope.component-4.2.2 zope.componentvocabulary-2.0.0 zope.configuration-4.0.3 zope.container-4.1.0 zope.contentprovider-4.0.0 zope.contenttype-4.1.0 zope.copy-4.0.3 zope.datetime-4.1.0 zope.deferredimport-4.1.0 zope.deprecation-4.1.2 zope.dottedname-4.1.0 zope.dublincore-4.1.1 zope.error-4.2.0 zope.event-4.2.0 zope.exceptions-4.0.8 zope.filerepresentation-4.1.0 zope.formlib-4.3.0 zope.globalrequest-1.1 zope.i18n-4.1.0 zope.i18nmessageid-4.0.3 zope.interface-4.1.3 zope.intid-4.1.0 zope.keyreference-4.1.0 zope.lifecycleevent-4.1.0 zope.location-4.0.3 zope.pagetemplate-4.2.1 zope.processlifetime-2.1.0 zope.proxy-4.1.6 zope.ptresource-4.0.0 zope.publisher-4.2.2 zope.ramcache-2.1.0 zope.schema-4.4.2 zope.security-4.0.3 zope.sendmail-4.0.1 zope.sequencesort-4.0.1 zope.site-4.0.0 zope.size-4.1.0 zope.structuredtext-4.1.0 zope.tal-4.1.1 zope.tales-4.1.1 zope.testbrowser-4.0.4 zope.testing-4.5.0 zope.traversing-4.0.0 zope.viewlet-4.0.0
+
+real	0m43.272s
+user	0m36.931s
+sys	0m5.584s
++ diff -us requirements.txt /dev/fd/63
+++ sort
+++ pip freeze
+DEPRECATION: Python 2.6 is no longer supported by the Python core team, please upgrade your Python. A future version of pip will drop support for Python 2.6
+Files requirements.txt and /dev/fd/63 are identical
+END -- warm
+
+real	0m49.014s
+user	0m41.281s
+sys	0m6.822s
+2016-02-24 13:29:02.771411441
+
+real	5m45.526s
+user	5m4.556s
+sys	0m43.252s

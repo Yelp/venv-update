@@ -1,0 +1,5 @@
+#!/not/executable/bash
+export HOMEBREW=$HOME/prefices/brew
+export LIBRARY_PATH=$HOMEBREW/lib:$HOMEBREW/lib64
+export CPATH=$HOMEBREW/include
+export XDG_CACHE_HOME=$PWD/cache

@@ -1,0 +1,11 @@
+#!/bin/bash
+set -eux
+
+rm -rf venv cache
+virtualenv venv
+source ./setup
+
+# `--pre` see: https://github.com/pypa/pip/issues/3511
+time "$PIP" install --pre plone
+"$PIP" freeze | sort > requirements.txt
+cat requirements.txt

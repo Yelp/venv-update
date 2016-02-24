@@ -1,0 +1,33 @@
+#!/bin/bash
+set -eu
+
+now() {
+    date +"%F %T.%N"
+}
+
+
+onetest() {
+    TEST="$1"
+    echo
+    echo START -- "$TEST"
+    ./"$TEST"
+    echo END -- "$TEST"
+}
+
+alltests() {
+    now
+    time onetest cold
+    now
+    time onetest noop
+    now
+    time onetest warm
+    now
+}
+
+export PIP="pip"
+export INSTALL="pip"
+(time alltests) 2>&1 | tee vanilla.log
+
+export PIP="pip-faster"
+export INSTALL="-e .."
+(time alltests) 2>&1 | tee faster.log

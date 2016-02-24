@@ -1,0 +1,31 @@
+benchmark: installing plone and its dependencies (260 packages)
+last run: [2016-02-24]
+
+pip8:
+    cold:   
+        real	4m37.612s
+        real	4m39.762s
+        real	4m39.717s
+    noop:
+        real	0m6.890s
+        real	0m7.112s
+        real	0m7.436s
+    warm:
+        real	0m44.684s
+        real	0m44.614s
+        real	0m43.272s
+
+
+pip-faster:
+    cold:
+        real	4m16.163s
+        real	4m21.282s
+        real	4m14.038s
+    noop:
+        real	0m2.399s
+        real	0m2.389s
+        real	0m2.335s
+    warm:
+        real	0m30.410s
+        real	0m21.303s
+        real	0m21.323s

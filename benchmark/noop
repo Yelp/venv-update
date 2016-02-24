@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eux
+
+source ./setup
+
+time "$PIP" install --upgrade -r requirements.txt
+
+# assert that we made a noop
+diff -us requirements.txt <("$PIP" freeze | sort)
