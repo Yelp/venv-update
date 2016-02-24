@@ -30,10 +30,10 @@ def find_version(*file_paths):
 
 def main():
     setup(
-        name='pip-faster',
+        name='venv-update',
         version=find_version('venv_update.py'),
         description='Quickly and exactly synchronize a virtualenv with a requirements.txt',
-        url='https://github.com/Yelp/pip-faster',
+        url='https://github.com/Yelp/venv-update',
         author='Buck Evan',
         author_email='buck@yelp.com',
         platforms='all',

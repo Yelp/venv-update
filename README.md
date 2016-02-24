@@ -1,10 +1,11 @@
-pip-faster
+venv-update
 --------
-[![PyPI version](https://badge.fury.io/py/pip-faster.svg)](https://pypi.python.org/pypi/pip-faster)
-[![Build Status](https://travis-ci.org/Yelp/pip-faster.svg?branch=master)](https://travis-ci.org/Yelp/pip-faster)
-[![Coverage Status](https://codecov.io/github/Yelp/pip-faster/coverage.svg?branch=master)](https://codecov.io/github/Yelp/pip-faster?branch=master)
+Quickly and exactly synchronize a virtualenv with a requirements.txt.
 
-pip-faster is like [pip][pip], but faster.
+[![PyPI version](https://badge.fury.io/py/venv-update.svg)](https://pypi.python.org/pypi/venv-update)
+[![Build Status](https://travis-ci.org/Yelp/venv-update.svg?branch=master)](https://travis-ci.org/Yelp/venv-update)
+[![Coverage Status](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=master)](https://codecov.io/github/Yelp/venv-update?branch=master)
+
 
 This project ships two distinct components:
 
@@ -187,7 +188,7 @@ only with the same Linux distribution they were compiled on, so this only works
 if your developers work in very homogeneous environments.
 
 For both venv-update and pip-faster, you can specify an index server by setting
-the `PIP_INDEX_URL` environment variable (or `PIP_EXTRA_INDEX_URL` if you
+the `PIP\_INDEX\_URL` environment variable (or `PIP\_EXTRA\_INDEX\_URL` if you
 want to supplement but not replace the default PyPI). For pip-faster you can
 also use `-i` or `-e`, just like in regular pip.
 

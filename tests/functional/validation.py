@@ -171,7 +171,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         assert out.startswith('''\
 > virtualenv venv
 Keeping valid virtualenv from previous run.
-> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse pip-faster==%s
+> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse venv-update==%s
 ''' % (tmpdir, __version__))
 
         final_version = assert_python_version(other_python.version_prefix)

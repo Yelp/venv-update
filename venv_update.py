@@ -421,7 +421,7 @@ def pip_faster(venv_path, pip_command, install):
     if exists(VENV_UPDATE_REQS_OVERRIDE):
         bootstrap_command += ('-r', VENV_UPDATE_REQS_OVERRIDE)
     else:
-        bootstrap_command += ('pip-faster==' + __version__,)
+        bootstrap_command += ('venv-update==' + __version__,)
     run(bootstrap_command)
 
     run(pip_command + install)
