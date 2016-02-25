@@ -166,6 +166,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         venv_update_symlink_pwd()
         out, err = run('./venv/bin/python', 'venv_update.py')
 
+        err = strip_pip_warnings(err)
         assert err == ''
         out = uncolor(out)
         assert out.startswith('''\

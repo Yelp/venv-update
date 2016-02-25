@@ -63,7 +63,7 @@ def test_arguments_version(tmpdir):
     out = uncolor(out)
     lines = out.splitlines()
     # 13:py27 14:py35 15:pypy
-    assert len(lines) == 9, repr(lines)
+    assert len(lines) == 8, repr(lines)
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
@@ -387,6 +387,7 @@ Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
 SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package==0.1.0
 Installing collected packages: cant-wheel-package, pure-python-package
   Running setup.py install for cant-wheel-package
+  Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
 Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
 ''' in out  # noqa

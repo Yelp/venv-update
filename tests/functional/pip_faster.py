@@ -34,6 +34,7 @@ def it_installs_stuff(tmpdir):
     assert pip_freeze(str(venv)) == '''\
 coverage==4.0.3
 coverage-enable-subprocess==0
+wheel==0.29.0
 '''
 
     pip = venv.join('bin/pip').strpath
