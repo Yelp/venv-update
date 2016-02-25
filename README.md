@@ -73,10 +73,39 @@ current directory, using `requirements.txt` in the current directory. You can
 pass additional options to both `virtualenv` and `pip`. A typical invocation
 looks something like this:
 
-    ./venv_update.py venv-name -- -r requirements.txt -r requirements-dev.txt
+    ./venv_update.py venv= venv-name install= -r requirements.txt -r requirements-dev.txt
 
-Arguments to `virtualenv` should go before the `--`; arguments to `pip` should
-go after it.
+`venv-update` uses "trailing equal" options (e.g. `venv=`) to delimit groups of
+(conventional, dashed) options to pass to wrapped commands (`virtualenv` and
+`pip`). The options are:
+
+* `venv=`, for arguments passed to `virtualenv`. The default is just `venv`,
+  for setting the name of the virtualenv created.
+
+* `install=`, for arguments passed to `pip-command` (defined below). The
+  default is `-r requirements.txt`.
+
+* `pip-command=` for the command to use inside the freshly-bootstrapped
+  virtualenv. The default is `pip-faster install --upgrade --prune`. It's
+  almost never necessary to modify this, as the default should work fine.
+
+
+Some example invocations of `venv-update`:
+
+* **Install `requirements.txt` to a virtualenv named `venv`:**
+  `venv-update`
+
+* **Install `requirements.txt` to a virtualenv named `myenv`:**
+  `venv-update venv= myenv`
+
+* **Install `reqs1.txt` and `reqs2.txt` to a virtualenv named `myenv`:**
+  `venv-update venv= myenv install= -r reqs1.txt -r reqs2.txt`
+
+* **Install `reqs1.txt` named `venv` using Python 3.4:**
+  `venv-update venv= -ppython3.4 venv install= -r reqs1.txt
+
+Note that options to pip are also [configurable via environment
+values][pip-env-vars]; this is recommended over changing the `pip-command`.
 
 
 ### Usage in `Makefile`s
@@ -88,7 +117,7 @@ never normally fail. Here's an example Makefile:
 VENV := venv
 
 $(VENV): requirements.txt requirements-dev.txt
-    ./venv_update.py $(VENV) -- -r requirements.txt -r requirements-dev.txt
+    ./venv_update.py venv= $(VENV) install= -r requirements.txt -r requirements-dev.txt
 
 .PHONY: run-some-script
 run-some-script: $(VENV)
@@ -188,12 +217,13 @@ only with the same Linux distribution they were compiled on, so this only works
 if your developers work in very homogeneous environments.
 
 For both venv-update and pip-faster, you can specify an index server by setting
-the `PIP\_INDEX\_URL` environment variable (or `PIP\_EXTRA\_INDEX\_URL` if you
+the `PIP_INDEX_URL` environment variable (or `PIP_EXTRA_INDEX_URL` if you
 want to supplement but not replace the default PyPI). For pip-faster you can
 also use `-i` or `-e`, just like in regular pip.
 
 
 [pip]: https://pip.pypa.io/en/stable/
+[pip-env-vars]: https://pip.readthedocs.org/en/stable/user_guide/#environment-variables
 [pypi]: https://pypi.python.org/pypi
 [tox]: https://tox.readthedocs.org/en/latest/
 [wheel]: https://wheel.readthedocs.org/en/latest/
