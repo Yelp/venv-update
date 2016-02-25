@@ -25,6 +25,9 @@ Examples:
     # install requirements.txt to "myenv"
     venv-update venv= myenv
 
+    # install requirements.txt to "myenv" using Python 3.4
+    venv-update venv= -ppython3.4 myenv
+
     # install myreqs.txt to "venv"
     venv-update install= -r myreqs.txt
 
