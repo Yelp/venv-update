@@ -1,20 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''\
-usage: pip-faster [-h] [virtualenv_dir(ignored)] [requirements [requirements ...]]
+'''pip-faster is a thin wrapper around pip.
 
-Update the current environment using a requirements.txt listing
-When this script completes, the environment should have the same packages as if it were
-removed, then rebuilt.
+It only adds a --prune option to the `install` subcommand.
+`pip-faster install --prune` will *uninstall* any installed packages that are
+not required.
 
-To set the index server, export a PIP_INDEX_SERVER variable.
-    See also: http://pip.readthedocs.org/en/latest/user_guide.html#environment-variables
-
-positional arguments:
-  requirements    Requirements files. (default: requirements.txt)
-
-optional arguments:
-  -h, --help      show this help message and exit
+Otherwise, you should find that pip-faster gives the same results as pip, just
+more quickly, especially in the case of pinned requirements (e.g.
+package-x==1.2.3).
 
 Version control at: https://github.com/yelp/venv-update
 '''
@@ -282,11 +276,13 @@ def fresh_working_set():
 def req_cycle(req):
     """is this requirement cyclic?"""
     cls = req.__class__
-    name = req.name
+    seen = set([req.name])
     while isinstance(req.comes_from, cls):
-        if name == req.comes_from.name:
-            return True
         req = req.comes_from
+        if req.name in seen:
+            return True
+        else:
+            seen.add(req.name)
     return False
 
 
@@ -312,23 +308,13 @@ def trace_requirements(requirements):
     # breadth-first traversal:
     from collections import deque
     queue = deque(requirements)
-    seen = set()
+    queued = set([req.req for req in queue])
     errors = []
     result = []
     while queue:
         req = queue.popleft()
-        req_id = str(req)  # InstallRequirement doesn't implement hash/equality, so we compare using str()
-        if req_id in seen:
-            logger.debug('already analyzed: %s', req)
-            continue
-        else:
-            seen.add(req_id)
 
         logger.debug('tracing: %s', req)
-        if req_cycle(req):
-            logger.warn('Circular dependency! %s', req)
-            continue
-
         try:
             dist = working_set.find(req.req)
         except pkg_resources.VersionConflict as conflict:
@@ -343,12 +329,20 @@ def trace_requirements(requirements):
 
         result.append(dist_to_req(dist))
 
-        for dist_req in sorted(dist.requires(), key=lambda req: req.key):
+        for sub_req in sorted(dist.requires(), key=lambda req: req.key):
             from pip.req import InstallRequirement
-            dist_req = InstallRequirement(dist_req, req)
+            sub_req = InstallRequirement(sub_req, req)
 
-            logger.debug('adding sub-requirement %s', dist_req)
-            queue.append(dist_req)
+            if req_cycle(sub_req):
+                logger.warn('Circular dependency! %s', sub_req)
+                continue
+            elif sub_req.req in queued:
+                logger.debug('already queued: %s', sub_req)
+                continue
+            else:
+                logger.debug('adding sub-requirement %s', sub_req)
+                queue.append(sub_req)
+                queued.add(sub_req.req)
 
     if errors:
         raise InstallationError('\n'.join(errors))
