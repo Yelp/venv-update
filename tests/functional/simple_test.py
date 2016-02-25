@@ -58,6 +58,7 @@ def test_arguments_version(tmpdir):
 
     # should show virtualenv version, successfully
     out, err = venv_update('venv=', '--version')
+    err = strip_pip_warnings(err)
     assert err == ''
 
     out = uncolor(out)

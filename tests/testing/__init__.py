@@ -78,6 +78,8 @@ pip_warnings_regex = Regex(
             r'A future version of pip will drop support for Python 2\.6\n'
         ),
         r"^  Url '[^']*/\.cache/pip-faster/wheelhouse' is ignored: it is neither a file nor a directory\.\n",
+        r'^You are using pip version [0-9.]+, however version [0-9.]+ is available\.\n',
+        r"^You should consider upgrading via the 'pip install --upgrade pip' command\.\n",
     )),
     flags=MULTILINE,
 )
@@ -106,6 +108,7 @@ def pip_freeze(venv='venv'):
     import re
     out = re.sub(r'argparse==[\d.]+\n', '', out, count=1)
 
+    err = strip_pip_warnings(err)
     assert err == ''
     return out
 
