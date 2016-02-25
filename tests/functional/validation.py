@@ -105,7 +105,7 @@ def test_recreate_active_virtualenv(tmpdir):
 def test_update_while_active(tmpdir):
     tmpdir.chdir()
     enable_coverage()
-    requirements('virtualenv<2')
+    requirements('')
 
     venv_update()
     assert 'project-with-c' not in pip_freeze()
@@ -129,7 +129,7 @@ Keeping valid virtualenv from previous run.
 def test_update_invalidated_while_active(tmpdir):
     tmpdir.chdir()
     enable_coverage()
-    requirements('virtualenv<2')
+    requirements('')
 
     venv_update()
     assert 'project-with-c' not in pip_freeze()
@@ -166,6 +166,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         venv_update_symlink_pwd()
         out, err = run('./venv/bin/python', 'venv_update.py')
 
+        err = strip_pip_warnings(err)
         assert err == ''
         out = uncolor(out)
         assert out.startswith('''\
