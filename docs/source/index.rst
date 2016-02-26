@@ -8,6 +8,7 @@ venv-update: quick, exact
 Release v\ |release| (:ref:`Installation`)
 
 .. toctree::
+   :hidden:
 
    Documentation overview <self>
    venv-update

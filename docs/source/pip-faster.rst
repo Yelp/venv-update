@@ -35,7 +35,7 @@ few desirable behavior differences, listed below.
 
 
 Installation
-~~~~~~~~~~~~
+------------
 
 You can ``pip install venv-update`` to get ``pip-faster``, the same way you
 would any other Python tool, but if you're using :ref:`venv-update` it's not
@@ -45,10 +45,9 @@ correct version inside your virtualenv for you.
 
 .. _wheeled: https://wheel.readthedocs.org/en/latest/
 
-
-
-
 .. toctree::
+   :hidden:
+
    internal-pypi
    benchmarks
 
