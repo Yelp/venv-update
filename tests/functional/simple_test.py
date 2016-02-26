@@ -45,7 +45,6 @@ def test_install_custom_path_and_requirements(tmpdir):
     assert pip_freeze('venv2') == '\n'.join((
         'six==1.8.0',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -59,12 +58,13 @@ def test_arguments_version(tmpdir):
 
     # should show virtualenv version, successfully
     out, err = venv_update('venv=', '--version')
+    err = strip_pip_warnings(err)
     assert err == ''
 
     out = uncolor(out)
     lines = out.splitlines()
     # 13:py27 14:py35 15:pypy
-    assert len(lines) == 9, repr(lines)
+    assert len(lines) == 8, repr(lines)
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
@@ -279,7 +279,6 @@ pep8<=1.5.7
         'pep8==1.5.7',
         'pyflakes==0.7.3',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -306,7 +305,6 @@ pep8<=1.5.7
         'pep8==1.5.7',
         'pyflakes==0.8.1',
         'venv-update==' + __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -354,13 +352,12 @@ pure_python_package
         '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements.d/venv-update.txt\n' % tmpdir
     ) in out
     assert (
-        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.0 venv-update-%s virtualenv-1.11.6' % __version__
+        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.0 venv-update-%s' % __version__
     ) in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
     expected = '\n'.join((
         'venv-update==%s' % __version__,
-        'virtualenv==1.11.6',
         'wheel==0.29.0',
         ''
     ))
@@ -391,6 +388,7 @@ Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
 SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package==0.1.0
 Installing collected packages: cant-wheel-package, pure-python-package
   Running setup.py install for cant-wheel-package
+  Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
 Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
 ''' in out  # noqa

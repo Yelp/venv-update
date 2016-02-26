@@ -54,7 +54,6 @@ def main():
         py_modules=['venv_update', 'pip_faster'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
-            'virtualenv>=1.11.5,<2.0',  # just for venv-update
             'pip>=1.5.0,<6.0.0',
             'wheel>0.25.0',  # 0.25.0 causes get_tag AssertionError in python3
             'setuptools>=0.8.0',  # 0.7 causes "'sys_platform' not defined" when installing wheel >0.25

@@ -45,7 +45,6 @@ def time_savings(tmpdir, between):
             'pure-python-package==0.2.0',
             'slow-python-package==0.1.0',
             'venv-update==%s' % __version__,
-            'virtualenv==1.11.6',
             'wheel==0.29.0',
             ''
         ))
@@ -107,7 +106,6 @@ def test_cached_clean_install_faster(tmpdir, pypi_packages):
                 'argparse',
                 'pip',
                 'venv_update',
-                'virtualenv-1.11.6',
                 'wheel',
         ):
             pattern = str(pypi_packages.join(package + '-*.whl'))
