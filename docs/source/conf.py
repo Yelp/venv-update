@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pip-faster documentation build configuration file, created by
+# venv-update documentation build configuration file, created by
 # sphinx-quickstart on Mon Feb 22 11:13:18 2016.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pip-faster'
+project = u'venv-update'
 #copyright = u'2016, Buck Evan'
 author = u'Buck Evan'
 
@@ -106,7 +106,7 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -123,11 +123,12 @@ html_theme = 'alabaster'
 # documentation.
 html_theme_options = {
     'github_user': 'Yelp',
-    'github_repo': 'pip-faster',
+    'github_repo': 'venv-update',
     'github_banner': True,
     'travis_button': True,
     'codecov_button': True,
     'show_related': True,
+    'sidebar_includehidden': True,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -223,7 +224,7 @@ html_sidebars = {
 #html_search_scorer = 'scorer.js'
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'pip-fasterdoc'
+htmlhelp_basename = 'venv-updatedoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -245,7 +246,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'pip-faster.tex', u'pip-faster Documentation',
+    (master_doc, 'venv-update.tex', u'venv-update Documentation',
      u'Buck Evan', 'manual'),
 ]
 
@@ -275,7 +276,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'pip-faster', u'pip-faster Documentation',
+    (master_doc, 'venv-update', u'venv-update Documentation',
      [author], 1)
 ]
 
@@ -289,8 +290,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'pip-faster', u'pip-faster Documentation',
-     author, 'pip-faster', 'One line description of project.',
+    (master_doc, 'venv-update', u'venv-update Documentation',
+     author, 'venv-update', 'One line description of project.',
      'Miscellaneous'),
 ]
 

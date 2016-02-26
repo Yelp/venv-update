@@ -1,7 +1,7 @@
 .. _venv-update-details:
 
-Details of ``venv-update``
---------------------------
+``venv-update`` in detail
+=========================
 
 venv-update is a small script whose job is to idempotently ensure the existence
 of a project's virtualenv based on a set of requirements files.
@@ -28,3 +28,22 @@ For reference, a project with 250 dependencies which are all pinned can run a
 no-op venv-update in ~2 seconds with no network access. The running time when
 changes are needed is dominated by the time it takes to download and install
 packages, but is generally quite fast (on the order of ~10 seconds).
+
+
+Customizing the install command
+-------------------------------
+
+If you don't like pip-faster, for whatever reason, ``venv-update`` provides
+sufficient control to use "plain-old" pip, or any other command for that
+matter.
+
+In order to tell venv-update to install pip, rather than pip-faster::
+
+   echo 'pip>8' > requirements.d/venv-update.txt
+
+
+To tell venv-update to `run` pip rather than pip-faster::
+
+   venv-update install-command= pip install --upgrade
+
+.. vim:textwidth=79:shiftwidth=3:noshiftround:

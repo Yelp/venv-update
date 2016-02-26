@@ -1,7 +1,8 @@
 .. _pip-faster-details:
 
-Details of ``pip-faster``
-=========================
+``pip-faster`` in detail
+========================
+
 
 By design ``pip-faster`` maintains the interface of pip, and should only have a
 few desirable behavior differences, listed below.
@@ -36,12 +37,19 @@ few desirable behavior differences, listed below.
 Installation
 ~~~~~~~~~~~~
 
-You can ``pip install pip-faster`` the same way you would any other Python
-tool, but if you're using :ref:`venv-update` it's not necessary to install
-pip-faster; the venv-update script will install the correct version inside your
-virtualenv for you.
+You can ``pip install venv-update`` to get ``pip-faster``, the same way you
+would any other Python tool, but if you're using :ref:`venv-update` it's not
+necessary to install pip-faster; the venv-update script will install the
+correct version inside your virtualenv for you.
 
 
 .. _wheeled: https://wheel.readthedocs.org/en/latest/
+
+
+
+
+.. toctree::
+   internal-pypi
+   benchmarks
 
 .. vim:textwidth=79:sts=3:shiftwidth=3:noshiftround:

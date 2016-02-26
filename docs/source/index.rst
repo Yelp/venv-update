@@ -1,27 +1,26 @@
-pip-faster: it's pip, just faster!
-==================================
+venv-update: quick, exact
+=========================
 `Issues <https://github.com/yelp/pip-faster/issues>`_ |
 `Github <https://github.com/yelp/pip-faster>`_ |
+`CI <https://circleci.com/gh/Yelp/pip-faster>`_ |
 `PyPI <https://pypi.python.org/pypi/pip-faster/>`_
 
 Release v\ |release| (:ref:`Installation`)
 
 .. toctree::
-   :hidden:
-   :maxdepth: 2
 
+   Documentation overview <self>
    venv-update
    pip-faster
-   internal-pypi
 
 Introduction
 ------------
 
-``pip-faster`` is an `MIT Licensed`_ tool to install your
-python dependencies, a bit faster than pip does.
+venv-update is an `MIT Licensed`_ tool to quickly and exactly update
+a large python project's requirements.  
 
-
-This project ships as two separable components: pip-faster and venv-update.
+This project ships as two separable components: ``pip-faster`` and
+``venv-update``.
 
 Both are designed for use on large projects with hundreds of requirements and
 are used daily by Yelp_ engineers.
@@ -30,36 +29,20 @@ are used daily by Yelp_ engineers.
 Why?
 ----
 
+Generating a repeatable build of a virtualenv has many edge cases. If
+a requirement is removed, it should be uninstalled when the virtualenv is
+updated. If the version of python has changed, the only reliable solution is to
+re-build the virtualenv from scratch. Initially, this was exactly how we
+implemented updates of our virtualenv, but it slowed things down terribly.
+``venv-update`` handles all of these edge cases and more, without completely
+starting from scratch (in the usual case).
+
 In a large application, best practice is to "pin" versions, with requirements
 like ``package-x==1.2.3`` in order to ensure that dev, staging, test, and
 production will all use the same code. Currently ``pip`` will always reach out
 to PyPI to list the versions of ``package-x`` regardless of whether the package
 is already installed, or whether its `wheel`_ can be found in the local cache.
 ``pip-faster`` adds these optimizations and others.
-
-Further, generating a repeatable build of a virtualenv has many edge cases. If
-a requirement is removed, it should be uninstalled when the virtualenv is
-updated. If the version of python has changed, the only reliable solution is to
-re-build the virtualenv from scratch. Our initial implementation would always
-completely remove the virtualenv and re-build it, but this slows things down
-terribly. ``venv-update`` handles all of these edge cases and more, without
-completely starting from scratch (in the usual case).
-
-
-`How much` faster?
-------------------
-
-
-
-``pip-faster``
---------------
-
-pip-faster is a drop-in replacement for pip. You should find that pip-faster
-gives the same results as pip, just more quickly, especially in the case of
-pinned requirements (e.g. package-x==1.2.3).
-
-If you're also using venv-update (which we heartily recommend!), you can view
-pip-faster as an implementation detail. For more, see :ref:`pip-faster-details`.
 
 
 .. _venv-update:
@@ -68,43 +51,75 @@ pip-faster as an implementation detail. For more, see :ref:`pip-faster-details`.
 ---------------
 
 A small script designed to keep a virtualenv in sync with a changing list of
-requirements. Given a list of ``requirements.txt`` files, venv-update makes
-sure the virtualenv state is exactly the same as if you deleted and regenerated
-the virtualenv (but does so *much* more quickly).
+requirements. The contract of ``venv-update`` is this:
+
+   The virtualenv state will be exactly the same as if you deleted and rebuilt
+   it from scratch, but will get there in *much* less time.
 
 The needs of venv-update are what drove the development of pip-faster.
 For more, see :ref:`venv-update-details`.
 
 
+``pip-faster``
+--------------
 
+pip-faster is a drop-in replacement for pip. ``pip-faster``'s contract is:
+
+   Take the same argumeents and give the same results as ``pip``, just more quickly.
+
+This is *especially* true in the case of pinned requirements (e.g. ``package-x==1.2.3``).
+If you're also using venv-update (which we heartily recommend!), you can view
+pip-faster as an implementation detail. For more, see :ref:`pip-faster-details`.
+
+
+`How much` faster?
+~~~~~~~~~~~~~~~~~~
+
+
+If we install `plone`_ (a large python application with more than 250
+dependencies) we get these numbers:
+
++---------+--------------+--------------+---------------+
+| testcase|  pip v8.0.2  |  pip-faster  |  improvement  |
++=========+==============+==============+===============+
+| cold    |    4:39s     |     4:16s    |       8%      |
++---------+--------------+--------------+---------------+
+| noop    |    7.11s     |     2.40s    |    **196%**   |
++---------+--------------+--------------+---------------+
+| warm    |    44.6s     |    21.3s     |    **109%**   |
++---------+--------------+--------------+---------------+
+
+In the "cold" case, all caches are completely empty.
+In the "noop" case nothing needs to be done in order to update the
+virtualenv.
+In the "warm" case caches are fully populated, but the virtualenv has been
+completely deleted.
+
+The :ref:`benchmarks` page has more detail.
 
 
 .. _installation:
 
 Installation
-~~~~~~~~~~~~
+------------
 
 Because ``venv-update`` is meant to be the entry-point for creating your
 virtualenv_ directory and installing your packages, it's not meant to be
 installed via pip; that would require a virtualenv to already exist!
 
 Instead, the script is designed to be `vendored` (directly checked in) to your
-project, and has no dependencies besides virtualenv and the standard Python
-library.
+project. It has no dependencies other than `virtualenv`_ and the standard
+Python library.
 
-.. sourcecode:: shell
 
- mkdir -p bin
- cd bin
- curl -O https://raw.githubusercontent.com/Yelp/pip-faster/master/venv_update.py
- mv venv_update.py venv-update
- chmod 755 venv-update
- git add venv-update
- git commit venv-update -m 'added bin/venv-update'
+ curl https://raw.githubusercontent.com/Yelp/venv-update/master/get-venv-update.sh | sh
+ git add bin/venv-update
+
+The paranoid should `read the script <https://raw.githubusercontent.com/Yelp/venv-update/master/get-venv-update.sh>`.
 
 
 Usage
-~~~~~
+------------
 
 By default, running ``venv-update`` will create a virtualenv named ``venv`` in the
 current directory, using ``requirements.txt`` in the current directory. This
@@ -174,6 +189,7 @@ all your dependencies with pip-slower:
 
 
 .. _MIT Licensed: https://github.com/Yelp/pip-faster/blob/master/COPYING
+.. _plone: https://en.wikipedia.org/wiki/Plone_(software)
 .. _pip: https://pip.pypa.io/en/stable/
 .. _virtualenv: https://virtualenv.readthedocs.org/en/latest/
 .. _wheel: https://wheel.readthedocs.org/en/latest/
