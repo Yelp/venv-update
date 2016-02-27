@@ -113,10 +113,10 @@ project. It has no dependencies other than `virtualenv`_ and the standard
 Python library.
 
 
- curl https://raw.githubusercontent.com/Yelp/venv-update/master/get-venv-update.sh | sh
+ curl https://raw.githubusercontent.com/Yelp/venv-update/stable/get-venv-update.sh | sh
  git add bin/venv-update
 
-The paranoid should `read the script <https://raw.githubusercontent.com/Yelp/venv-update/master/get-venv-update.sh>`.
+The paranoid should `read the script <https://raw.githubusercontent.com/Yelp/venv-update/stable/get-venv-update.sh>`.
 
 
 Usage
@@ -187,7 +187,7 @@ The ``skipsdist`` avoids installing your package twice. In tox<2, it also
 prevents all of your packages dependencies from being installed by pip-slower.
 
 
-.. _MIT-Licensed: https://github.com/Yelp/pip-faster/blob/master/COPYING
+.. _MIT-Licensed: https://github.com/Yelp/pip-faster/blob/latest/COPYING
 .. _requirements: https://pip.pypa.io/en/stable/user_guide/#requirements-files
 .. _plone: https://en.wikipedia.org/wiki/Plone_(software)
 .. _pip: https://pip.pypa.io/en/stable/

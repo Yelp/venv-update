@@ -1,26 +1,42 @@
-
 NEXT
 ====
-We plan to work on these as soon as possible.
+We plan to work on these in our next version.
 
-* neither pip-faster nor venv-update report their *own* versions
-
-- [ ] testing
-  - [ ] PIP\_FIND\_LINKS=https://...
-  - [ ] pip-faster install nonsense
+* support for `pip>6`
 
 
- - [ ] dogfood venv-update during travis, tox
-   - [ ] recommended tox config: `install_command=pip-faster --prune {opts} {packages}`
+
+BACKLOG
+=======
+
+(none, at the moment)
+
+
+ARCHIVE
+=======
+
+v1.0: tox support
+-----------------
+
+
+* venv-update reports its *own* version
+
+- [x] testing
+  - [x] PIP\_FIND\_LINKS=https://...
+  - [x] pip-faster install nonsense
+
+
+ - [x] dogfood venv-update during travis, tox
+   - [x] recommended tox config: `install_command=pip-faster --prune {opts} {packages}`
 
 * change host-python requirement to simply virtualenv, any version
 
- - [ ] missing tests
-   - [ ] non-default requirements file(s)
-   - [ ] run from virtualenv which doesn't have virtualenv installed
-   - [ ] update an active virtualenv which wasn't created by venv-update
+ - [x] missing tests
+   - [x] non-default requirements file(s)
+   - [x] run from virtualenv which doesn't have virtualenv installed
+   - [x] update an active virtualenv which wasn't created by venv-update
 
-* upgrade-install of unpinned requirements is ~50% slower than vanilla pip.
+* fixed upgrade-install of unpinned requirements is ~50% slower than vanilla pip.
   compare:
 
   - time pip install --find-links file://$HOME/.pip/wheelhouse --upgrade -r
@@ -36,42 +52,7 @@ We plan to work on these as soon as possible.
     user    0m4.021s
     sys     0m0.631s
 
-
-
-
-
-BACKLOG
-=======
-
-
-
-
-
-
-
-
-
-
-ARCHIVE
-=======
-
-
-
-v1.0: tox support
------------------
-
-rename project to "pip-faster"
-"venv-update" is an auxiliary, vendorable script that depends on the rest of it
-pip-faster closely implements the pip interface, with an additional --prune option
-
-* dogfood venv-update during travis, tox
-
-* recommended tox config: install_command=pip-faster --prune {opts} {packages}
-
 * change host-python requirement to simply virtualenv, any version
-
-* missing tests
-   * non-default requirements file(s)
 
 * STRETCH GOAL: pip6 support
 
