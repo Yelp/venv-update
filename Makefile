@@ -15,6 +15,10 @@ test tests: venv
 venv: setup.py requirements.txt requirements.d/* Makefile
 	./venv_update.py venv= --python=$(PYTHON) venv install= -r $(REQUIREMENTS)
 
+.PHONY: docs
+docs: venv
+	make -C docs serve
+
 .PHONY: clean
 clean:
 	rm -rf .tox

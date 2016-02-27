@@ -41,11 +41,10 @@ def time_savings(tmpdir, between):
             'dependant-package==1',
             'implicit-dependency==1',
             'many-versions-package==2.1',
-            'pip-faster==%s' % __version__,
             'project-with-c==0.1.0',
             'pure-python-package==0.2.0',
             'slow-python-package==0.1.0',
-            'virtualenv==1.11.6',
+            'venv-update==%s' % __version__,
             'wheel==0.29.0',
             ''
         ))
@@ -106,8 +105,7 @@ def test_cached_clean_install_faster(tmpdir, pypi_packages):
         for package in (
                 'argparse',
                 'pip',
-                'pip_faster',
-                'virtualenv-1.11.6',
+                'venv_update',
                 'wheel',
         ):
             pattern = str(pypi_packages.join(package + '-*.whl'))

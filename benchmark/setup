@@ -1,0 +1,11 @@
+#!/not/executable/bash
+source ./env
+set +ux
+source ./venv/bin/activate
+set -ux
+
+./venv/bin/pip install --upgrade $INSTALL wheel setuptools
+venv-update --version || true
+pip --version
+python -c 'import wheel; print wheel.__version__'
+python -c 'import setuptools; print setuptools.__version__'

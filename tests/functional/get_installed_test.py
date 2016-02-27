@@ -7,7 +7,7 @@ import pytest
 from testing import run
 from venv_update import __version__
 
-ALWAYS = set(['pip', 'pip-faster', 'setuptools', 'virtualenv', 'wheel'])
+ALWAYS = set(['pip', 'venv-update', 'setuptools', 'wheel'])
 
 
 def get_installed():
@@ -37,7 +37,7 @@ def test_pip_get_installed(tmpdir):
 
     run('virtualenv', 'myvenv')
     run('rm', '-rf', 'myvenv/local')
-    run('myvenv/bin/pip', 'install', 'pip-faster==' + __version__)
+    run('myvenv/bin/pip', 'install', 'venv-update==' + __version__)
 
     assert get_installed() == []
 

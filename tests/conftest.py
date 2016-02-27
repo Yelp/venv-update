@@ -81,7 +81,7 @@ def pypi_packages():
             sys.executable,
             'tests/testing/make_sdists.py',
             'tests/testing/packages',
-            '.',  # we need pip-faster to be installable too
+            '.',  # we need venv-update to be installable too
             str(package_temp),
         )
 

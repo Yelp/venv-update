@@ -25,6 +25,9 @@ Examples:
     # install requirements.txt to "myenv"
     venv-update venv= myenv
 
+    # install requirements.txt to "myenv" using Python 3.4
+    venv-update venv= -ppython3.4 myenv
+
     # install myreqs.txt to "venv"
     venv-update install= -r myreqs.txt
 
@@ -421,7 +424,7 @@ def pip_faster(venv_path, pip_command, install):
     if exists(VENV_UPDATE_REQS_OVERRIDE):
         bootstrap_command += ('-r', VENV_UPDATE_REQS_OVERRIDE)
     else:
-        bootstrap_command += ('pip-faster==' + __version__,)
+        bootstrap_command += ('venv-update==' + __version__,)
     run(bootstrap_command)
 
     run(pip_command + install)

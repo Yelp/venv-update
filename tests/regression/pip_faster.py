@@ -26,7 +26,7 @@ def test_circular_dependencies(tmpdir):
     install_coverage(venv.strpath)
 
     pip = venv.join('bin/pip').strpath
-    run(pip, 'install', 'pip-faster==' + __version__)
+    run(pip, 'install', 'venv-update==' + __version__)
 
     out, err = run(
         venv.join('bin/pip-faster').strpath,
@@ -38,11 +38,8 @@ def test_circular_dependencies(tmpdir):
     out = uncolor(out)
     assert out.endswith('''
 tracing: circular-dep-a
-adding sub-requirement circular-dep-b==1.0 (from circular-dep-a)
+already queued: circular-dep-b==1.0 (from circular-dep-a)
 tracing: circular-dep-b==1.0 (from circular-dep-a)
-adding sub-requirement circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
-already analyzed: circular-dep-b==1.0 (from circular-dep-a)
-tracing: circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
 Circular dependency! circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
 ''')
 
@@ -68,7 +65,7 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     """We should be able to use pip-faster's wheel building even if we have
     ancient pip and setuptools.
 
-    https://github.com/Yelp/pip-faster/issues/33
+    https://github.com/Yelp/venv-update/issues/33
     """
     tmpdir.chdir()
 
@@ -91,7 +88,7 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
         # wheel needs argparse but it won't get installed
         if sys.version_info < (2, 7):
             run(pip, 'install', 'argparse')
-        run(pip, 'install', 'pip-faster==' + __version__)
+        run(pip, 'install', 'venv-update==' + __version__)
     finally:
         del environ['PIP_EXTRA_INDEX_URL']
 

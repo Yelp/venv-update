@@ -1,0 +1,607 @@
+2016-02-24 13:29:02.773360934
+
+START -- cold
++ rm -rf venv cache
++ virtualenv venv
+New python executable in venv/bin/python
+Installing setuptools, pip...done.
++ source ./setup
+++ source ./env
++++ export HOMEBREW=/nail/home/buck/prefices/brew
++++ HOMEBREW=/nail/home/buck/prefices/brew
++++ export LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ export CPATH=/nail/home/buck/prefices/brew/include
++++ CPATH=/nail/home/buck/prefices/brew/include
++++ export XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
++++ XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
+++ set +ux
+++ ./venv/bin/pip install --upgrade -e .. wheel setuptools
+Obtaining file:///nail/home/buck/trees/yelp/pip-faster
+  Running setup.py (path:/nail/home/buck/trees/yelp/pip-faster/setup.py) egg_info for package from file:///nail/home/buck/trees/yelp/pip-faster
+Downloading/unpacking wheel
+Downloading/unpacking setuptools from https://pypi.python.org/packages/3.5/s/setuptools/setuptools-20.1.1-py2.py3-none-any.whl#md5=9c0765fbbe30368494ec7eb72702c67e
+Downloading/unpacking pip>=1.5.0,<6.0.0 from https://pypi.python.org/packages/py2.py3/p/pip/pip-1.5.6-py2.py3-none-any.whl#md5=4d4fb4b69df6731c7aeaadd6300bc1f2 (from pip-faster==1.0rc6.dev4)
+Downloading/unpacking argparse (from wheel)
+  Downloading argparse-1.4.0-py2.py3-none-any.whl
+Installing collected packages: wheel, setuptools, pip, pip-faster, argparse
+  Found existing installation: setuptools 3.4.4
+    Uninstalling setuptools:
+      Successfully uninstalled setuptools
+  Found existing installation: pip 1.5.5
+    Uninstalling pip:
+      Successfully uninstalled pip
+  Running setup.py develop for pip-faster
+    Creating /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip-faster.egg-link (link to .)
+    Adding pip-faster 1.0rc6.dev4 to easy-install.pth file
+    Installing venv-update script to /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/bin
+    Installing pip-faster script to /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/bin
+    
+    Installed /nail/home/buck/trees/yelp/pip-faster
+Successfully installed wheel setuptools pip pip-faster argparse
+Cleaning up...
+++ venv-update --version
+1.0rc6.dev4
+++ pip --version
+pip 1.5.6 from /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages (python 2.6)
+++ python -c 'import wheel; print wheel.__version__'
+0.29.0
+++ python -c 'import setuptools; print setuptools.__version__'
+20.1.1
++ pip-faster install --pre plone
+Downloading/unpacking plone
+  Downloading Plone-5.0.2.tar.gz
+  Running setup.py (path:/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/plone/setup.py) egg_info for package plone
+    /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/plone/setup.py:12: DeprecationWarning: Parameters to load are deprecated.  Call .resolve and .require separately.
+      'Environment :: Web Environment',
+    warning: no previously-included files matching '*.pyc' found anywhere in distribution
+Requirement already satisfied (use --upgrade to upgrade): setuptools in ./venv/lib/python2.6/site-packages (from plone)
+Downloading/unpacking Products.Archetypes (from plone)
+  Running setup.py (path:/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/Products.Archetypes/setup.py) egg_info for package Products.Archetypes
+    /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/Products.Archetypes/setup.py:12: DeprecationWarning: Parameters to load are deprecated.  Call .resolve and .require separately.
+      classifiers=[
+    warning: no previously-included files matching '*pyc' found anywhere in distribution
+... <snip!> ...
+Downloading/unpacking zope.error (from zope.app.publication->zope.app.file->plone.namedfile[scales]>=1.0b5dev-r36016->plone.app.dexterity->plone)
+  Downloading zope.error-4.2.0.tar.gz
+  Running setup.py (path:/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/zope.error/setup.py) egg_info for package zope.error
+    /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/zope.error/setup.py:12: DeprecationWarning: Parameters to load are deprecated.  Call .resolve and .require separately.
+      #
+Downloading/unpacking linecache2 (from traceback2->unittest2->python-gettext>=0.6->Products.PlacelessTranslationService->Products.Archetypes->plone)
+  Downloading linecache2-1.0.0-py2.py3-none-any.whl
+  Saved ./cache/pip-faster/wheelhouse/linecache2-1.0.0-py2.py3-none-any.whl
+Building wheels for collected packages: plone,Products.Archetypes,Products.ATContentTypes,Products.CMFPlacefulWorkflow,Products.CMFPlone,plone.app.caching,plone.app.dexterity,plone.app.iterate,plone.app.openid,plone.app.upgrade,zope.component,zope.contenttype,zope.datetime,zope.deferredimport,zope.i18n,zope.i18nmessageid,zope.interface,zope.lifecycleevent,zope.publisher,zope.schema,zope.site,zope.tal,zope.viewlet,Products.CMFCore,Products.CMFFormController,Products.CMFQuickInstallerTool,Products.DCWorkflow,Products.GenericSetup,Products.MimetypesRegistry,Products.PlacelessTranslationService,Products.PortalTransforms,Products.ZSQLMethods,Products.statusmessages,Products.validation,plone.folder,plone.uuid,plone.app.folder,Acquisition,DateTime,ExtensionClass,transaction,ZODB3,Zope2,plone.app.widgets,plone.i18n,plone.memoize,plone.app.blob,plone.app.collection,plone.app.layout,Products.CMFDynamicViewFTI,ZConfig,Pillow,Products.CMFDiffTool,Products.CMFEditions,Products.CMFUid,Products.ExtendedPathIndex,Products.ExternalEditor,Products.PasswordResetTool,Products.PlonePAS,Products.PluggableAuthService,Products.PluginRegistry,Products.ResourceRegistries,Products.contentmigration,borg.localrole,cssmin,five.customerize,five.localsitemanager,five.pt,mockup,plone.api,plone.app.content,plone.app.contentlisting,plone.app.contentmenu,plone.app.contentrules,plone.app.contenttypes,plone.app.controlpanel,plone.app.customerize,plone.app.discussion,plone.app.i18n,plone.app.multilingual,plone.app.linkintegrity,plone.app.locales,plone.app.portlets,plone.app.redirector,plone.app.registry,plone.app.theming,plone.app.users,plone.app.uuid,plone.app.viewletmanager,plone.app.vocabularies,plone.app.workflow,plone.batching,plone.browserlayer,plone.contentrules,plone.indexer,plone.intelligenttext,plone.locking,plone.outputfilters,plone.portlet.collection,plone.portlet.static,plone.portlets,plone.protect,plone.registry,plone.schema,plone.session,plone.theme,plonetheme.barceloneta,slimit,z3c.autoinclude,zope.app.locales,zope.cachedescriptors,zope.container,zope.deprecation,zope.dottedname,zope.location,zope.pagetemplate,zope.structuredtext,zope.tales,zope.traversing,plone.caching,plone.cachepurging,zope.browserresource,plone.app.z3cform,z3c.form,z3c.zcmlhook,plone.app.textfield,plone.behavior,plone.dexterity,plone.formwidget.namedfile,plone.namedfile,plone.rfc822,plone.schemaeditor,lxml,plone.autoform,plone.supermodel,plone.z3cform,zope.browserpage,zope.annotation,plone.openid,zope.ramcache,Products.SecureMailHost,Products.ZCatalog,zope.proxy,zope.browser,zope.configuration,zope.exceptions,zope.security,ordereddict,zope.contentprovider,five.globalrequest,Products.BTreeFolder2,Products.MailHost,Products.PythonScripts,Products.ExternalMethod,zope.formlib,python-gettext,Markdown,Missing,Persistence,Record,ZEO,ZODB,persistent,BTrees,AccessControl,DocumentTemplate,MultiMapping,Products.OFSP,Products.ZCTextIndex,RestrictedPython,ZopeUndo,docutils,initgroups,tempstorage,zdaemon,zExceptions,zLOG,zope.browsermenu,zope.processlifetime,zope.ptresource,zope.sendmail,zope.sequencesort,zope.size,zope.testbrowser,zope.testing,Products.MIMETools,Products.StandardCacheManagers,Unidecode,archetypes.schemaextender,plone.app.imaging,plone.scale,plone.formwidget.querystring,zope.copy,Products.ZopeVersionControl,zope.componentvocabulary,sourcecodegen,z3c.pt,Chameleon,zope.globalrequest,plone.stringinterp,plone.app.event,plone.app.querystring,plone.app.relationfield,plone.app.versioningbehavior,plone.app.lockingbehavior,archetypes.multilingual,z3c.relationfield,plone.app.intid,feedparser,diazo,plone.resource,plone.resourceeditor,plone.subrequest,plone.transformchain,repoze.xmliter,roman,plone.keyring,collective.monkeypatcher,ply,odict,zope.filerepresentation,z3c.caching,z3c.formwidget.query,plone.alterego,plone.synchronize,zope.app.file,python-openid,zc.lockfile,mechanize,Products.DateRecurringIndex,collective.elephantvocabulary,icalendar,plone.event,plone.formwidget.recurrence,zope.intid,five.intid,z3c.objpath,zc.relation,cssselect,future,zope.app.publication,zope.dublincore,zope.keyreference,importlib,zope.authentication,zope.error
+Running setup.py bdist_wheel for plone
+Destination directory: /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip-faster/wheelhouse
+Running setup.py bdist_wheel for Products.Archetypes
+Destination directory: /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip-faster/wheelhouse
+... <snip!> ...
+Running setup.py bdist_wheel for zope.error
+Destination directory: /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip-faster/wheelhouse
+Installing collected packages: plone, Products.Archetypes, Products.ATContentTypes, Products.CMFPlacefulWorkflow, Products.CMFPlone, plone.app.caching, plone.app.dexterity, plone.app.iterate, plone.app.openid, plone.app.upgrade, zope.component, zope.contenttype, zope.datetime, zope.deferredimport, zope.event, zope.i18n, zope.i18nmessageid, zope.interface, zope.lifecycleevent, zope.publisher, zope.schema, zope.site, zope.tal, zope.viewlet, Products.CMFCore, Products.CMFFormController, Products.CMFQuickInstallerTool, Products.DCWorkflow, Products.GenericSetup, Products.MimetypesRegistry, Products.PlacelessTranslationService, Products.PortalTransforms, Products.ZSQLMethods, Products.statusmessages, Products.validation, plone.folder, plone.uuid, plone.app.folder, Acquisition, DateTime, ExtensionClass, transaction, ZODB3, Zope2, plone.app.widgets, plone.i18n, plone.memoize, plone.app.blob, plone.app.collection, plone.app.layout, Products.CMFDynamicViewFTI, ZConfig, Pillow, Products.CMFDiffTool, Products.CMFEditions, Products.CMFUid, Products.ExtendedPathIndex, Products.ExternalEditor, Products.PasswordResetTool, Products.PlonePAS, Products.PluggableAuthService, Products.PluginRegistry, Products.ResourceRegistries, Products.contentmigration, borg.localrole, cssmin, five.customerize, five.localsitemanager, five.pt, mockup, plone.api, plone.app.content, plone.app.contentlisting, plone.app.contentmenu, plone.app.contentrules, plone.app.contenttypes, plone.app.controlpanel, plone.app.customerize, plone.app.discussion, plone.app.i18n, plone.app.multilingual, plone.app.linkintegrity, plone.app.locales, plone.app.portlets, plone.app.redirector, plone.app.registry, plone.app.theming, plone.app.users, plone.app.uuid, plone.app.viewletmanager, plone.app.vocabularies, plone.app.workflow, plone.batching, plone.browserlayer, plone.contentrules, plone.indexer, plone.intelligenttext, plone.locking, plone.outputfilters, plone.portlet.collection, plone.portlet.static, plone.portlets, plone.protect, plone.registry, plone.schema, plone.session, plone.theme, plonetheme.barceloneta, slimit, z3c.autoinclude, zope.app.locales, zope.cachedescriptors, zope.container, zope.deprecation, zope.dottedname, zope.location, zope.pagetemplate, zope.structuredtext, zope.tales, zope.traversing, python-dateutil, plone.caching, plone.cachepurging, zope.browserresource, plone.app.z3cform, z3c.form, z3c.zcmlhook, plone.app.textfield, plone.behavior, plone.dexterity, plone.formwidget.namedfile, plone.namedfile, plone.rfc822, plone.schemaeditor, lxml, plone.autoform, plone.supermodel, plone.z3cform, zope.browserpage, zope.annotation, plone.openid, zope.ramcache, Products.SecureMailHost, Products.ZCatalog, zope.proxy, pytz, six, zope.browser, zope.configuration, zope.exceptions, zope.security, ordereddict, zope.contentprovider, five.globalrequest, Products.BTreeFolder2, Products.MailHost, Products.PythonScripts, Products.ExternalMethod, zope.formlib, python-gettext, Markdown, Missing, Persistence, Record, ZEO, ZODB, persistent, BTrees, AccessControl, DocumentTemplate, MultiMapping, Products.OFSP, Products.ZCTextIndex, RestrictedPython, ZopeUndo, docutils, initgroups, tempstorage, zdaemon, zExceptions, zLOG, zope.browsermenu, zope.processlifetime, zope.ptresource, zope.sendmail, zope.sequencesort, zope.size, zope.testbrowser, zope.testing, Products.MIMETools, Products.StandardCacheManagers, Unidecode, archetypes.schemaextender, plone.app.imaging, plone.scale, plone.formwidget.querystring, zope.copy, Products.ZopeVersionControl, zope.componentvocabulary, sourcecodegen, z3c.pt, Chameleon, decorator, zope.globalrequest, plone.stringinterp, plone.app.event, plone.app.querystring, plone.app.relationfield, plone.app.versioningbehavior, plone.app.lockingbehavior, archetypes.multilingual, z3c.relationfield, plone.app.intid, feedparser, diazo, plone.resource, plone.resourceeditor, plone.subrequest, plone.transformchain, repoze.xmliter, roman, plone.keyring, collective.monkeypatcher, ply, odict, zc.buildout, zope.filerepresentation, z3c.caching, z3c.formwidget.query, plone.alterego, plone.synchronize, zope.app.file, python-openid, unittest2, zc.lockfile, mechanize, Products.DateRecurringIndex, collective.elephantvocabulary, icalendar, plone.event, plone.formwidget.recurrence, zope.intid, five.intid, z3c.objpath, zc.relation, cssselect, future, zope.app.publication, zope.dublincore, traceback2, zope.keyreference, importlib, zope.authentication, zope.error, linecache2
+Compiling /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/Products.Archetypes/Products/Archetypes/skins/archetypes/at_download.py ...
+SyntaxError: ("'return' outside function", ('/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/Products.Archetypes/Products/Archetypes/skins/archetypes/at_download.py', 19, None, 'return field.download(context)\n'))
+... <snip!> ...
+Compiling /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/linecache2/linecache2/tests/inspect_fodder2.py ...
+SyntaxError: ('invalid syntax', ('/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/linecache2/linecache2/tests/inspect_fodder2.py', 102, 25, 'def keyworded(*arg1, arg2=1):\n'))
+
+Successfully installed plone Products.Archetypes Products.ATContentTypes Products.CMFPlacefulWorkflow Products.CMFPlone plone.app.caching plone.app.dexterity plone.app.iterate plone.app.openid plone.app.upgrade zope.component zope.contenttype zope.datetime zope.deferredimport zope.event zope.i18n zope.i18nmessageid zope.interface zope.lifecycleevent zope.publisher zope.schema zope.site zope.tal zope.viewlet Products.CMFCore Products.CMFFormController Products.CMFQuickInstallerTool Products.DCWorkflow Products.GenericSetup Products.MimetypesRegistry Products.PlacelessTranslationService Products.PortalTransforms Products.ZSQLMethods Products.statusmessages Products.validation plone.folder plone.uuid plone.app.folder Acquisition DateTime ExtensionClass transaction ZODB3 Zope2 plone.app.widgets plone.i18n plone.memoize plone.app.blob plone.app.collection plone.app.layout Products.CMFDynamicViewFTI ZConfig Pillow Products.CMFDiffTool Products.CMFEditions Products.CMFUid Products.ExtendedPathIndex Products.ExternalEditor Products.PasswordResetTool Products.PlonePAS Products.PluggableAuthService Products.PluginRegistry Products.ResourceRegistries Products.contentmigration borg.localrole cssmin five.customerize five.localsitemanager five.pt mockup plone.api plone.app.content plone.app.contentlisting plone.app.contentmenu plone.app.contentrules plone.app.contenttypes plone.app.controlpanel plone.app.customerize plone.app.discussion plone.app.i18n plone.app.multilingual plone.app.linkintegrity plone.app.locales plone.app.portlets plone.app.redirector plone.app.registry plone.app.theming plone.app.users plone.app.uuid plone.app.viewletmanager plone.app.vocabularies plone.app.workflow plone.batching plone.browserlayer plone.contentrules plone.indexer plone.intelligenttext plone.locking plone.outputfilters plone.portlet.collection plone.portlet.static plone.portlets plone.protect plone.registry plone.schema plone.session plone.theme plonetheme.barceloneta slimit z3c.autoinclude zope.app.locales zope.cachedescriptors zope.container zope.deprecation zope.dottedname zope.location zope.pagetemplate zope.structuredtext zope.tales zope.traversing python-dateutil plone.caching plone.cachepurging zope.browserresource plone.app.z3cform z3c.form z3c.zcmlhook plone.app.textfield plone.behavior plone.dexterity plone.formwidget.namedfile plone.namedfile plone.rfc822 plone.schemaeditor lxml plone.autoform plone.supermodel plone.z3cform zope.browserpage zope.annotation plone.openid zope.ramcache Products.SecureMailHost Products.ZCatalog zope.proxy pytz six zope.browser zope.configuration zope.exceptions zope.security ordereddict zope.contentprovider five.globalrequest Products.BTreeFolder2 Products.MailHost Products.PythonScripts Products.ExternalMethod zope.formlib python-gettext Markdown Missing Persistence Record ZEO ZODB persistent BTrees AccessControl DocumentTemplate MultiMapping Products.OFSP Products.ZCTextIndex RestrictedPython ZopeUndo docutils initgroups tempstorage zdaemon zExceptions zLOG zope.browsermenu zope.processlifetime zope.ptresource zope.sendmail zope.sequencesort zope.size zope.testbrowser zope.testing Products.MIMETools Products.StandardCacheManagers Unidecode archetypes.schemaextender plone.app.imaging plone.scale plone.formwidget.querystring zope.copy Products.ZopeVersionControl zope.componentvocabulary sourcecodegen z3c.pt Chameleon decorator zope.globalrequest plone.stringinterp plone.app.event plone.app.querystring plone.app.relationfield plone.app.versioningbehavior plone.app.lockingbehavior archetypes.multilingual z3c.relationfield plone.app.intid feedparser diazo plone.resource plone.resourceeditor plone.subrequest plone.transformchain repoze.xmliter roman plone.keyring collective.monkeypatcher ply odict zc.buildout zope.filerepresentation z3c.caching z3c.formwidget.query plone.alterego plone.synchronize zope.app.file python-openid unittest2 zc.lockfile mechanize Products.DateRecurringIndex collective.elephantvocabulary icalendar plone.event plone.formwidget.recurrence zope.intid five.intid z3c.objpath zc.relation cssselect future zope.app.publication zope.dublincore traceback2 zope.keyreference importlib zope.authentication zope.error linecache2
+Cleaning up...
+Circular dependency! Products.CMFPlone (from Products.PasswordResetTool->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.content->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.contentlisting->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.contentmenu>=1.1.6dev-r22380->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.contentrules->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.controlpanel->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.discussion->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone>=5.0b1 (from plone.app.multilingual->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.portlets->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.registry->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.theming->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.users->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.workflow->Products.CMFPlone->plone)
+Circular dependency! Zope2>=2.13.0a1 (from Products.OFSP>=2.13.2->Zope2>=2.13.1->Products.Archetypes->plone)
+Circular dependency! Zope2>=2.13.0dev (from Products.ZCTextIndex->Zope2>=2.13.1->Products.Archetypes->plone)
+Circular dependency! Zope2>=2.13.0a1 (from Products.StandardCacheManagers->Zope2>=2.13.1->Products.Archetypes->plone)
+Circular dependency! Products.CMFPlone (from plone.app.event>=2.0a4->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.querystring>=1.2.2->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! plone.app.multilingual (from archetypes.multilingual->plone.app.multilingual->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.formwidget.recurrence[z3cform]>=1.2.4->plone.app.event>=2.0a4->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone>=5.0b3.dev0 (from plone.app.layout>=1.1.7dev-r23744->Products.CMFPlone->plone)
+Circular dependency! plone.app.dexterity (from Products.CMFPlone>=4.0b1->plone.app.dexterity->plone)
+Circular dependency! plone.app.layout>=1.1.7dev-r23744 (from Products.CMFPlone>=5.0b3.dev0->plone.app.layout->Products.ATContentTypes>=2.1.3->plone)
+Circular dependency! Products.CMFPlone (from plone.app.content>=2.0a3->plone.app.contentmenu>=1.1.6dev-r22380->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone>=4.0b1 (from plone.app.dexterity>=2.0.7->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.z3cform>=1.1.0.dev0->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! plone.app.portlets (from plone.app.layout>=1.2dev->plone.app.portlets->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone>=5.0b3.dev0 (from plone.app.layout>=1.2dev->plone.app.portlets->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.registry>=1.0a2->plone.app.theming->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.controlpanel>=2.1b1->plone.app.users->Products.CMFPlone->plone)
+Circular dependency! plone.app.vocabularies (from plone.app.querystring->plone.app.vocabularies->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.querystring->plone.app.vocabularies->Products.CMFPlone->plone)
+Circular dependency! Products.BTreeFolder2 (from Zope2>=2.13.0a1->Products.BTreeFolder2->Products.CMFCore->Products.Archetypes->plone)
+Circular dependency! Products.CMFPlone (from plone.app.portlets>=2.5.1->plone.app.event>=2.0a4->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from plone.app.registry>=1.1dev->plone.app.querystring>=1.2.2->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone>=4.0b1 (from plone.app.dexterity[relations]->plone.app.versioningbehavior->plone.app.contenttypes->Products.CMFPlone->plone)
+Circular dependency! Products.CMFPlone (from Products.ATContentTypes->archetypes.multilingual->plone.app.multilingual->Products.CMFPlone->plone)
+
+real	4m14.038s
+user	3m49.580s
+sys	0m32.240s
++ pip-faster freeze
++ sort
+Error when trying to get requirement for VCS system Command /usr/bin/git config remote.origin.url failed with error code 1 in /nail/home/buck/trees/yelp/pip-faster, falling back to uneditable format
+Could not determine repository location of /nail/home/buck/trees/yelp/pip-faster
++ cat requirements.txt
+AccessControl==3.0.12
+Acquisition==4.2.2
+archetypes.multilingual==3.0.1
+archetypes.schemaextender==2.1.5
+argparse==1.4.0
+borg.localrole==3.1.1
+BTrees==4.2.0
+Chameleon==2.24
+collective.elephantvocabulary==0.2.5
+collective.monkeypatcher==1.1.1
+## !! Could not determine repository location
+cssmin==0.2.0
+cssselect==0.9.1
+DateTime==4.0.1
+decorator==4.0.9
+diazo==1.2.2
+DocumentTemplate==2.13.2
+docutils==0.12
+ExtensionClass==4.1.2
+feedparser==5.2.1
+five.customerize==1.1
+five.globalrequest==1.0
+five.intid==1.1.0
+five.localsitemanager==2.0.5
+five.pt==2.2.3
+future==0.15.2
+icalendar==3.9.2
+importlib==1.0.3
+initgroups==2.13.0
+linecache2==1.0.0
+lxml==3.5.0
+Markdown==2.6.5
+mechanize==0.2.5
+Missing==3.0
+mockup==2.1.2
+MultiMapping==2.13.0
+odict==1.5.1
+ordereddict==1.1
+Persistence==3.0a1
+persistent==4.1.1
+Pillow==3.1.1
+pip-faster==1.0rc6.dev4
+Plone==5.0.2
+plone.alterego==1.0
+plone.api==1.5
+plone.app.blob==1.6.1
+plone.app.caching==1.2.9
+plone.app.collection==2.0b5
+plone.app.content==3.0.18
+plone.app.contentlisting==1.2.4
+plone.app.contentmenu==2.1.7
+plone.app.contentrules==4.0.10
+plone.app.contenttypes==1.2.9
+plone.app.controlpanel==3.0.4
+plone.app.customerize==1.3.4
+plone.app.dexterity==2.1.17
+plone.app.discussion==2.4.10
+plone.app.event==2.0.6
+plone.app.folder==1.2.0
+plone.app.i18n==3.0.2
+plone.app.imaging==2.0.3
+plone.app.intid==1.1.0
+plone.app.iterate==3.1.4
+plone.app.layout==2.5.18
+plone.app.linkintegrity==3.0.4
+plone.app.locales==5.0.7
+plone.app.lockingbehavior==1.0.3
+plone.app.multilingual==3.0.13
+plone.app.openid==2.1.0
+plone.app.portlets==3.1.3
+plone.app.querystring==1.3.14
+plone.app.redirector==1.3.1
+plone.app.registry==1.3.9
+plone.app.relationfield==1.3.2
+plone.app.textfield==1.2.6
+plone.app.theming==1.2.17
+plone.app.upgrade==1.3.20
+plone.app.users==2.3.5
+plone.app.uuid==1.1
+plone.app.versioningbehavior==1.2.7
+plone.app.viewletmanager==2.0.9
+plone.app.vocabularies==2.2.1
+plone.app.widgets==2.0.3
+plone.app.workflow==2.2.4
+plone.app.z3cform==1.1.8
+plone.autoform==1.6.2
+plone.batching==1.1.0
+plone.behavior==1.1
+plone.browserlayer==2.1.6
+plone.cachepurging==1.0.11
+plone.caching==1.0.1
+plone.contentrules==2.0.4
+plone.dexterity==2.4.0
+plone.event==1.3
+plone.folder==1.0.7
+plone.formwidget.namedfile==1.0.14
+plone.formwidget.querystring==1.1.5
+plone.formwidget.recurrence==2.0.2
+plone.i18n==3.0.3
+plone.indexer==1.0.3
+plone.intelligenttext==2.1.0
+plone.keyring==3.0.1
+plone.locking==2.1.1
+plone.memoize==1.2.0
+plone.namedfile==3.0.7
+plone.openid==2.0.4
+plone.outputfilters==2.1.2
+plone.portlet.collection==3.0.6
+plone.portlets==2.2.2
+plone.portlet.static==3.0.2
+plone.protect==3.0.17
+plone.registry==1.0.2
+plone.resource==1.0.4
+plone.resourceeditor==2.0.4
+plone.rfc822==1.1.2
+plone.scale==1.4.1
+plone.schema==1.0a1
+plone.schemaeditor==2.0.9
+plone.session==3.5.6
+plone.stringinterp==1.1.2
+plone.subrequest==1.6.11
+plone.supermodel==1.2.7
+plone.synchronize==1.0.1
+plone.theme==3.0.0
+plonetheme.barceloneta==1.6.16
+plone.transformchain==1.1.0
+plone.uuid==1.0.3
+plone.z3cform==0.8.1
+ply==3.8
+Products.Archetypes==1.10.12
+Products.ATContentTypes==2.2.11
+Products.BTreeFolder2==2.14.0
+Products.CMFCore==2.3.0
+Products.CMFDiffTool==3.0.3
+Products.CMFDynamicViewFTI==4.1.3
+Products.CMFEditions==2.2.19
+Products.CMFFormController==3.0.5
+Products.CMFPlacefulWorkflow==1.6.5
+Products.CMFPlone==5.0.2
+Products.CMFQuickInstallerTool==3.0.13
+Products.CMFUid==2.3.0b0
+Products.contentmigration==2.1.11
+Products.DateRecurringIndex==2.1
+Products.DCWorkflow==2.3.0b0
+Products.ExtendedPathIndex==3.1
+Products.ExternalEditor==2.0.0
+Products.ExternalMethod==2.13.1
+Products.GenericSetup==1.8.1
+Products.MailHost==2.13.2
+Products.MIMETools==2.13.0
+Products.MimetypesRegistry==2.0.8
+Products.OFSP==2.13.2
+Products.PasswordResetTool==2.2.1
+Products.PlacelessTranslationService==2.0.5
+Products.PlonePAS==5.0.8
+Products.PluggableAuthService==1.10.0
+Products.PluginRegistry==1.3
+Products.PortalTransforms==2.2.0
+Products.PythonScripts==2.13.2
+Products.ResourceRegistries==3.0.3
+Products.SecureMailHost==1.1.2
+Products.StandardCacheManagers==2.13.1
+Products.statusmessages==4.0
+Products.validation==2.0.1
+Products.ZCatalog==3.1
+Products.ZCTextIndex==2.13.5
+Products.ZopeVersionControl==1.1.3
+Products.ZSQLMethods==2.13.4
+python-dateutil==2.4.2
+python-gettext==3.0
+python-openid==2.2.5
+pytz==2015.7
+Record==3.0
+repoze.xmliter==0.6
+RestrictedPython==3.6.0
+roman==2.0.0
+six==1.10.0
+slimit==0.8.1
+sourcecodegen==0.6.14
+tempstorage==2.12.2
+traceback2==1.4.0
+transaction==1.4.4
+Unidecode==0.4.19
+unittest2==1.1.0
+wheel==0.29.0
+wsgiref==0.1.2
+z3c.autoinclude==0.3.6
+z3c.caching==2.0a1
+z3c.form==3.2.9
+z3c.formwidget.query==0.12
+z3c.objpath==1.1
+z3c.pt==3.0.0a1
+z3c.relationfield==0.7
+z3c.zcmlhook==1.0b1
+zc.buildout==2.5.0
+zc.lockfile==1.1.0
+ZConfig==3.1.0
+zc.relation==1.0
+zdaemon==4.1.0
+ZEO==4.2.0b1
+zExceptions==2.13.0
+zLOG==2.12.0
+ZODB3==3.11.0
+ZODB==4.2.0
+Zope2==2.13.23
+zope.annotation==4.4.1
+zope.app.file==3.6.1
+zope.app.locales==3.7.4
+zope.app.publication==4.0.0a1.dev0
+zope.authentication==4.2.1
+zope.browser==2.1.0
+zope.browsermenu==4.1.1
+zope.browserpage==4.1.0
+zope.browserresource==4.1.0
+zope.cachedescriptors==4.1.0
+zope.component==4.2.2
+zope.componentvocabulary==2.0.0
+zope.configuration==4.0.3
+zope.container==4.1.0
+zope.contentprovider==4.0.0
+zope.contenttype==4.1.0
+zope.copy==4.0.3
+zope.datetime==4.1.0
+zope.deferredimport==4.1.0
+zope.deprecation==4.1.2
+zope.dottedname==4.1.0
+zope.dublincore==4.1.1
+zope.error==4.2.0
+zope.event==4.2.0
+zope.exceptions==4.0.8
+zope.filerepresentation==4.1.0
+zope.formlib==4.3.0
+zope.globalrequest==1.1
+zope.i18n==4.1.0
+zope.i18nmessageid==4.0.3
+zope.interface==4.1.3
+zope.intid==4.1.0
+zope.keyreference==4.1.0
+zope.lifecycleevent==4.1.0
+zope.location==4.0.3
+zope.pagetemplate==4.2.1
+zope.processlifetime==2.1.0
+zope.proxy==4.1.6
+zope.ptresource==4.0.0
+zope.publisher==4.2.2
+zope.ramcache==2.1.0
+zope.schema==4.4.2
+zope.security==4.0.3
+zope.sendmail==4.0.1
+zope.sequencesort==4.0.1
+zope.site==4.0.0
+zope.size==4.1.0
+zope.structuredtext==4.1.0
+zope.tal==4.1.1
+zope.tales==4.1.1
+zope.testbrowser==4.0.4
+zope.testing==4.5.0
+zope.traversing==4.0.0
+ZopeUndo==4.0
+zope.viewlet==4.0.0
+END -- cold
+
+real	4m21.814s
+user	3m55.491s
+sys	0m33.965s
+2016-02-24 13:33:24.589025807
+
+START -- noop
++ source ./setup
+++ source ./env
++++ export HOMEBREW=/nail/home/buck/prefices/brew
++++ HOMEBREW=/nail/home/buck/prefices/brew
++++ export LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ export CPATH=/nail/home/buck/prefices/brew/include
++++ CPATH=/nail/home/buck/prefices/brew/include
++++ export XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
++++ XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
+++ set +ux
+++ ./venv/bin/pip install --upgrade -e .. wheel setuptools
+Obtaining file:///nail/home/buck/trees/yelp/pip-faster
+  Running setup.py (path:/nail/home/buck/trees/yelp/pip-faster/setup.py) egg_info for package from file:///nail/home/buck/trees/yelp/pip-faster
+    /nail/home/buck/trees/yelp/pip-faster/setup.py:12: DeprecationWarning: Parameters to load are deprecated.  Call .resolve and .require separately.
+      import io
+Requirement already up-to-date: wheel in ./venv/lib/python2.6/site-packages
+Requirement already up-to-date: setuptools in ./venv/lib/python2.6/site-packages
+Requirement already up-to-date: pip>=1.5.0,<6.0.0 in ./venv/lib/python2.6/site-packages (from pip-faster==1.0rc6.dev4)
+Installing collected packages: pip-faster
+  Running setup.py develop for pip-faster
+    Creating /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip-faster.egg-link (link to .)
+    pip-faster 1.0rc6.dev4 is already the active version in easy-install.pth
+    Installing venv-update script to /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/bin
+    Installing pip-faster script to /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/bin
+    
+    Installed /nail/home/buck/trees/yelp/pip-faster
+Successfully installed pip-faster
+Cleaning up...
+++ venv-update --version
+1.0rc6.dev4
+++ pip --version
+pip 1.5.6 from /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages (python 2.6)
+++ python -c 'import wheel; print wheel.__version__'
+0.29.0
+++ python -c 'import setuptools; print setuptools.__version__'
+20.1.1
++ pip-faster install --upgrade -r requirements.txt
+Faster! pinned requirement already installed.
+Requirement already up-to-date: AccessControl==3.0.12 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 1))
+Faster! pinned requirement already installed.
+Requirement already up-to-date: Acquisition==4.2.2 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 2))
+... <snip!> ...
+Faster! pinned requirement already installed.
+Requirement already up-to-date: zope.viewlet==4.0.0 in ./venv/lib/python2.6/site-packages (from -r requirements.txt (line 260))
+Requirement already up-to-date: pip>=1.5.0,<6.0.0 in ./venv/lib/python2.6/site-packages (from pip-faster==1.0rc6.dev4->-r requirements.txt (line 42))
+Requirement already up-to-date: setuptools>=0.8.0 in ./venv/lib/python2.6/site-packages (from pip-faster==1.0rc6.dev4->-r requirements.txt (line 42))
+Cleaning up...
+Error when trying to get requirement for VCS system Command /usr/bin/git config remote.origin.url failed with error code 1 in /nail/home/buck/trees/yelp/pip-faster, falling back to uneditable format
+Could not determine repository location of /nail/home/buck/trees/yelp/pip-faster
+Circular dependency! archetypes.multilingual (from plone.app.multilingual->archetypes.multilingual==3.0.1->-r requirements.txt (line 3))
+Circular dependency! plone.app.dexterity (from Products.CMFPlone>=4.0b1->plone.app.dexterity==2.1.17->-r requirements.txt (line 56))
+Circular dependency! plone.app.layout>=1.2dev (from plone.app.portlets->plone.app.layout==2.5.18->-r requirements.txt (line 64))
+Circular dependency! plone.app.layout>=1.1.7dev-r23744 (from Products.CMFPlone>=5.0b3.dev0->plone.app.layout==2.5.18->-r requirements.txt (line 64))
+Circular dependency! plone.app.multilingual (from archetypes.multilingual->plone.app.multilingual==3.0.13->-r requirements.txt (line 68))
+Circular dependency! plone.app.multilingual (from Products.CMFPlone>=5.0b1->plone.app.multilingual==3.0.13->-r requirements.txt (line 68))
+Circular dependency! plone.app.portlets (from plone.app.layout>=1.2dev->plone.app.portlets==3.1.3->-r requirements.txt (line 70))
+Circular dependency! Products.BTreeFolder2 (from Zope2>=2.13.0a1->Products.BTreeFolder2==2.14.0->-r requirements.txt (line 132))
+Circular dependency! Products.CMFPlone (from plone.app.contentmenu>=1.1.6dev-r22380->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.contentrules->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.contenttypes->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.discussion->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone>=5.0b3.dev0 (from plone.app.layout>=1.1.7dev-r23744->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.users->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.workflow->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from Products.PasswordResetTool->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.ZCTextIndex (from Zope2>=2.13.0dev->Products.ZCTextIndex==2.13.5->-r requirements.txt (line 166))
+Circular dependency! Zope2>=2.13.0a1 (from Products.OFSP>=2.13.2->Zope2==2.13.23->-r requirements.txt (line 205))
+Circular dependency! Zope2>=2.13.0a1 (from Products.StandardCacheManagers->Zope2==2.13.23->-r requirements.txt (line 205))
+
+real	0m2.335s
+user	0m2.162s
+sys	0m0.151s
++ diff -us requirements.txt /dev/fd/63
+++ pip-faster freeze
+++ sort
+Error when trying to get requirement for VCS system Command /usr/bin/git config remote.origin.url failed with error code 1 in /nail/home/buck/trees/yelp/pip-faster, falling back to uneditable format
+Could not determine repository location of /nail/home/buck/trees/yelp/pip-faster
+Files requirements.txt and /dev/fd/63 are identical
+END -- noop
+
+real	0m12.310s
+user	0m10.917s
+sys	0m1.345s
+2016-02-24 13:33:36.900031321
+
+START -- warm
++ rm -rf venv
++ virtualenv venv
+New python executable in venv/bin/python
+Installing setuptools, pip...done.
++ ./noop
++ source ./setup
+++ source ./env
++++ export HOMEBREW=/nail/home/buck/prefices/brew
++++ HOMEBREW=/nail/home/buck/prefices/brew
++++ export LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ LIBRARY_PATH=/nail/home/buck/prefices/brew/lib:/nail/home/buck/prefices/brew/lib64
++++ export CPATH=/nail/home/buck/prefices/brew/include
++++ CPATH=/nail/home/buck/prefices/brew/include
++++ export XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
++++ XDG_CACHE_HOME=/nail/home/buck/trees/yelp/pip-faster/benchmark/cache
+++ set +ux
+++ ./venv/bin/pip install --upgrade -e .. wheel setuptools
+Obtaining file:///nail/home/buck/trees/yelp/pip-faster
+  Running setup.py (path:/nail/home/buck/trees/yelp/pip-faster/setup.py) egg_info for package from file:///nail/home/buck/trees/yelp/pip-faster
+Downloading/unpacking wheel
+Downloading/unpacking setuptools from https://pypi.python.org/packages/3.5/s/setuptools/setuptools-20.1.1-py2.py3-none-any.whl#md5=9c0765fbbe30368494ec7eb72702c67e
+Downloading/unpacking pip>=1.5.0,<6.0.0 from https://pypi.python.org/packages/py2.py3/p/pip/pip-1.5.6-py2.py3-none-any.whl#md5=4d4fb4b69df6731c7aeaadd6300bc1f2 (from pip-faster==1.0rc6.dev4)
+Downloading/unpacking argparse (from wheel)
+  Downloading argparse-1.4.0-py2.py3-none-any.whl
+Installing collected packages: wheel, setuptools, pip, pip-faster, argparse
+  Found existing installation: setuptools 3.4.4
+    Uninstalling setuptools:
+      Successfully uninstalled setuptools
+  Found existing installation: pip 1.5.5
+    Uninstalling pip:
+      Successfully uninstalled pip
+  Running setup.py develop for pip-faster
+    Creating /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages/pip-faster.egg-link (link to .)
+    Adding pip-faster 1.0rc6.dev4 to easy-install.pth file
+    Installing venv-update script to /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/bin
+    Installing pip-faster script to /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/bin
+    
+    Installed /nail/home/buck/trees/yelp/pip-faster
+Successfully installed wheel setuptools pip pip-faster argparse
+Cleaning up...
+++ venv-update --version
+1.0rc6.dev4
+++ pip --version
+pip 1.5.6 from /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/lib/python2.6/site-packages (python 2.6)
+++ python -c 'import wheel; print wheel.__version__'
+0.29.0
+++ python -c 'import setuptools; print setuptools.__version__'
+20.1.1
++ pip-faster install --upgrade -r requirements.txt
+Downloading/unpacking AccessControl==3.0.12 (from -r requirements.txt (line 1))
+  Faster! Pinned wheel found, without hitting PyPI.
+  File was already downloaded /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip-faster/wheelhouse/AccessControl-3.0.12-cp26-cp26mu-linux_x86_64.whl
+Downloading/unpacking Acquisition==4.2.2 (from -r requirements.txt (line 2))
+  Faster! Pinned wheel found, without hitting PyPI.
+  File was already downloaded /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip-faster/wheelhouse/Acquisition-4.2.2-cp26-cp26mu-linux_x86_64.whl
+... <snip!> ...
+Downloading/unpacking zope.viewlet==4.0.0 (from -r requirements.txt (line 260))
+  Faster! Pinned wheel found, without hitting PyPI.
+  File was already downloaded /nail/home/buck/trees/yelp/pip-faster/benchmark/cache/pip-faster/wheelhouse/zope.viewlet-4.0.0-py2-none-any.whl
+Requirement already up-to-date: setuptools in ./venv/lib/python2.6/site-packages (from archetypes.multilingual==3.0.1->-r requirements.txt (line 3))
+Requirement already up-to-date: pip>=1.5.0,<6.0.0 in ./venv/lib/python2.6/site-packages (from pip-faster==1.0rc6.dev4->-r requirements.txt (line 42))
+Installing collected packages: AccessControl, Acquisition, archetypes.multilingual, archetypes.schemaextender, borg.localrole, BTrees, Chameleon, collective.elephantvocabulary, collective.monkeypatcher, cssmin, cssselect, DateTime, decorator, diazo, DocumentTemplate, docutils, ExtensionClass, feedparser, five.customerize, five.globalrequest, five.intid, five.localsitemanager, five.pt, future, icalendar, importlib, initgroups, linecache2, lxml, Markdown, mechanize, Missing, mockup, MultiMapping, odict, ordereddict, Persistence, persistent, Pillow, Plone, plone.alterego, plone.api, plone.app.blob, plone.app.caching, plone.app.collection, plone.app.content, plone.app.contentlisting, plone.app.contentmenu, plone.app.contentrules, plone.app.contenttypes, plone.app.controlpanel, plone.app.customerize, plone.app.dexterity, plone.app.discussion, plone.app.event, plone.app.folder, plone.app.i18n, plone.app.imaging, plone.app.intid, plone.app.iterate, plone.app.layout, plone.app.linkintegrity, plone.app.locales, plone.app.lockingbehavior, plone.app.multilingual, plone.app.openid, plone.app.portlets, plone.app.querystring, plone.app.redirector, plone.app.registry, plone.app.relationfield, plone.app.textfield, plone.app.theming, plone.app.upgrade, plone.app.users, plone.app.uuid, plone.app.versioningbehavior, plone.app.viewletmanager, plone.app.vocabularies, plone.app.widgets, plone.app.workflow, plone.app.z3cform, plone.autoform, plone.batching, plone.behavior, plone.browserlayer, plone.cachepurging, plone.caching, plone.contentrules, plone.dexterity, plone.event, plone.folder, plone.formwidget.namedfile, plone.formwidget.querystring, plone.formwidget.recurrence, plone.i18n, plone.indexer, plone.intelligenttext, plone.keyring, plone.locking, plone.memoize, plone.namedfile, plone.openid, plone.outputfilters, plone.portlet.collection, plone.portlets, plone.portlet.static, plone.protect, plone.registry, plone.resource, plone.resourceeditor, plone.rfc822, plone.scale, plone.schema, plone.schemaeditor, plone.session, plone.stringinterp, plone.subrequest, plone.supermodel, plone.synchronize, plone.theme, plonetheme.barceloneta, plone.transformchain, plone.uuid, plone.z3cform, ply, Products.Archetypes, Products.ATContentTypes, Products.BTreeFolder2, Products.CMFCore, Products.CMFDiffTool, Products.CMFDynamicViewFTI, Products.CMFEditions, Products.CMFFormController, Products.CMFPlacefulWorkflow, Products.CMFPlone, Products.CMFQuickInstallerTool, Products.CMFUid, Products.contentmigration, Products.DateRecurringIndex, Products.DCWorkflow, Products.ExtendedPathIndex, Products.ExternalEditor, Products.ExternalMethod, Products.GenericSetup, Products.MailHost, Products.MIMETools, Products.MimetypesRegistry, Products.OFSP, Products.PasswordResetTool, Products.PlacelessTranslationService, Products.PlonePAS, Products.PluggableAuthService, Products.PluginRegistry, Products.PortalTransforms, Products.PythonScripts, Products.ResourceRegistries, Products.SecureMailHost, Products.StandardCacheManagers, Products.statusmessages, Products.validation, Products.ZCatalog, Products.ZCTextIndex, Products.ZopeVersionControl, Products.ZSQLMethods, python-dateutil, python-gettext, python-openid, pytz, Record, repoze.xmliter, RestrictedPython, roman, six, slimit, sourcecodegen, tempstorage, traceback2, transaction, Unidecode, unittest2, z3c.autoinclude, z3c.caching, z3c.form, z3c.formwidget.query, z3c.objpath, z3c.pt, z3c.relationfield, z3c.zcmlhook, zc.buildout, zc.lockfile, ZConfig, zc.relation, zdaemon, ZEO, zExceptions, zLOG, ZODB3, ZODB, Zope2, zope.annotation, zope.app.file, zope.app.locales, zope.app.publication, zope.authentication, zope.browser, zope.browsermenu, zope.browserpage, zope.browserresource, zope.cachedescriptors, zope.component, zope.componentvocabulary, zope.configuration, zope.container, zope.contentprovider, zope.contenttype, zope.copy, zope.datetime, zope.deferredimport, zope.deprecation, zope.dottedname, zope.dublincore, zope.error, zope.event, zope.exceptions, zope.filerepresentation, zope.formlib, zope.globalrequest, zope.i18n, zope.i18nmessageid, zope.interface, zope.intid, zope.keyreference, zope.lifecycleevent, zope.location, zope.pagetemplate, zope.processlifetime, zope.proxy, zope.ptresource, zope.publisher, zope.ramcache, zope.schema, zope.security, zope.sendmail, zope.sequencesort, zope.site, zope.size, zope.structuredtext, zope.tal, zope.tales, zope.testbrowser, zope.testing, zope.traversing, ZopeUndo, zope.viewlet
+Compiling /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/linecache2/linecache2/tests/inspect_fodder2.py ...
+SyntaxError: ('invalid syntax', ('/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/linecache2/linecache2/tests/inspect_fodder2.py', 102, 25, 'def keyworded(*arg1, arg2=1):\n'))
+
+Compiling /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/plone.app.theming/plone/app/theming/utils.py ...
+SyntaxError: ('invalid syntax', ('/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/plone.app.theming/plone/app/theming/utils.py', 598, 26, "    xslParams = {k: '' for k in params}\n"))
+
+... <snip!> ...
+
+Compiling /nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/RestrictedPython/RestrictedPython/tests/security_in_syntax27.py ...
+SyntaxError: ('invalid syntax', ('/nail/home/buck/trees/yelp/pip-faster/benchmark/venv/build/RestrictedPython/RestrictedPython/tests/security_in_syntax27.py', 6, 13, '    {y: y for _restricted_name in x}\n'))
+
+Successfully installed AccessControl Acquisition archetypes.multilingual archetypes.schemaextender borg.localrole BTrees Chameleon collective.elephantvocabulary collective.monkeypatcher cssmin cssselect DateTime decorator diazo DocumentTemplate docutils ExtensionClass feedparser five.customerize five.globalrequest five.intid five.localsitemanager five.pt future icalendar importlib initgroups linecache2 lxml Markdown mechanize Missing mockup MultiMapping odict ordereddict Persistence persistent Pillow Plone plone.alterego plone.api plone.app.blob plone.app.caching plone.app.collection plone.app.content plone.app.contentlisting plone.app.contentmenu plone.app.contentrules plone.app.contenttypes plone.app.controlpanel plone.app.customerize plone.app.dexterity plone.app.discussion plone.app.event plone.app.folder plone.app.i18n plone.app.imaging plone.app.intid plone.app.iterate plone.app.layout plone.app.linkintegrity plone.app.locales plone.app.lockingbehavior plone.app.multilingual plone.app.openid plone.app.portlets plone.app.querystring plone.app.redirector plone.app.registry plone.app.relationfield plone.app.textfield plone.app.theming plone.app.upgrade plone.app.users plone.app.uuid plone.app.versioningbehavior plone.app.viewletmanager plone.app.vocabularies plone.app.widgets plone.app.workflow plone.app.z3cform plone.autoform plone.batching plone.behavior plone.browserlayer plone.cachepurging plone.caching plone.contentrules plone.dexterity plone.event plone.folder plone.formwidget.namedfile plone.formwidget.querystring plone.formwidget.recurrence plone.i18n plone.indexer plone.intelligenttext plone.keyring plone.locking plone.memoize plone.namedfile plone.openid plone.outputfilters plone.portlet.collection plone.portlets plone.portlet.static plone.protect plone.registry plone.resource plone.resourceeditor plone.rfc822 plone.scale plone.schema plone.schemaeditor plone.session plone.stringinterp plone.subrequest plone.supermodel plone.synchronize plone.theme plonetheme.barceloneta plone.transformchain plone.uuid plone.z3cform ply Products.Archetypes Products.ATContentTypes Products.BTreeFolder2 Products.CMFCore Products.CMFDiffTool Products.CMFDynamicViewFTI Products.CMFEditions Products.CMFFormController Products.CMFPlacefulWorkflow Products.CMFPlone Products.CMFQuickInstallerTool Products.CMFUid Products.contentmigration Products.DateRecurringIndex Products.DCWorkflow Products.ExtendedPathIndex Products.ExternalEditor Products.ExternalMethod Products.GenericSetup Products.MailHost Products.MIMETools Products.MimetypesRegistry Products.OFSP Products.PasswordResetTool Products.PlacelessTranslationService Products.PlonePAS Products.PluggableAuthService Products.PluginRegistry Products.PortalTransforms Products.PythonScripts Products.ResourceRegistries Products.SecureMailHost Products.StandardCacheManagers Products.statusmessages Products.validation Products.ZCatalog Products.ZCTextIndex Products.ZopeVersionControl Products.ZSQLMethods python-dateutil python-gettext python-openid pytz Record repoze.xmliter RestrictedPython roman six slimit sourcecodegen tempstorage traceback2 transaction Unidecode unittest2 z3c.autoinclude z3c.caching z3c.form z3c.formwidget.query z3c.objpath z3c.pt z3c.relationfield z3c.zcmlhook zc.buildout zc.lockfile ZConfig zc.relation zdaemon ZEO zExceptions zLOG ZODB3 ZODB Zope2 zope.annotation zope.app.file zope.app.locales zope.app.publication zope.authentication zope.browser zope.browsermenu zope.browserpage zope.browserresource zope.cachedescriptors zope.component zope.componentvocabulary zope.configuration zope.container zope.contentprovider zope.contenttype zope.copy zope.datetime zope.deferredimport zope.deprecation zope.dottedname zope.dublincore zope.error zope.event zope.exceptions zope.filerepresentation zope.formlib zope.globalrequest zope.i18n zope.i18nmessageid zope.interface zope.intid zope.keyreference zope.lifecycleevent zope.location zope.pagetemplate zope.processlifetime zope.proxy zope.ptresource zope.publisher zope.ramcache zope.schema zope.security zope.sendmail zope.sequencesort zope.site zope.size zope.structuredtext zope.tal zope.tales zope.testbrowser zope.testing zope.traversing ZopeUndo zope.viewlet
+Cleaning up...
+Error when trying to get requirement for VCS system Command /usr/bin/git config remote.origin.url failed with error code 1 in /nail/home/buck/trees/yelp/pip-faster, falling back to uneditable format
+Could not determine repository location of /nail/home/buck/trees/yelp/pip-faster
+Circular dependency! archetypes.multilingual (from plone.app.multilingual->archetypes.multilingual==3.0.1->-r requirements.txt (line 3))
+Circular dependency! plone.app.dexterity (from Products.CMFPlone>=4.0b1->plone.app.dexterity==2.1.17->-r requirements.txt (line 56))
+Circular dependency! plone.app.layout>=1.2dev (from plone.app.portlets->plone.app.layout==2.5.18->-r requirements.txt (line 64))
+Circular dependency! plone.app.layout>=1.1.7dev-r23744 (from Products.CMFPlone>=5.0b3.dev0->plone.app.layout==2.5.18->-r requirements.txt (line 64))
+Circular dependency! plone.app.multilingual (from archetypes.multilingual->plone.app.multilingual==3.0.13->-r requirements.txt (line 68))
+Circular dependency! plone.app.multilingual (from Products.CMFPlone>=5.0b1->plone.app.multilingual==3.0.13->-r requirements.txt (line 68))
+Circular dependency! plone.app.portlets (from plone.app.layout>=1.2dev->plone.app.portlets==3.1.3->-r requirements.txt (line 70))
+Circular dependency! Products.BTreeFolder2 (from Zope2>=2.13.0a1->Products.BTreeFolder2==2.14.0->-r requirements.txt (line 132))
+Circular dependency! Products.CMFPlone (from plone.app.contentmenu>=1.1.6dev-r22380->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.contentrules->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.contenttypes->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.discussion->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone>=5.0b3.dev0 (from plone.app.layout>=1.1.7dev-r23744->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.users->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from plone.app.workflow->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.CMFPlone (from Products.PasswordResetTool->Products.CMFPlone==5.0.2->-r requirements.txt (line 139))
+Circular dependency! Products.ZCTextIndex (from Zope2>=2.13.0dev->Products.ZCTextIndex==2.13.5->-r requirements.txt (line 166))
+Circular dependency! Zope2>=2.13.0a1 (from Products.OFSP>=2.13.2->Zope2==2.13.23->-r requirements.txt (line 205))
+Circular dependency! Zope2>=2.13.0a1 (from Products.StandardCacheManagers->Zope2==2.13.23->-r requirements.txt (line 205))
+
+real	0m21.323s
+user	0m16.496s
+sys	0m4.592s
++ diff -us requirements.txt /dev/fd/63
+++ sort
+++ pip-faster freeze
+Error when trying to get requirement for VCS system Command /usr/bin/git config remote.origin.url failed with error code 1 in /nail/home/buck/trees/yelp/pip-faster, falling back to uneditable format
+Could not determine repository location of /nail/home/buck/trees/yelp/pip-faster
+Files requirements.txt and /dev/fd/63 are identical
+END -- warm
+
+real	0m29.159s
+user	0m22.479s
+sys	0m6.070s
+2016-02-24 13:34:06.060095022
+
+real	5m3.288s
+user	4m28.888s
+sys	0m41.384s
