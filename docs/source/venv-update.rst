@@ -4,7 +4,8 @@
 =========================
 
 venv-update is a small script whose job is to idempotently ensure the existence
-of a project's virtualenv based on a set of requirements files.
+and correctness of a project's virtualenv, and synchronize it with its
+requirements.
 
 We like to call venv-update from our Makefiles to create and maintain a
 virtualenv. It does the following:

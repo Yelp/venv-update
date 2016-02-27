@@ -310,8 +310,8 @@ texinfo_documents = [
 
 def process_docstring(unused_app, what, name, unused_obj, unused_options, lines):  # pylint:disable=too-many-arguments
     if (what, name) == ('module', 'venv_update'):
-        for i in xrange(len(lines)):
-            lines[i] = ' ' + lines[i]
+        for i, line in enumerate(lines):
+            lines[i] = ' ' + line
         lines[:0] = ('.. sourcecode:: bash', '', ' $ venv-update --help')
     else:
         print('MISS:', (what, name))

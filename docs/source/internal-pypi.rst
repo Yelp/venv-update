@@ -10,7 +10,7 @@ projects like lxml on Linux is normally extremely slow since they will need to
 be compiled during every installation.
 
 pip-faster improves this by only compiling on the first installation for each
-user (this is also the default behavior for pip >= 6), but this doesn't help
+user (this is also the default behavior for pip >= 7), but this doesn't help
 for the first run.
 
 Using an internal PyPI server which allows uploading of Linux wheels can

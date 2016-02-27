@@ -32,7 +32,7 @@ def main():
     setup(
         name='venv-update',
         version=find_version('venv_update.py'),
-        description='Quickly and exactly synchronize a virtualenv with a requirements.txt',
+        description="quickly and exactly synchronize a large project's virtualenv with its requirements",
         url='https://github.com/Yelp/venv-update',
         author='Buck Evan',
         author_email='buck@yelp.com',

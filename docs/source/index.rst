@@ -17,8 +17,8 @@ Release v\ |release| (:ref:`Installation`)
 Introduction
 ------------
 
-venv-update is an `MIT Licensed`_ tool to quickly and exactly update
-a large python project's requirements.  
+venv-update is an `MIT-Licensed`_ tool to quickly and exactly synchronize
+a large python project's virtualenv with its `requirements`_.
 
 This project ships as two separable components: ``pip-faster`` and
 ``venv-update``.
@@ -83,11 +83,11 @@ dependencies) we get these numbers:
 +---------+--------------+--------------+---------------+
 | testcase|  pip v8.0.2  |  pip-faster  |  improvement  |
 +=========+==============+==============+===============+
-| cold    |    4:39s     |     4:16s    |       8%      |
+| cold    |   4m 39s     |    4m 16s    |       8%      |
 +---------+--------------+--------------+---------------+
 | noop    |    7.11s     |     2.40s    |    **196%**   |
 +---------+--------------+--------------+---------------+
-| warm    |    44.6s     |    21.3s     |    **109%**   |
+| warm    |    44.6s     |     21.3s    |    **109%**   |
 +---------+--------------+--------------+---------------+
 
 In the "cold" case, all caches are completely empty.
@@ -163,11 +163,16 @@ Then, apply a change like this to your ``tox.ini`` file:
 
 .. sourcecode:: diff
 
+
+   [tox]
+   envlist = py27,py34
+ + skipsdist = true
+
    [testenv]
  + venv_update =
  +     {toxinidir}/bin/venv-update \
  +        venv= {envdir} \
- +        install= -r {toxinidir}/requirements.txt -e {toxinidir}
+ +        install= -r {toxinidir}/requirements.txt {toxinidir}
  - deps = -rrequirements.txt
    commands =
  +     {[testenv]venv_update}
@@ -178,18 +183,12 @@ The exact changes will of course vary, but above is a general template. The
 two changes are: running venv-update as the first test command, and
 removing the list of ``deps`` (so that tox will never invalidate your
 virtualenv itself; we want to let venv-update manage that instead).
-
-Users of tox version <2 will want to add this as well, to avoid tox installing
-all your dependencies with pip-slower:
-
-.. sourcecode:: diff
-
-     [tox]
-     envlist = py27,py34
-   + skipsdist = true
+The ``skipsdist`` avoids installing your package twice. In tox<2, it also
+prevents all of your packages dependencies from being installed by pip-slower.
 
 
-.. _MIT Licensed: https://github.com/Yelp/pip-faster/blob/master/COPYING
+.. _MIT-Licensed: https://github.com/Yelp/pip-faster/blob/master/COPYING
+.. _requirements: https://pip.pypa.io/en/stable/user_guide/#requirements-files
 .. _plone: https://en.wikipedia.org/wiki/Plone_(software)
 .. _pip: https://pip.pypa.io/en/stable/
 .. _virtualenv: https://virtualenv.readthedocs.org/en/latest/
