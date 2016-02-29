@@ -5,18 +5,48 @@ Known Bugs
 This is just a place to brain-dump bugs I've found so I don't go insane trying to remember them.
 It's much lighter weight than filing tickets, and I like that it's version controlled.
 
+(none, at the moment)
+
+
+Annoyances
+==========
+
+    * `capture_subprocess` doesn't properly proxy tty input/output.
+      This means I can't simply insert a `import pudb; pudb.set_trace` to debug tests.
+      see: https://github.com/bukzor/ptyproxy
+
+    * CI sometimes craps out with "pypi server never became ready!"
+      I've never had this happen locally.
+
+    * CI sometimes fails with missing coverage.
+      Looking closely, some of the test workers entirely failed to report in.
+      I've never had this happen locally, although I can sometimes
+      reproduce it in a io-constrained docker container.
+
+
+Fixed, Not Tested
+=================
+
+    * venv-update can `rm -rf .`, if '.' is its first argument.
+      Fix: check for $DEST/bin/python before removal
+
     * venv-update shows the same `> virtualenv venv` line twice in a row
 
     * the first venv-update fails with "filename too long" in a download cache file,
         but subsequent run succeeds
         TESTCASE: add a super-extra-really-obscenely-long-named-package
-        FIX: don't set download-cache within pip-faster. i dont think it was speeding anything up. the wheels are what
-        matter.
+        FIX: don't set download-cache within pip-faster. i dont think it was speeding anything up.
+        the wheels are what matter.
 
-    * if the "outer" pip is >6, installing pip1.5 shows "a valid SSLContext is not available" and "a newer pip is available"
-        we can suppress these with PIP_NO_PIP_VERSION_CHECK and python -W 'ignore'
+    * if the "outer" pip is >6, installing pip1.5 shows "a valid SSLContext is not available" and
+        "a newer pip is available" we can suppress these with PIP_NO_PIP_VERSION_CHECK and
+        python -W 'ignore'
 
-    * venv-update can `rm -rf .`, if '.' is its first argument.
+
+Magically Fixed
+===============
+
+    * `print 1; print 2` is coming from somewhere during py.test -s
 
     * Explosion when argparse is not installed:
 
@@ -34,16 +64,8 @@ It's much lighter weight than filing tickets, and I like that it's version contr
            raise DistributionNotFound(req)
        pkg_resources.DistributionNotFound: argparse
 
-
-Annoyances
-==========
-
-    * `capture_subprocess` doesn't properly proxy tty input/output.
-      see: https://github.com/bukzor/ptyproxy
-
-
-Fixed, Not Tested
-=================
+Fixed and Tested
+================
 
 pip-faster install:
 
@@ -54,7 +76,7 @@ pip-faster install:
       Fix: nasty hack to remove non-wheel source and replace with unzipped wheel
 
     * wheel-install can install a prior version
-      Fix: terribad code to use the wheel with maximum pkg_resources.parse_version
+      Fix: only do the wheel search with pinned requirements
 
     * Cause: a prior prune uninstalled argparse, but pip-faster depends on it, transitively, via wheel
       Planned fix: for the purposes of pruning, pip-faster should be added to the list of requirements
@@ -64,14 +86,3 @@ test:
     * during make-sdists, the setup.py for pip-faster went missing, once
       Cause: parallel test fixtures were stomping on each others' egg-info
       Fix: set a --egg-dir for egg-info
-
-
-Magically Fixed
-===============
-
-    * `print 1; print 2` is coming from somewhere during py.test -s
-
-Fixed and Tested
-================
-
-(none, yet)
