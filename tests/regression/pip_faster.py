@@ -15,11 +15,7 @@ from testing import uncolor
 from venv_update import __version__
 
 
-@pytest.mark.usefixtures('pypi_server')
-def test_circular_dependencies(tmpdir):
-    """pip-faster should be able to install packages with circular
-    dependencies."""
-    tmpdir.chdir()
+def make_venv():
     enable_coverage()
     venv = Path('venv')
     run('virtualenv', venv.strpath)
@@ -27,6 +23,14 @@ def test_circular_dependencies(tmpdir):
 
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'venv-update==' + __version__)
+    return venv
+
+
+@pytest.mark.usefixtures('pypi_server', 'tmpdir')
+def test_circular_dependencies():
+    """pip-faster should be able to install packages with circular
+    dependencies."""
+    venv = make_venv()
 
     out, err = run(
         venv.join('bin/pip-faster').strpath,
@@ -103,3 +107,21 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     assert 'pure-python-package' in [
         Wheel(f.basename).name for f in wheelhouse.listdir()
     ]
+
+
+@pytest.mark.usefixtures('tmpdir')
+def test_install_whl_over_http(pypi_server):
+    whl_url = pypi_server + '/packages/wheeled_package-0.2.0-py2.py3-none-any.whl'
+    venv = make_venv()
+
+    out, err = run(str(venv.join('bin/pip-faster')), 'install', whl_url)
+    assert err == ''
+    out = uncolor(out)
+    assert out == '''\
+Downloading/unpacking %s/packages/wheeled_package-0.2.0-py2.py3-none-any.whl
+  Downloading wheeled_package-0.2.0-py2.py3-none-any.whl
+  Saved ./home/.cache/pip-faster/wheelhouse/wheeled_package-0.2.0-py2.py3-none-any.whl
+Installing collected packages: wheeled-package
+Successfully installed wheeled-package
+Cleaning up...
+''' % pypi_server

@@ -116,9 +116,10 @@ def start_pypi_server(packages, port, pypi_fallback):
         else:
             raise AssertionError('pypi server never became ready!')
 
-    os.environ['PIP_INDEX_URL'] = 'http://localhost:' + str(port) + '/simple'
+    pypi_url = 'http://localhost:' + str(port)
+    os.environ['PIP_INDEX_URL'] = pypi_url + '/simple'
     try:
-        yield
+        yield pypi_url
     finally:
         server.terminate()
         server.wait()
@@ -126,14 +127,14 @@ def start_pypi_server(packages, port, pypi_fallback):
 
 @pytest.yield_fixture
 def pypi_server(pypi_packages, pypi_port):
-    with start_pypi_server(pypi_packages, pypi_port, False):
-        yield
+    with start_pypi_server(pypi_packages, pypi_port, False) as pypi_url:
+        yield pypi_url
 
 
 @pytest.yield_fixture
 def pypi_server_with_fallback(pypi_packages, pypi_port):
-    with start_pypi_server(pypi_packages, pypi_port, True):
-        yield
+    with start_pypi_server(pypi_packages, pypi_port, True) as pypi_url:
+        yield pypi_url
 
 
 def ioerror_to_errno(error):  # :pragma:nocover:  all of these cases are exceptional and quite rare
