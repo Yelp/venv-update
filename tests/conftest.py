@@ -101,14 +101,15 @@ def start_pypi_server(packages, port, pypi_fallback):
         cmd += ('--disable-fallback',)
     cmd += (str(packages),)
     print(colorize(cmd))
-    server = subprocess.Popen(cmd, close_fds=True, cwd=str(TOP))
+    server = subprocess.Popen(cmd, cwd=str(TOP), stderr=1)
 
     limit = 10
     poll = .1
+    pypi_url = 'http://localhost:' + str(port)
     while True:
         if server.poll() is not None:
             raise AssertionError('pypi ended! (code %i)' % server.returncode)
-        elif service_up(port):
+        elif service_up(pypi_url):
             break
         elif limit > 0:
             time.sleep(poll)
@@ -116,7 +117,6 @@ def start_pypi_server(packages, port, pypi_fallback):
         else:
             raise AssertionError('pypi server never became ready!')
 
-    pypi_url = 'http://localhost:' + str(port)
     os.environ['PIP_INDEX_URL'] = pypi_url + '/simple'
     try:
         yield pypi_url
@@ -151,11 +151,9 @@ def ioerror_to_errno(error):  # :pragma:nocover:  all of these cases are excepti
         raise ValueError('Could not find error number: %r' % error)
 
 
-def service_up(port):
+def service_up(url):
     try:
-        response = six.moves.urllib.request.urlopen(
-            'http://localhost:{0}'.format(port)
-        )
+        response = six.moves.urllib.request.urlopen(url)
     except IOError as error:
         if ioerror_to_errno(error) in (ECONNREFUSED, 404):
             print('pypi not up:', error)
