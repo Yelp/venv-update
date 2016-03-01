@@ -96,7 +96,7 @@ def pypi_port():
 @contextmanager
 def start_pypi_server(packages, port, pypi_fallback):
     port = str(port)
-    cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
+    cmd = ('pypi-server', '-vvvvvv', '-i', '127.0.0.1', '-p', port)
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
     cmd += (str(packages),)
@@ -145,20 +145,26 @@ def ioerror_to_errno(error):  # :pragma:nocover:  all of these cases are excepti
         return error.args[1].errno
     elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
         return error.args[0].errno
+    elif hasattr(error, 'code') and isinstance(error.code, int):
+        return error.code
     else:
         raise ValueError('Could not find error number: %r' % error)
 
 
 def service_up(port):
     try:
-        return six.moves.urllib.request.urlopen(
+        response = six.moves.urllib.request.urlopen(
             'http://localhost:{0}'.format(port)
-        ).getcode() == 200
+        )
     except IOError as error:
-        if ioerror_to_errno(error) == ECONNREFUSED:
+        if ioerror_to_errno(error) in (ECONNREFUSED, 404):
+            print('pypi not up:', error)
             return False
         else:
             raise
+
+    print('pypi response:', response)
+    return response.getcode() == 200
 
 
 def pytest_assertrepr_compare(config, op, left, right):  # TODO: unit-test :pragma:nocover:

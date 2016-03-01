@@ -5,11 +5,11 @@ Quickly and exactly synchronize a large python project's virtualenv with its
 
 [![PyPI version](https://badge.fury.io/py/venv-update.svg)]
 (https://pypi.python.org/pypi/venv-update)
-[![Build Status (circle)](https://circleci.com/gh/Yelp/venv-update.svg?style=shield)]
-(https://circleci.com/gh/Yelp/pip-faster)
-[![Build Status (travis)](https://travis-ci.org/Yelp/venv-update.svg?branch=stable)]
-(https://travis-ci.org/Yelp/venv-update)
-[![Coverage Status](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=stable)]
+[![Circle CI](https://circleci.com/gh/Yelp/venv-update/tree/stable.svg?style=shield)]
+(https://circleci.com/gh/Yelp/venv-update/tree/stable)
+[![Travis CI](https://travis-ci.org/Yelp/venv-update.svg?branch=stable)]
+(https://travis-ci.org/Yelp/venv-update/branches)
+[![Coverage](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=stable)]
 (https://codecov.io/github/Yelp/venv-update?branch=stable)
 [![Documentation](https://readthedocs.org/projects/venv-update/badge/)]
 (http://venv-update.readthedocs.org/en/stable/)
