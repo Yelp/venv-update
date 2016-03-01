@@ -189,10 +189,27 @@ def pipfaster_packagefinder():
     return patched(vars(install), {'PackageFinder': FasterPackageFinder})
 
 
+@contextmanager
 def pipfaster_install():
     # pip<6 needs this exact import -- they clobber `commands` in __init__
     from pip.commands import install
-    return patched(vars(install), {'RequirementSet': FasterRequirementSet})
+    with patched(vars(install), {'RequirementSet': FasterRequirementSet}):
+        @property
+        def delete_marker_filename(self):
+            """
+            pip.req.InstallRequirement.delete_marker_filename contains an unhelpful assertion of `self.source_dir`
+            Instead, we return a filename that will never exist.
+            """
+            if not self.source_dir:
+                return ''  # The empty string never exists: http://man7.org/linux/man-pages/man2/stat.2.html#ERRORS
+            else:
+                return orig.__get__(self)  # pylint: disable=no-member
+
+        from pip.req import InstallRequirement
+        orig = InstallRequirement.delete_marker_filename
+        InstallRequirement.delete_marker_filename = delete_marker_filename
+        yield
+        InstallRequirement.delete_marker_filename = orig
 
 
 def pip(args):

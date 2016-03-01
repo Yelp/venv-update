@@ -98,6 +98,7 @@ class public_pypi_enabled(object):
 def wheel(src, dst):
     with public_pypi_enabled():
         build = dst.join('build')
+        build.ensure_dir()
         run((
             python, '-m', 'pip.__main__',
             'wheel',
@@ -172,7 +173,7 @@ def make_sdists(sources, destination):
         flock(lock.strpath, blocking=True)
         return
 
-    staging = destination.new(ext=random_string() + '.tmp')
+    staging = destination.new(ext=random_string())
     staging.ensure(dir=True)
 
     do_build(sources, staging)
