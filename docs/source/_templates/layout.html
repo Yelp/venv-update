@@ -1,0 +1,7 @@
+{%- extends "!layout.html" %}
+{%- block extrahead %}
+    {{ super() }}
+    {%- if favicon %}
+    <link rel="icon" href="{{ pathto('_static/' + favicon, 1) }}"/>
+    {%- endif %}
+{% endblock %}
