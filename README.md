@@ -7,7 +7,7 @@ Quickly and exactly synchronize a large python project's virtualenv with its
 (https://pypi.python.org/pypi/venv-update)
 [![Circle CI](https://circleci.com/gh/Yelp/venv-update/tree/stable.svg?style=shield)]
 (https://circleci.com/gh/Yelp/venv-update/tree/stable)
-[![Travis CI](https://travis-ci.org/Yelp/venv-update.svg?branch=stable)]
+[![Travis CI](https://img.shields.io/travis/Yelp/venv-update/stable.svg?label=travis-ci)]
 (https://travis-ci.org/Yelp/venv-update/branches)
 [![Coverage](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=stable)]
 (https://codecov.io/github/Yelp/venv-update?branch=stable)
