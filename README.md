@@ -11,7 +11,7 @@ Quickly and exactly synchronize a large python project's virtualenv with its
 (https://travis-ci.org/Yelp/venv-update/branches)
 [![Coverage](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=stable)]
 (https://codecov.io/github/Yelp/venv-update?branch=stable)
-[![Documentation](https://readthedocs.org/projects/venv-update/badge/)]
+[![Documentation](https://readthedocs.org/projects/venv-update/badge/?version=stable)]
 (http://venv-update.readthedocs.org/en/stable/)
 
 
