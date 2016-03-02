@@ -41,6 +41,10 @@ else
     set -- $TOP/tests $SITEPACKAGES/{venv_update,pip_faster}.py
 fi
 
+if "${CI:-false}"; then
+    # Under CI, we don't get to use all the CPU.
+    NCPU=$((NCPU > 5? NCPU/5 : 1))
+fi
 
 set -x
 # unquoted is intentional. we want to expand words.
@@ -49,7 +53,7 @@ if $PYPY; then
     # coverage under pypy takes too dang long:
     #   https://bitbucket.org/pypy/pypy/issue/1871/10x-slower-than-cpython-under-coverage#comment-14404182
     # pypy can oom on travis; let's use less workers
-    py.test -n $((NCPU / 5)) "$@"
+    py.test -n $NCPU "$@"
 else
     # clean up anything left behind from before:
     rm -f $TOP/.coverage $TOP/.coverage.*

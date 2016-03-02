@@ -96,19 +96,20 @@ def pypi_port():
 @contextmanager
 def start_pypi_server(packages, port, pypi_fallback):
     port = str(port)
-    cmd = ('pypi-server', '-i', '127.0.0.1', '-p', port)
+    cmd = ('pypi-server', '-vvvvvv', '-i', '127.0.0.1', '-p', port)
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
     cmd += (str(packages),)
     print(colorize(cmd))
-    server = subprocess.Popen(cmd, close_fds=True, cwd=str(TOP))
+    server = subprocess.Popen(cmd, cwd=str(TOP), stderr=1)
 
     limit = 10
     poll = .1
+    pypi_url = 'http://localhost:' + str(port)
     while True:
         if server.poll() is not None:
             raise AssertionError('pypi ended! (code %i)' % server.returncode)
-        elif service_up(port):
+        elif service_up(pypi_url):
             break
         elif limit > 0:
             time.sleep(poll)
@@ -116,7 +117,6 @@ def start_pypi_server(packages, port, pypi_fallback):
         else:
             raise AssertionError('pypi server never became ready!')
 
-    pypi_url = 'http://localhost:' + str(port)
     os.environ['PIP_INDEX_URL'] = pypi_url + '/simple'
     try:
         yield pypi_url
@@ -145,20 +145,24 @@ def ioerror_to_errno(error):  # :pragma:nocover:  all of these cases are excepti
         return error.args[1].errno
     elif len(error.args) == 1 and isinstance(error.args[0], socket.error):
         return error.args[0].errno
+    elif hasattr(error, 'code') and isinstance(error.code, int):
+        return error.code
     else:
         raise ValueError('Could not find error number: %r' % error)
 
 
-def service_up(port):
+def service_up(url):
     try:
-        return six.moves.urllib.request.urlopen(
-            'http://localhost:{0}'.format(port)
-        ).getcode() == 200
+        response = six.moves.urllib.request.urlopen(url)
     except IOError as error:
-        if ioerror_to_errno(error) == ECONNREFUSED:
+        if ioerror_to_errno(error) in (ECONNREFUSED, 404):
+            print('pypi not up:', error)
             return False
         else:
             raise
+
+    print('pypi response:', response)
+    return response.getcode() == 200
 
 
 def pytest_assertrepr_compare(config, op, left, right):  # TODO: unit-test :pragma:nocover:
