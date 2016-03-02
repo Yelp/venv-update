@@ -113,10 +113,12 @@ project. It has no dependencies other than `virtualenv`_ and the standard
 Python library.
 
 
- curl https://raw.githubusercontent.com/Yelp/venv-update/stable/get-venv-update.sh | sh
+.. parsed-literal::
+
+ curl http://yelp.github.io/venv-update/install | bash
  git add bin/venv-update
 
-The paranoid should `read the script <https://raw.githubusercontent.com/Yelp/venv-update/stable/get-venv-update.sh>`.
+The paranoid should `read the script http://yelp.github.io/venv-update/install`_.
 
 
 Usage
