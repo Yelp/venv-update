@@ -1,4 +1,12 @@
 #!/bin/bash
+#######################################################################
+# This is the installation script for venv-update.
+# To run it:
+#   curl http://yelp.github.io/venv-update/install.txt | bash
+#
+# Documentation:
+#   https://venv-update.rtfd.org
+#######################################################################
 set -Eeu
 trap 'echo "[31mFAILED[m (code $?)"' ERR
 
