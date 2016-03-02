@@ -2,3 +2,7 @@ pre {
  padding: 7px 7px;
  font-size: 13px;
 }
+
+img.logo {
+    width: 100%;
+}
