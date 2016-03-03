@@ -25,14 +25,18 @@ How to Contribute
 2. Clone it: https://help.github.com/articles/cloning-a-repository/
 3. Make a feature branch for your changes:
 
+    ```
     git remote add yelp https://github.com/Yelp/venv-update.git
     git fetch yelp
     git checkout yelp/development -b my-feature-branch
+    ```
 
 4. Make sure the test suite works before you start:
 
+    ```
     source .activate.sh
     make test
+    ```
 
 5. Commit patches: http://gitref.org/basic/
 6. Push to github: `git pull && git push origin`
@@ -43,14 +47,19 @@ How to Contribute
 
 Run a particular test:
 
+    ```
     py.test tests/functional/simple_test.py::test_downgrade
-
+    ```
 
 See all output from a test:
 
+    ```
     py.test -s -k downgrade
+    ```
 
 
 Check coverage of a single test:
 
+    ```
     ./test tests/functional/simple_test.py::test_downgrade
+    ```
