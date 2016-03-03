@@ -47,19 +47,13 @@ How to Contribute
 
 Run a particular test:
 
-    ```
     py.test tests/functional/simple_test.py::test_downgrade
-    ```
 
 See all output from a test:
 
-    ```
     py.test -s -k downgrade
-    ```
 
 
 Check coverage of a single test:
 
-    ```
     ./test tests/functional/simple_test.py::test_downgrade
-    ```
