@@ -29,7 +29,7 @@ download() {
 }
 
 colorize mkdir -p ./bin
-download https://github.com/Yelp/venv-update/raw/stable/venv_update.py bin/venv-update
+download https://raw.githubusercontent.com/Yelp/venv-update/stable/venv_update.py ./bin/venv-update
 colorize chmod 755 bin/venv-update
 
 echo '
