@@ -115,10 +115,10 @@ Python library.
 
 .. parsed-literal::
 
- curl `<http://yelp.github.io/venv-update/install.txt>`_ | bash
+ curl `<https://yelp.github.io/venv-update/install.txt>`_ | bash
  git add bin/venv-update
 
-The paranoid should `read the script <http://yelp.github.io/venv-update/install.txt>`_.
+The paranoid should `read the script <https://yelp.github.io/venv-update/install.txt>`_.
 
 
 Usage
