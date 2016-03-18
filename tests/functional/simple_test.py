@@ -183,10 +183,11 @@ def pipe_output(read, write):
     uncolored = uncolor(result)
     assert uncolored.startswith('> ')
     # FIXME: Sometimes this is 'python -m', sometimes 'python2.7 -m'. Weird.
+    import virtualenv
     assert uncolored.endswith('''
 > virtualenv --version
-14.0.6
-''')
+%s
+''' % virtualenv.__version__)
 
     return result, uncolored
 
@@ -231,10 +232,17 @@ def test_args_backward(tmpdir):
     # py26 doesn't have a consistent exit code:
     #   http://bugs.python.org/issue15033
     assert excinfo.value.returncode != 0
-    _, err = excinfo.value.result
-    lasterr = strip_coverage_warnings(err).rsplit('\n', 2)[-2]
-    errname = 'NotADirectoryError' if PY33 else 'OSError'
-    assert lasterr.startswith(errname + ': [Errno 20] Not a directory'), err
+    out, err = excinfo.value.result
+    err = strip_coverage_warnings(err)
+    err = strip_pip_warnings(err)
+    assert err == ''
+    out = uncolor(out)
+    assert out.rsplit('\n', 4)[-4:] == [
+        '> virtualenv requirements.txt',
+        'ERROR: File already exists and is not a directory.',
+        'Please provide a different path or delete the file.',
+        '',
+    ]
 
     assert Path('requirements.txt').isfile()
     assert Path('requirements.txt').read() == ''
