@@ -4,11 +4,15 @@
 # To run it:
 #   curl http://yelp.github.io/venv-update/install.txt | bash
 #
+# Or, to get a specific version:
+#   curl http://yelp.github.io/venv-update/install.txt | bash -s v1.0.0
+#
 # Documentation:
 #   https://venv-update.rtfd.org
 #######################################################################
 set -Eeu
 trap 'echo "[31mFAILED[m (code $?)"' ERR
+version=${1:-stable}
 
 colorize() {
     echo "[01;36m>[m [01;33m$@[m" >&2
@@ -19,7 +23,8 @@ canhas(){
 }
 download() {
     if canhas curl; then
-        colorize curl "$1" --output "$2"
+        # --fail: stop if we get 404. wget already does this.
+        colorize curl --fail "$1" --output "$2"
     elif canhas wget; then
         colorize wget "$1" --output-document "$2"
     else
@@ -29,7 +34,7 @@ download() {
 }
 
 colorize mkdir -p ./bin
-download https://raw.githubusercontent.com/Yelp/venv-update/stable/venv_update.py ./bin/venv-update
+download https://raw.githubusercontent.com/Yelp/venv-update/$version/venv_update.py ./bin/venv-update
 colorize chmod 755 bin/venv-update
 
 echo '
