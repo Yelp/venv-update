@@ -3,7 +3,7 @@
 '''\
 usage: venv-update [-hV] [options]
 
-Update a (possibly non-existant) virtualenv directory using a pip requirements
+Update a (possibly non-existent) virtualenv directory using a pip requirements
 file.  When this script completes, the virtualenv directory should contain the
 same packages as if it were deleted then rebuilt.
 
