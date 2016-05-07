@@ -56,7 +56,7 @@ from __future__ import unicode_literals
 from os.path import exists
 from os.path import join
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 DEFAULT_VIRTUALENV_PATH = 'venv'
 VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
 DEFAULT_OPTION_VALUES = {

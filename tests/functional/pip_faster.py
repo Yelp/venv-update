@@ -46,7 +46,7 @@ coverage-enable-subprocess==0
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
-    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
+    assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -64,7 +64,7 @@ def it_installs_stuff_from_requirements_file(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
 
-    assert 'pure-python-package==0.2.0' in frozen_requirements
+    assert 'pure-python-package==0.2.1' in frozen_requirements
     assert 'project-with-c==0.1.0' in frozen_requirements
 
 
@@ -122,7 +122,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
         'dependant-package==1',
         'implicit-dependency==1',
         'many-versions-package==3',
-        'pure-python-package==0.2.0',
+        'pure-python-package==0.2.1',
         'venv-update==' + __version__,
         'wheel==0.29.0',
         '',
@@ -184,9 +184,9 @@ def it_can_handle_a_bad_findlink(tmpdir):
     out = uncolor(out)
 
     assert '''
-Candidate wheel: pure_python_package-0.2.0-py2.py3-none-any.whl
+Candidate wheel: pure_python_package-0.2.1-py2.py3-none-any.whl
 Installing collected packages: pure-python-package
 Successfully installed pure-python-package
 ''' in out
     assert err == ''
-    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
+    assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')

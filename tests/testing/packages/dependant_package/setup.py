@@ -14,7 +14,7 @@ setup(
     install_requires=[
         'many_versions_package>=2,<4',
         'implicit_dependency',
-        'pure_python_package>=0.2.0',
+        'pure_python_package>=0.2.1',
     ],
     options={
         'bdist_wheel': {
