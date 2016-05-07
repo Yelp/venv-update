@@ -360,7 +360,7 @@ pure_python_package
         '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements.d/venv-update.txt\n' % tmpdir
     ) in out
     assert (
-        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.0 venv-update-%s' % __version__
+        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.1 venv-update-%s' % __version__
     ) in out
     assert '\n  Successfully uninstalled pure-python-package\n' in out
 
@@ -401,3 +401,23 @@ Successfully installed cant-wheel-package pure-python-package
 Cleaning up...
 ''' in out  # noqa
         assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_has_extras(tmpdir):
+    with tmpdir.as_cwd():
+        enable_coverage()
+        install_coverage()
+        requirements('pure-python-package[my-extra]')
+
+        for _ in range(2):
+            venv_update()
+
+            expected = '\n'.join((
+                'implicit-dependency==1',
+                'pure-python-package==0.2.1',
+                'venv-update==%s' % __version__,
+                'wheel==0.29.0',
+                ''
+            ))
+            assert pip_freeze() == expected

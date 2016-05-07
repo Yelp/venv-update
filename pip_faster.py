@@ -346,7 +346,9 @@ def trace_requirements(requirements):
 
         result.append(dist_to_req(dist))
 
-        for sub_req in sorted(dist.requires(), key=lambda req: req.key):
+        # TODO: pip does no validation of extras. should we?
+        extras = [extra for extra in req.extras if extra in dist.extras]
+        for sub_req in sorted(dist.requires(extras=extras), key=lambda req: req.key):
             from pip.req import InstallRequirement
             sub_req = InstallRequirement(sub_req, req)
 

@@ -21,7 +21,7 @@ def time_savings(tmpdir, between):
 
         requirements('\n'.join((
             'project_with_c',
-            'pure_python_package==0.2.0',
+            'pure_python_package==0.2.1',
             'slow_python_package==0.1.0',
             'dependant_package',
             'many_versions_package>=2,<3',
@@ -42,7 +42,7 @@ def time_savings(tmpdir, between):
             'implicit-dependency==1',
             'many-versions-package==2.1',
             'project-with-c==0.1.0',
-            'pure-python-package==0.2.0',
+            'pure-python-package==0.2.1',
             'slow-python-package==0.1.0',
             'venv-update==%s' % __version__,
             'wheel==0.29.0',
