@@ -6,3 +6,4 @@
 -r docs.txt
 
 pudb
+twine
