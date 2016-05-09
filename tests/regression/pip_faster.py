@@ -99,7 +99,7 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
     # it was installed
-    assert 'pure-python-package==0.2.0' in pip_freeze(str(venv)).split('\n')
+    assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')
 
     # it was wheeled
     from pip.wheel import Wheel
