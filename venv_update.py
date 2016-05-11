@@ -11,12 +11,14 @@ venv-update uses "trailing equal" options (e.g. venv=) to delimit groups of
 (conventional, dashed) options to pass to wrapped commands (virtualenv and pip).
 
 Options:
-    venv=          parameters are passed to virtualenv
-                    default: {venv=}
-    install=       options to pip-command
-                    default: {install=}
-    pip-command=   is run after the virtualenv directory is bootstrapped
-                    default: {pip-command=}
+    venv=             parameters are passed to virtualenv
+                       default: {venv=}
+    install=          options to pip-command
+                       default: {install=}
+    pip-command=      is run after the virtualenv directory is bootstrapped
+                       default: {pip-command=}
+    bootstrap-deps=   dependencies to install before pip-command= is run
+                       default: {bootstrap-deps=}
 
 Examples:
     # install requirements.txt to "venv"
@@ -39,8 +41,8 @@ Examples:
 
 We strongly recommend that you keep the default value of pip-command= in order
 to quickly and reproducibly install your requirements. You can override the
-packages installed during bootstrapping, prior to pip-command=, by creating a
-`{VENV_UPDATE_REQS_OVERRIDE}` file.
+packages installed during bootstrapping, prior to pip-command=, by setting
+bootstrap-deps=
 
 Pip options are also controllable via environment variables.
 See https://pip.readthedocs.org/en/stable/user_guide/#environment-variables
@@ -58,14 +60,13 @@ from os.path import join
 
 __version__ = '1.0.1'
 DEFAULT_VIRTUALENV_PATH = 'venv'
-VENV_UPDATE_REQS_OVERRIDE = 'requirements.d/venv-update.txt'
 DEFAULT_OPTION_VALUES = {
     'venv=': (DEFAULT_VIRTUALENV_PATH,),
     'install=': ('-r', 'requirements.txt',),
     'pip-command=': ('pip-faster', 'install', '--upgrade', '--prune'),
+    'bootstrap-deps=': ('venv-update==' + __version__,),
 }
 __doc__ = __doc__.format(  # pylint:disable=redefined-builtin
-    VENV_UPDATE_REQS_OVERRIDE=VENV_UPDATE_REQS_OVERRIDE,
     **dict((key, ' '.join(val)) for key, val in DEFAULT_OPTION_VALUES.items())
 )
 
@@ -378,6 +379,7 @@ def venv_update(
         venv=DEFAULT_OPTION_VALUES['venv='],
         install=DEFAULT_OPTION_VALUES['install='],
         pip_command=DEFAULT_OPTION_VALUES['pip-command='],
+        bootstrap_deps=DEFAULT_OPTION_VALUES['bootstrap-deps='],
 ):
     """we have an arbitrary python interpreter active, (possibly) outside the virtualenv we want.
 
@@ -393,7 +395,7 @@ def venv_update(
         if return_values.venv_path is None:
             return
         # invariant: the final virtualenv exists, with the right python version
-        raise_on_failure(lambda: pip_faster(return_values.venv_path, pip_command, install))
+        raise_on_failure(lambda: pip_faster(return_values.venv_path, pip_command, install, bootstrap_deps))
     except BaseException:
         mark_venv_invalid(return_values.venv_path)
         raise
@@ -407,7 +409,7 @@ def execfile_(filename):
         exec(code, {'__file__': filename})  # pylint:disable=exec-used
 
 
-def pip_faster(venv_path, pip_command, install):
+def pip_faster(venv_path, pip_command, install, bootstrap_deps):
     """install and run pip-faster"""
     # activate the virtualenv
     execfile_(venv_executable(venv_path, 'activate_this.py'))
@@ -421,10 +423,7 @@ def pip_faster(venv_path, pip_command, install):
     # executable doesn't imply the right version. pip is able to validate the
     # version in the fastpath case quickly anyway.
     bootstrap_command = ('pip', 'install') + CacheOpts().pip_options
-    if exists(VENV_UPDATE_REQS_OVERRIDE):
-        bootstrap_command += ('-r', VENV_UPDATE_REQS_OVERRIDE)
-    else:
-        bootstrap_command += ('venv-update==' + __version__,)
+    bootstrap_command += bootstrap_deps
     run(bootstrap_command)
 
     run(pip_command + install)

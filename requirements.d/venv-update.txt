@@ -1,2 +1,0 @@
-# these are the packages installed during venv-update bootstrap. meta.
--e .

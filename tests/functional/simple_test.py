@@ -347,17 +347,19 @@ def test_override_requirements_file(tmpdir):
     tmpdir.chdir()
     enable_coverage()
     requirements('')
-    Path('.').ensure_dir('requirements.d').join('venv-update.txt').write('''\
+    Path('.').join('requirements-bootstrap.txt').write('''\
 venv-update==%s
 pure_python_package
 ''' % __version__)
-    out, err = venv_update()
+    out, err = venv_update(
+        'bootstrap-deps=', '-r', 'requirements-bootstrap.txt',
+    )
     err = strip_pip_warnings(err)
     assert err == ''
 
     out = uncolor(out)
     assert (
-        '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements.d/venv-update.txt\n' % tmpdir
+        '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements-bootstrap.txt\n' % tmpdir
     ) in out
     assert (
         '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.1 venv-update-%s' % __version__

@@ -38,13 +38,8 @@ If you don't like pip-faster, for whatever reason, ``venv-update`` provides
 sufficient control to use "plain-old" pip, or any other command for that
 matter.
 
-In order to tell venv-update to install pip, rather than pip-faster::
+To tell venv-update to install and run pip rather than pip-faster::
 
-   echo 'pip>8' > requirements.d/venv-update.txt
-
-
-To tell venv-update to `run` pip rather than pip-faster::
-
-   venv-update install-command= pip install --upgrade
+   venv-update install-command= pip install --upgrade bootstrap-deps= 'pip>8'
 
 .. vim:textwidth=79:shiftwidth=3:noshiftround:
