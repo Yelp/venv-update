@@ -58,7 +58,7 @@ from __future__ import unicode_literals
 from os.path import exists
 from os.path import join
 
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 DEFAULT_VIRTUALENV_PATH = 'venv'
 DEFAULT_OPTION_VALUES = {
     'venv=': (DEFAULT_VIRTUALENV_PATH,),
