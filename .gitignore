@@ -1,5 +1,4 @@
 # only ignored in this directory, specifically
-/*.egg-info/
 /build/
 /.coverage
 /.idea
@@ -13,6 +12,7 @@
 /.cache
 
 # ignored anywhere
+*.egg-info/
 *.iml
 *.py[co]
 .*.sw[a-z]

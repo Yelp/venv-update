@@ -13,7 +13,7 @@ test tests: venv
 	. venv/bin/activate && ./test $(ARGS)
 
 venv: setup.py requirements.txt requirements.d/* Makefile
-	./venv_update.py venv= --python=$(PYTHON) venv install= -r $(REQUIREMENTS)
+	./venv_update.py venv= --python=$(PYTHON) venv install= -r $(REQUIREMENTS) bootstrap-deps= -e .
 
 .PHONY: docs
 docs: venv
