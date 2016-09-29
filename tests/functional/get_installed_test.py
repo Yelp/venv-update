@@ -52,7 +52,7 @@ def test_pip_get_installed(tmpdir):
     run('myvenv/bin/pip', 'uninstall', '--yes', 'cov-core', 'coverage', 'py', 'pytest', 'pytest-cov')
     assert get_installed() == []
 
-    run('myvenv/bin/pip', 'install', 'flake8')
+    run('myvenv/bin/pip', 'install', 'flake8==2.5.0')
     assert get_installed() == ['flake8', 'mccabe', 'pep8', 'pyflakes']
 
     run('myvenv/bin/pip', 'uninstall', '--yes', 'flake8')
