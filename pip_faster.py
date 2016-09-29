@@ -71,6 +71,25 @@ def is_local_directory(url):
         return isdir(url[5:])
 
 
+def is_vcs_url(url):
+    """Test if a URL is a VCS repo.
+
+    >>> is_vcs_url('git+git://git.myproject.org/MyProject#egg=MyProject')
+    True
+    >>> is_vcs_url('svn+http://svn.myproject.org/svn/MyProject/trunk@2019#egg=MyProject')
+    True
+    >>> is_vcs_url('file:///tmp/')
+    False
+    """
+    if url is None:
+        return False
+    else:
+        return url.startswith(tuple(
+            scheme + '+'
+            for scheme in pipmodule.vcs.vcs
+        ))
+
+
 def optimistic_wheel_search(req, find_links):
     assert req_is_pinned(req), req
 
@@ -145,7 +164,9 @@ def wheelable(req):
         # we don't want to permanently cache something we'll edit
         not req.editable and
         # people expect `pip install .` to work without bumping the version
-        not is_local_directory(req.url)
+        not is_local_directory(req.url) and
+        # don't cache vcs packages, since the version is often bogus (#156)
+        not is_vcs_url(req.url)
     )
 
 

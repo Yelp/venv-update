@@ -37,8 +37,8 @@ class-rgx=%(const-rgx)s
 [FORMAT]
 max-line-length=131
 
-# TODO: we'd like to hit 250 here
-max-module-lines=532
+# TODO: we'd like to hit this
+# max-module-lines=250
 
 [TYPECHECK]
 ignored-classes=pytest,LocalPath,RootLogger
