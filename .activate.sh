@@ -1,4 +1,1 @@
-export TOP=$PWD
-make venv
-. venv/bin/activate
-pre-commit install
+venv/bin/activate
