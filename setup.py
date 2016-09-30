@@ -54,7 +54,7 @@ def main():
         py_modules=['venv_update', 'pip_faster'],
         packages=find_packages('.', exclude=('tests*',)),
         install_requires=[
-            'pip>=1.5.0,<6.0.0',
+            'pip>=1.5.5,<6.0.0',  # 1.5.4 causes TypeError: add() got an unexpected keyword argument 'replace'
             'wheel>0.25.0',  # 0.25.0 causes get_tag AssertionError in python3
             'setuptools>=0.8.0',  # 0.7 causes "'sys_platform' not defined" when installing wheel >0.25
         ],
