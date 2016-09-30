@@ -13,6 +13,7 @@
     -   id: double-quote-string-fixer
     -   id: end-of-file-fixer
     -   id: flake8
+        exclude: ^docs/
 -   repo: git://github.com/asottile/reorder_python_imports
     sha: 8b583ac1beb0dd0f14c4bceb0a53bb1023cb3dd7
     hooks:
