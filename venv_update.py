@@ -205,7 +205,10 @@ def exec_scratch_virtualenv(args):
         rename(tmp, scratch.src)
 
     import sys
-    if sys.prefix != scratch.venv:
+    from os.path import realpath
+    # We want to compare the paths themselves as sometimes sys.path is the same
+    # as scratch.venv, but with a suffix of bin/..
+    if realpath(sys.prefix) != realpath(scratch.venv):
         # TODO-TEST: sometimes we would get a stale version of venv-update
         exec_((scratch.python, dotpy(__file__)) + args)  # never returns
 
