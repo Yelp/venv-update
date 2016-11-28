@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+source ./venv/bin/activate
+
+set -ux
+rm -r ./dist/
+git fetch yelp
+git checkout yelp/stable -B stable
+git tag -f v"$(python venv_update.py --version)"
+git push yelp --tags
+python setup.py sdist bdist_wheel
+python setup.py register
+twine upload --skip-existing dist/*
+
+# yelpcorp-specific
+if command -v fetch-python-package > /dev/null; then
+    yes y | fetch-python-package venv-update
+fi
