@@ -72,5 +72,6 @@ def main():
         },
     )  # :pragma:nocover: covered by tox
 
+
 if __name__ == '__main__':
     exit(main())
