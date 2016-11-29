@@ -151,6 +151,25 @@ Removing invalidated virtualenv. (system-site-packages changed, to True)
 
 
 @pytest.mark.usefixtures('pypi_server')
+def test_update_invalidated_missing_activate(tmpdir):
+    with tmpdir.as_cwd():
+        enable_coverage()
+        requirements('')
+
+        venv_update()
+        tmpdir.join('venv/bin/activate').remove()
+
+        out, err = venv_update()
+        err = strip_pip_warnings(err)
+        assert err == "sh: 1: .: Can't open venv/bin/activate\n"
+        out = uncolor(out)
+        assert out.startswith('''\
+> virtualenv venv
+Removing invalidated virtualenv. (could not inspect metadata)
+''')
+
+
+@pytest.mark.usefixtures('pypi_server')
 def it_gives_the_same_python_version_as_we_started_with(tmpdir):
     other_python = OtherPython()
     with tmpdir.as_cwd():

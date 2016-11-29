@@ -57,6 +57,7 @@ from __future__ import unicode_literals
 
 from os.path import exists
 from os.path import join
+from subprocess import CalledProcessError
 
 __version__ = '1.1.2'
 DEFAULT_VIRTUALENV_PATH = 'venv'
@@ -141,7 +142,7 @@ def info(msg):
 
 
 def check_output(cmd):
-    from subprocess import Popen, PIPE, CalledProcessError
+    from subprocess import Popen, PIPE
     process = Popen(cmd, stdout=PIPE)
     output, _ = process.communicate()
     if process.returncode:
@@ -251,7 +252,10 @@ def get_python_version(interpreter):
 
 
 def invalid_virtualenv_reason(venv_path, source_python, destination_python, options):
-    orig_path = get_original_path(venv_path)
+    try:
+        orig_path = get_original_path(venv_path)
+    except CalledProcessError:
+        return 'could not inspect metadata'
     if not samefile(orig_path, venv_path):
         return 'virtualenv moved %s -> %s' % (timid_relpath(orig_path), timid_relpath(venv_path))
     elif has_system_site_packages(destination_python) != options.system_site_packages:
@@ -434,7 +438,6 @@ def pip_faster(venv_path, pip_command, install, bootstrap_deps):
 
 def raise_on_failure(mainfunc):
     """raise if and only if mainfunc fails"""
-    from subprocess import CalledProcessError
     try:
         errors = mainfunc()
         if errors:
