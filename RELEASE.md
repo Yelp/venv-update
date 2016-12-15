@@ -1,6 +1,6 @@
-**NOTE:** This guide is only useful for the owners of the pip-faster project.
+**NOTE:** This guide is only useful for the owners of the venv-update project.
 
-1. `git checkout upstream/stable -b {{branch}}`
+1. `git checkout upstream/master -b {{branch}}`
 1. bump `venv_update.py`
 1. `git commit -m "this is {{version}}"`
 1. Create a pull request
