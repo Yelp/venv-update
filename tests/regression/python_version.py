@@ -22,9 +22,6 @@ def test_python_version():
     if python_version == 'pypy':  # :pragma:nocover: coverage under pypy is too slow.
         assert platform.python_implementation() == PYPY
         expected_version = (2, 7)
-    elif python_version == 'pypy3':  # :pragma:nocover: coverage under pypy is too slow.
-        assert platform.python_implementation() == PYPY
-        expected_version = (3, 2)
     else:  # eg python3.4
         expected_version = python_version.replace('python', '').split('.')
         expected_version = tuple(int(part) for part in expected_version)

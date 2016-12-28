@@ -532,7 +532,6 @@ def pipfaster_install_prune_option():
 
 def improved_wheel_support():
     """get the wheel supported-tags from wheel, rather than vendor
-    This fixes pypy3 support.
     """
     import pip.pep425tags
     from wheel.pep425tags import get_supported
