@@ -108,6 +108,9 @@ def pip_freeze(venv='venv'):
     import re
     out = re.sub(r'argparse==[\d.]+\n', '', out, count=1)
 
+    # We don't pin the coverage package.
+    out = re.sub(r'coverage==[\d.]+\n', 'coverage==X.Y\n', out, count=1)
+
     err = strip_pip_warnings(err)
     assert err == ''
     return out
