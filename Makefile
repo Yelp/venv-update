@@ -1,3 +1,4 @@
+export PATH := $(PWD)/bin:$(PWD)/venv/bin:$(PATH)
 export PYTHON?=python2.7
 export REQUIREMENTS?=requirements.txt
 
@@ -6,11 +7,11 @@ all: lint test
 
 .PHONY: lint
 lint: venv
-	. venv/bin/activate && pre-commit run --all-files
+	pre-commit run --all-files
 
 .PHONY: test tests
 test tests: venv
-	. venv/bin/activate && ./test $(ARGS)
+	./test $(ARGS)
 
 venv: setup.py requirements.txt requirements.d/* Makefile
 	./venv_update.py venv= --python=$(PYTHON) venv install= -r $(REQUIREMENTS) bootstrap-deps= -e .
