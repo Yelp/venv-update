@@ -1,0 +1,25 @@
+#!/bin/bash
+set -eu
+PYTHON="$1"
+PYENV="$HOME/.pyenv"
+CACHE="$HOME/.cache/pyenv"
+
+# we always use the highest version on offer from pyenv
+LATEST=$(
+    pyenv install --list |
+        egrep "^  $PYTHON[.-][0-9.]+$" |
+        tail -1
+)
+
+set -x
+if ! [ -d $CACHE/$LATEST ]; then
+    mkdir -p $CACHE/
+    if [ -d $PYENV/versions/$LATEST ]; then
+        ln -sf  $PYENV/versions/$LATEST $CACHE/$LATEST
+    else
+        $PYENV/plugins/python-build/bin/python-build $LATEST $CACHE/$LATEST
+    fi
+fi
+
+ln -sf $CACHE/$LATEST/bin/* ./bin/
+rm -f ./bin/virtualenv* ./bin/pip*

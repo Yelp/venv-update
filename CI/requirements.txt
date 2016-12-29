@@ -1,3 +1,0 @@
-# minimal set of packages for travis to run our test suites
-tox
-codecov

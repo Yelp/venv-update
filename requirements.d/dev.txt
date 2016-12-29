@@ -2,7 +2,6 @@
 -e .
 -r test.txt
 -r _lint.txt
--r CI.txt
 -r docs.txt
 
 pudb

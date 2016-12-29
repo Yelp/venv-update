@@ -1,0 +1,30 @@
+#!/bin/bash
+set -eux
+
+### ensure we have enough nodes
+test $CIRCLE_NODE_TOTAL -eq 4
+
+### per-node actions
+case $CIRCLE_NODE_INDEX in
+0)  ## 7.7m
+    ./CI/main 2.7 lint  # 40s
+
+    ./CI/main 2.7 test  # 6m
+    ;;
+1)  ## 8.2m
+    ./CI/main 3.4 lint  # 40s
+
+    ./CI/main 3.5 test  # 7.5m
+    ;;
+2)  ## 9m
+    ./CI/main pypy test  # 9m
+    ;;
+3)  ## 12m
+    ./CI/main 2.6 test  # 6m
+
+    ./CI/main 3.4 test  # 6m
+    ;;
+*)
+    echo unrecognized node: $CIRCLE_NODE_INDEX
+    exit 1
+esac
