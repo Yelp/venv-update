@@ -2,13 +2,11 @@
 set -eu
 
 ### definitions
-source CI/env
 PATH=$PWD/CI/circle:$PATH
 trap timestamp EXIT
 
 ### main
 set -x
-: $TOX_TESTENV_PASSENV
 
 ### machine
 lsb_release -a

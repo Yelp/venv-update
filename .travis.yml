@@ -1,9 +1,8 @@
 language: python
 env:
-    # putting this ahead of the `python` directive
-    #   means we start all lints before any tests
-    - TOXENV=lint
-    - TOXENV=python
+    # putting env: ahead of python: means we start all lints before any tests
+    - MAKE=lint
+    - MAKE=test
 python:
     # in order of most-valuable tests first
     - "3.5"
@@ -26,16 +25,14 @@ matrix:
     # really only need to run lint twice
     exclude:
         - python: "2.6"
-          env: TOXENV=lint
+          env: MAKE=lint
         - python: pypy
-          env: TOXENV=lint
+          env: MAKE=lint
         - python: '3.4'
-          env: TOXENV=lint
+          env: MAKE=lint
 
 install: ./venv_update.py venv= $VIRTUAL_ENV install= -r CI/requirements.txt
-script:
-    - . CI/env
-    - tox
+script: ./CI/travis
 
 
 # sudo:false gives us the new, faster cluster and enables caches for public repos
