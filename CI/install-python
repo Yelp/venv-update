@@ -3,30 +3,37 @@ set -eu
 PYENV="$HOME/.pyenv"
 CACHE="$HOME/.cache/pyenv"
 
-if ! [[ -d $PYENV ]]; then
+if ! [[ -d "$PYENV" ]]; then
     # make travis look like circleci
-    ln -sfn /opt/pyenv $PYENV
+    ln -sfn /opt/pyenv "$PYENV"
 fi
 
 # we always use the highest version on offer from pyenv
 LATEST=$(
-    $PYENV/bin/pyenv install --list |
+    "$PYENV/bin/pyenv" install --list |
         egrep "^  $PY[.-][0-9.]+$" |
         tail -1 |
         sed 's/^ *//'
 )
 
 set -x
-if ! [[ -d $CACHE/$LATEST ]]; then
-    mkdir -p $CACHE/
-    if [[ -d $PYENV/versions/$LATEST ]]; then
-        ln -sf  $PYENV/versions/$LATEST $CACHE/$LATEST
+
+#DEBUG:
+: LATEST: "$LATEST"
+$PYENV/bin/pyenv install --list |
+    egrep "^  $PY[.-][0-9.]+$" |
+
+
+if ! [[ -d "$CACHE/$LATEST" ]]; then
+    mkdir -p "$CACHE/"
+    if [[ -d "$PYENV/versions/$LATEST" ]]; then
+        ln -sf  "$PYENV/versions/$LATEST" "$CACHE/$LATEST"
     else
-        $PYENV/plugins/python-build/bin/python-build $LATEST $CACHE/$LATEST
+        "$PYENV/plugins/python-build/bin/python-build" "$LATEST" "$CACHE/$LATEST"
     fi
 fi
 
-ln -sfn $CACHE/$LATEST ~/python
+ln -sfn "$CACHE/$LATEST" ~/python
 
 # some of these come with ancient, broken virtualenvs installed
 # we'll just use the system one
