@@ -1,8 +1,9 @@
 #!/bin/bash
 set -euo pipefail
-TARGET="$1"
+ENV="$1"
+TARGET="${2:$ENV}"
 
 set -x
-export REQUIREMENTS=requirements.d/$MAKE.txt
+export REQUIREMENTS=requirements.d/$ENV.txt
 time make $TARGET
 : make $TARGET finished
