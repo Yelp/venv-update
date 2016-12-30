@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 ENV="$1"
-TARGET="${2:$ENV}"
+TARGET="${2:-$ENV}"
 
 set -x
 export REQUIREMENTS=requirements.d/$ENV.txt
