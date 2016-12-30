@@ -8,6 +8,10 @@ if ! [[ -d $PYENV ]]; then
     ln -sfn /opt/pyenv $PYENV
 fi
 
+# DEBUG
+which -a pyenv
+ls -la $PYENV
+
 # we always use the highest version on offer from pyenv
 LATEST=$(
     pyenv install --list |

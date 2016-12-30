@@ -7,6 +7,9 @@ export PATH=~/python/bin:$PATH
 # map "2.7" to "python2.7":
 export PYTHON="$(sed 's/^[0-9]/python&/' <<< "$PY")"
 
+#DEBUG
+env | sort
+
 set -x
 ./CI/install
 ./CI/make $MAKE
