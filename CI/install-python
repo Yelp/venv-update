@@ -3,6 +3,11 @@ set -eu
 PYENV="$HOME/.pyenv"
 CACHE="$HOME/.cache/pyenv"
 
+if ! [[ -d $PYENV ]]; then
+    # make travis look like circleci
+    ln -sfn /opt/pyenv $PYENV
+fi
+
 # we always use the highest version on offer from pyenv
 LATEST=$(
     pyenv install --list |
