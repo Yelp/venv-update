@@ -16,7 +16,6 @@ def fixed_environment_variables():
     pass
 
 
-@pytest.mark.skipif('PYTHON' not in environ, reason='$PYTHON not set')
 def test_python_version():
     python_version = environ['PYTHON'].lower()
     if python_version == 'pypy':  # :pragma:nocover: coverage under pypy is too slow.

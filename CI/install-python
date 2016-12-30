@@ -1,13 +1,12 @@
 #!/bin/bash
 set -eu
-PYTHON="$1"
 PYENV="$HOME/.pyenv"
 CACHE="$HOME/.cache/pyenv"
 
 # we always use the highest version on offer from pyenv
 LATEST=$(
     pyenv install --list |
-        egrep "^  $PYTHON[.-][0-9.]+$" |
+        egrep "^  $PY[.-][0-9.]+$" |
         tail -1
 )
 
@@ -21,5 +20,8 @@ if ! [ -d $CACHE/$LATEST ]; then
     fi
 fi
 
-ln -sf $CACHE/$LATEST/bin/* ./bin/
-rm -f ./bin/virtualenv* ./bin/pip*
+ln -sfn $CACHE/$LATEST ~/python
+
+# some of these come with ancient, broken virtualenvs installed
+# we'll just use the system one
+~/python/bin/pip uninstall --yes virtualenv || true

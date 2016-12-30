@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+TARGET="$1"
+
+set -x
+export REQUIREMENTS=requirements.d/$MAKE.txt
+time make $TARGET
+: make $TARGET finished

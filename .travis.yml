@@ -23,7 +23,9 @@ matrix:
         - python: '3.4'
           env: MAKE=lint
 
-script: ./CI/travis
+before_install: export PY=$TRAVIS_PYTHON_VERSION
+install: ./CI/install
+script: ./CI/main $PY $MAKE
 
 
 # sudo:false gives us the new, faster cluster and enables caches for public repos

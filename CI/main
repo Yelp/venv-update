@@ -1,15 +1,12 @@
 #!/bin/bash
 set -euo pipefail
-PY="$1"
-MAKE="$2"
+export PY="$1"
+export MAKE="$2"
+
+export PATH=~/python:$PATH
+# map "2.7" to "python2.7":
+export PYTHON="$(sed 's/^[0-9]/python&/' <<< "$PY")"
 
 set -x
-lsb_release -a
-time ./CI/install-python $PY
-: python install finished
-
-# map "2.7" to "python2.7":
-PYTHON="$(sed 's/^[0-9]/python&/' <<< "$PY")"
-export REQUIREMENTS=requirements.d/$MAKE.txt
-time make $MAKE
-: make $MAKE finished
+./CI/install
+./CI/make $MAKE

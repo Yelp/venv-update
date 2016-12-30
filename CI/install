@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+
+set -x
+lsb_release -a
+time ./CI/install-python $PY
+: python install finished
+
+./CI/make venv

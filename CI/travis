@@ -1,3 +1,0 @@
-#!/bin/bash
-set -eux
-./CI/main $TRAVIS_PYTHON_VERSION $MAKE
