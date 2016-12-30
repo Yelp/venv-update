@@ -7,13 +7,14 @@ CACHE="$HOME/.cache/pyenv"
 LATEST=$(
     pyenv install --list |
         egrep "^  $PY[.-][0-9.]+$" |
-        tail -1
+        tail -1 |
+        sed 's/^ *//'
 )
 
 set -x
-if ! [ -d $CACHE/$LATEST ]; then
+if ! [[ -d $CACHE/$LATEST ]]; then
     mkdir -p $CACHE/
-    if [ -d $PYENV/versions/$LATEST ]; then
+    if [[ -d $PYENV/versions/$LATEST ]]; then
         ln -sf  $PYENV/versions/$LATEST $CACHE/$LATEST
     else
         $PYENV/plugins/python-build/bin/python-build $LATEST $CACHE/$LATEST
