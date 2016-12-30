@@ -20,8 +20,8 @@ set -x
 
 #DEBUG:
 : LATEST: "$LATEST"
-$PYENV/bin/pyenv install --list |
-    egrep "^  $PY[.-][0-9.]+$" |
+$PYENV/bin/pyenv install --list
+echo =======================================================
 
 
 if ! [[ -d "$CACHE/$LATEST" ]]; then
