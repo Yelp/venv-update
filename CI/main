@@ -3,7 +3,7 @@ set -euo pipefail
 export PY="$1"
 export MAKE="$2"
 
-export PATH=~/python:$PATH
+export PATH=~/python/bin:$PATH
 # map "2.7" to "python2.7":
 export PYTHON="$(sed 's/^[0-9]/python&/' <<< "$PY")"
 
