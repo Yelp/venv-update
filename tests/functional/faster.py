@@ -7,6 +7,7 @@ import pytest
 
 from testing import enable_coverage
 from testing import install_coverage
+from testing import maybe_add_wheel
 from testing import pip_freeze
 from testing import requirements
 from testing import venv_update
@@ -37,7 +38,9 @@ def time_savings(tmpdir, between):
             PIP_TIMEOUT='0',
         )
         time1 = time() - start
-        expected = '\n'.join((
+
+        frozen_requirements = pip_freeze().split('\n')
+        expected = (
             'dependant-package==1',
             'implicit-dependency==1',
             'many-versions-package==2.1',
@@ -45,10 +48,10 @@ def time_savings(tmpdir, between):
             'pure-python-package==0.2.1',
             'slow-python-package==0.1.0',
             'venv-update==%s' % __version__,
-            'wheel==0.29.0',
-            ''
-        ))
-        assert pip_freeze() == expected
+            '',
+        )
+        expected = maybe_add_wheel(expected)
+        assert set(frozen_requirements) == set(expected)
 
         between()
         install_coverage()
@@ -65,7 +68,7 @@ def time_savings(tmpdir, between):
             ftp_proxy='ftp://127.0.0.1:333333',
         )
         time2 = time() - start
-        assert pip_freeze() == expected
+        assert set(pip_freeze().split('\n')) == set(expected)
 
         print()
         print('%.3fs originally' % time1)
