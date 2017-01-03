@@ -11,6 +11,14 @@ python:
     - "2.7"
     - "3.4"
 
+addons:
+    apt:
+        sources:
+            - deadsnakes
+        packages:
+            - python2.7-dev
+            - python3.4-dev
+
 matrix:
     # notify a failed build as soon as anything fails
     fast_finish: true
