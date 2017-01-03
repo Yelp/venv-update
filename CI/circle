@@ -5,7 +5,7 @@ set -eux
 test $CIRCLE_NODE_TOTAL -eq 4
 
 time sudo apt-get update
-time sudo apt-get install -y python2.7-dev python3.4-dev
+time sudo apt-get install -qy python2.7-dev python3.4-dev
 
 ### per-node actions
 case $CIRCLE_NODE_INDEX in

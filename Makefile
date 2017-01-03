@@ -24,3 +24,8 @@ docs: venv
 clean:
 	rm -rf .tox
 	find -name '*.pyc' -print0 | xargs -0 -r -P4 rm
+
+
+# standard Makefile housekeeping
+.SUFFIXES:
+MAKEFLAGS += --no-builtin-rules
