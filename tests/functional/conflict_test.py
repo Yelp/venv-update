@@ -33,19 +33,15 @@ conflicting_package
 
     err = T.strip_coverage_warnings(err)
     err = T.strip_pip_warnings(err)
-    assert err == ''
-
+    assert err == ('''\
+Error: version conflict: many-versions-package 3 (venv/{python_lib})'''
+''' <-> many-versions-package<2 (from conflicting_package->-r requirements.txt (line 3))
+''').format(python_lib=PYTHON_LIB)
     out = T.uncolor(out)
-    assert (
-        '''
-Cleaning up...
-Error: version conflict: many-versions-package 3 (venv/%s)'''
-        ''' <-> many-versions-package<2 (from conflicting-package->-r requirements.txt (line 3))
-Storing debug log for failure in %s/home/.pip/pip.log
+    assert out.endswith('''
 
 Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
-''' % (PYTHON_LIB, tmpdir)
-    ) in out
+''')
 
     assert_venv_marked_invalid(tmpdir.join('venv'))
 
@@ -72,29 +68,26 @@ pure_python_package==0.1.0
     out, err = excinfo.value.result
 
     err = T.strip_coverage_warnings(err)
-    assert err == ''
-
+    assert err == ('''\
+Error: version conflict: pure-python-package 0.1.0 (venv/{python_lib})'''
+        ''' <-> pure-python-package>=0.2.1 (from dependant_package->-r requirements.txt (line 2))
+Error: version conflict: many-versions-package 3 (venv/{python_lib})'''
+        ''' <-> many-versions-package<2 (from conflicting_package->-r requirements.txt (line 3))
+''').format(python_lib=PYTHON_LIB)
     out = T.uncolor(out)
-    assert (
+    assert out.endswith(
         '''
-Cleaning up...
-Error: unmet dependency: implicit-dependency (from dependant-package->-r requirements.txt (line 2))
-Error: version conflict: many-versions-package 1 (venv/%s)'''
-        ''' <-> many-versions-package>=2,<4 (from dependant-package->-r requirements.txt (line 2))
-Error: version conflict: pure-python-package 0.1.0 (venv/%s)'''
-        ''' <-> pure-python-package>=0.2.1 (from dependant-package->-r requirements.txt (line 2))
-Storing debug log for failure in %s/home/.pip/pip.log
 
 Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
-''' % (PYTHON_LIB, PYTHON_LIB, tmpdir)
-    ) in out
+''')
 
     assert_venv_marked_invalid(tmpdir.join('venv'))
 
 
 @pytest.mark.usefixtures('pypi_server')
 def test_editable_egg_conflict(tmpdir):
-    conflicting_package = tmpdir / 'tmp/conflicting_package'
+    tmp_conflicting_package = 'tmp/conflicting_package'
+    conflicting_package = tmpdir / tmp_conflicting_package
     many_versions_package_2 = tmpdir / 'tmp/many_versions_package_2'
 
     from shutil import copytree
@@ -122,28 +115,27 @@ def test_editable_egg_conflict(tmpdir):
 
         err = T.strip_coverage_warnings(err)
         err = T.strip_pip_warnings(err)
-        assert err == ''
-
-        out = T.uncolor(out)
-        expected = '\nSuccessfully installed many-versions-package conflicting-package\n'
-        assert expected in out
-        rest = out.rsplit(expected, 1)[-1]
-
         if True:  # :pragma:nocover:pylint:disable=using-constant-test
             # Debian de-vendorizes the version of pip it ships
             try:
                 from sysconfig import get_python_version
             except ImportError:  # <= python2.6
                 from distutils.sysconfig import get_python_version
+        assert err == ('''\
+Error: version conflict: many-versions-package 2 ({0}/many_versions_package-2-py{1}.egg)'''
+''' <-> many_versions_package<2 (from conflicting-package==1->-r requirements.txt (line 1))
+''').format(tmp_conflicting_package, get_python_version())
+
+        out = T.uncolor(out)
+        expected = '\nSuccessfully installed conflicting-package many-versions-package-1\n'
+        assert expected in out
+        rest = out.rsplit(expected, 1)[-1]
+
         assert (
             '''\
-Cleaning up...
-Error: version conflict: many-versions-package 2 (tmp/conflicting_package/many_versions_package-2-py{0}.egg)'''
-            ''' <-> many-versions-package<2 (from conflicting-package==1->-r requirements.txt (line 1))
-Storing debug log for failure in {1}/home/.pip/pip.log
 
 Something went wrong! Sending 'venv' back in time, so make knows it's invalid.
-'''.format(get_python_version(), tmpdir)
+'''
         ) == rest
 
         assert_venv_marked_invalid(tmpdir.join('venv'))

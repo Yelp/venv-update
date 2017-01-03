@@ -9,6 +9,7 @@ from py._path.local import LocalPath as Path
 
 from testing import enable_coverage
 from testing import install_coverage
+from testing import maybe_add_wheel
 from testing import OtherPython
 from testing import pip_freeze
 from testing import requirements
@@ -42,12 +43,15 @@ def test_install_custom_path_and_requirements(tmpdir):
     )
     enable_coverage()
     venv_update('venv=', 'venv2', 'install=', '-r', 'requirements2.txt')
-    assert pip_freeze('venv2') == '\n'.join((
+
+    frozen_requirements = pip_freeze('venv2').split('\n')
+    expected = (
         'six==1.8.0',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
-        ''
-    ))
+        '',
+    )
+    expected = maybe_add_wheel(expected)
+    assert set(frozen_requirements) == set(expected)
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -98,7 +102,7 @@ def test_eggless_url(tmpdir):
     requirements('-e file://' + str(TOP / 'tests/testing/packages/pure_python_package'))
 
     venv_update()
-    assert 'pure-python-package' in pip_freeze()
+    assert 'pure_python_package' in pip_freeze()
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -135,7 +139,7 @@ def assert_timestamps(*reqs):
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update(*args)
 
-    assert excinfo.value.returncode == 2
+    assert excinfo.value.returncode != 0
     assert firstreq.mtime() > Path('venv').mtime()
 
     # blank requirements should succeed
@@ -262,7 +266,7 @@ def test_wrong_wheel(tmpdir):
     ret2out, _ = venv_update('venv=', 'venv2', '-p' + other_python.interpreter, 'install=', '-vv', '-r', 'requirements.txt')
 
     assert '''
-  No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+  No wheel found locally for pinned requirement pure_python_package==0.1.0 (from -r requirements.txt (line 1))
 ''' in uncolor(ret2out)
 
 
@@ -279,17 +283,20 @@ pep8<=1.5.7
 -r %s/requirements.d/coverage.txt
 ''' % TOP)
     venv_update()
-    assert pip_freeze() == '\n'.join((
-        'coverage==4.2',
+
+    frozen_requirements = pip_freeze().split('\n')
+    expected = (
+        'coverage==4.3.1',
         'coverage-enable-subprocess==1.0',
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
         'pyflakes==0.7.3',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
-        ''
-    ))
+        '',
+    )
+    expected = maybe_add_wheel(expected)
+    assert set(frozen_requirements) == set(expected)
 
 
 def flake8_newer():
@@ -305,17 +312,19 @@ pep8<=1.5.7
 -r %s/requirements.d/coverage.txt
 ''' % TOP)
     venv_update()
-    assert pip_freeze() == '\n'.join((
-        'coverage==4.2',
+    frozen_requirements = pip_freeze().split('\n')
+    expected = (
+        'coverage==4.3.1',
         'coverage-enable-subprocess==1.0',
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
         'pyflakes==0.8.1',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
-        ''
-    ))
+        '',
+    )
+    expected = maybe_add_wheel(expected)
+    assert set(frozen_requirements) == set(expected)
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -355,23 +364,24 @@ pure_python_package
         'bootstrap-deps=', '-r', 'requirements-bootstrap.txt',
     )
     err = strip_pip_warnings(err)
-    assert err == ''
+    assert 'You must give at least one requirement to install' in err
 
     out = uncolor(out)
     assert (
         '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements-bootstrap.txt\n' % tmpdir
     ) in out
     assert (
-        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.1 venv-update-%s' % __version__
+        '\nSuccessfully installed pure-python-package-0.2.1 venv-update-%s' % __version__
     ) in out
-    assert '\n  Successfully uninstalled pure-python-package\n' in out
+    assert '\n  Successfully uninstalled pure-python-package-0.2.1\n' in out
 
-    expected = '\n'.join((
-        'venv-update==%s' % __version__,
-        'wheel==0.29.0',
-        ''
-    ))
-    assert pip_freeze() == expected
+    frozen_requirements = pip_freeze().split('\n')
+    expected = (
+        'venv-update==' + __version__,
+        '',
+    )
+    expected = maybe_add_wheel(expected)
+    assert set(frozen_requirements) == set(expected)
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -383,25 +393,26 @@ def test_cant_wheel_package(tmpdir):
 
         out, err = venv_update()
         err = strip_pip_warnings(err)
-        assert err == ''
-
+        assert err == '''\
+  Failed building wheel for cant-wheel-package
+SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package==0.1.0
+  Failed building wheel for cant-wheel-package
+'''
         out = uncolor(out)
 
         # for unknown reasons, py27 has an extra line with four spaces in this output, where py26 does not.
         out = out.replace('\n    \n', '\n')
-        assert '''
-
-----------------------------------------
-Failed building wheel for cant-wheel-package
-Running setup.py bdist_wheel for pure-python-package
-Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
-SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package==0.1.0
-Installing collected packages: cant-wheel-package, pure-python-package
-  Running setup.py install for cant-wheel-package
-  Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
-Successfully installed cant-wheel-package pure-python-package
-Cleaning up...
-''' in out  # noqa
+        # The ... in the logs are generated with a spinner, which also leaves these
+        # \x08 (backspaces) around
+        out = out.replace('\x08', '')
+        assert all([line in out for line in [
+            'Running setup.py bdist_wheel for pure-python-package ... - done',
+            'Running setup.py bdist_wheel for cant-wheel-package ... - error',
+            'Stored in directory: %s/home/.cache/pip-faster/wheelhouse' % tmpdir,
+            'Installing collected packages: cant-wheel-package, pure-python-package',
+            'Running setup.py install for cant-wheel-package ... - done',
+            'Successfully installed cant-wheel-package-0.1.0 pure-python-package-0.2.1',
+        ]])
         assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')
 
 
@@ -410,16 +421,17 @@ def test_has_extras(tmpdir):
     with tmpdir.as_cwd():
         enable_coverage()
         install_coverage()
-        requirements('pure-python-package[my-extra]')
+        requirements('pure-python-package[my_extra]')
 
         for _ in range(2):
             venv_update()
 
-            expected = '\n'.join((
+            frozen_requirements = pip_freeze().split('\n')
+            expected = (
                 'implicit-dependency==1',
                 'pure-python-package==0.2.1',
-                'venv-update==%s' % __version__,
-                'wheel==0.29.0',
-                ''
-            ))
-            assert pip_freeze() == expected
+                'venv-update==' + __version__,
+                '',
+            )
+            expected = maybe_add_wheel(expected)
+            assert set(frozen_requirements) == set(expected)

@@ -3,9 +3,11 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from distutils.version import LooseVersion
 from re import compile as Regex
 from re import MULTILINE
 
+import pip as pipmodule
 from py._path.local import LocalPath as Path
 
 TOP = Path(__file__) / '../../..'
@@ -136,3 +138,10 @@ class OtherPython(object):
         else:
             self.interpreter = 'python2.7'
             self.version_prefix = '2.7.'
+
+
+def maybe_add_wheel(expected):
+    # wheel is excluded from the pip freeze output since 8.1.0
+    if LooseVersion(pipmodule.__version__) < LooseVersion('8.1.0'):
+        expected.append('wheel==0.29.0')
+    return expected

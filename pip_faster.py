@@ -25,6 +25,7 @@ from pip.commands.install import RequirementSet
 from pip.exceptions import InstallationError
 from pip.index import BestVersionAlreadyInstalled
 from pip.index import PackageFinder
+from pip.utils.logging import indent_log
 from pip.wheel import WheelBuilder
 
 from venv_update import colorize
@@ -94,7 +95,11 @@ def optimistic_wheel_search(req, find_links):
     assert req_is_pinned(req), req
 
     # this matches the name-munging done in pip.wheel:
-    reqname = req.project_name.replace('-', '_')
+    try:
+        reqname = req.project_name
+    except AttributeError:
+        reqname = req.name
+    reqname = reqname.replace('-', '_')
     reqname = ignorecase_glob(reqname)
     reqname = reqname + '-*.whl'
 
@@ -111,7 +116,7 @@ def optimistic_wheel_search(req, find_links):
             from pip.wheel import Wheel
             wheel = Wheel(link.filename)
             logger.debug('Candidate wheel: %s', link.filename)
-            if wheel.version in req and wheel.supported():
+            if req.specifier.contains(wheel.version) and wheel.supported():
                 return link
 
 
@@ -120,8 +125,8 @@ def req_is_pinned(requirement):
         # url-style requirement
         return False
 
-    for qualifier, dummy_version in requirement.specs:
-        if qualifier == '==':
+    for spec in requirement.specifier:
+        if spec.operator == '==':
             return True
     return False
 
@@ -133,7 +138,7 @@ class FasterPackageFinder(PackageFinder):
             # if the version is pinned-down by a ==
             # first try to use any installed package that satisfies the req
             if req.satisfied_by:
-                logger.notify('Faster! pinned requirement already installed.')
+                logger.info('Faster! pinned requirement already installed.')
                 raise BestVersionAlreadyInstalled
 
             # then try an optimistic search for a .whl file:
@@ -142,7 +147,7 @@ class FasterPackageFinder(PackageFinder):
                 # The wheel will be built during prepare_files
                 logger.debug('No wheel found locally for pinned requirement %s', req)
             else:
-                logger.notify('Faster! Pinned wheel found, without hitting PyPI.')
+                logger.info('Faster! Pinned wheel found, without hitting PyPI.')
                 return link
         else:
             # unpinned requirements aren't very notable. only show with -v
@@ -155,48 +160,133 @@ class FasterPackageFinder(PackageFinder):
 
 
 def wheelable(req):
+    url = req.link.url if req.link is not None else None
     """do we want to wheel that thing?"""
     return (
-        # there's no point in wheeling something that's already wheeled
-        not req.is_wheel and
         # let's not wheel things that are already installed
         not req.satisfied_by and
-        # we don't want to permanently cache something we'll edit
-        not req.editable and
         # people expect `pip install .` to work without bumping the version
-        not is_local_directory(req.url) and
+        not is_local_directory(url) and
         # don't cache vcs packages, since the version is often bogus (#156)
-        not is_vcs_url(req.url)
+        not is_vcs_url(url)
     )
 
 
 class FasterWheelBuilder(WheelBuilder):
 
-    def build(self):
-        """This is copy-paasta of pip.wheel.Wheelbuilder.build except in the two noted spots"""
-        # TODO-TEST: `pip-faster wheel` works at all
-        # FASTER: the slower wheelbuilder did self.requirement_set.prepare_files() here
+    def build(self, autobuilding=False):
+        """This is copy-paasta of pip.wheel.Wheelbuilder.build except in the spots marked with FASTER"""
 
+        assert self._wheel_dir or (autobuilding and self._cache_root)
+
+        # FASTER: the slower wheelbuilder did self.requirement_set.prepare_files() here
         reqset = self.requirement_set.requirements.values()
 
-        buildset = [
-            req for req in reqset
-            # FASTER: don't wheel things that have no source available
-            if wheelable(req)
-        ]
+        # FASTER: save buildset as instance variable so we can retrieve it later
+        self.buildset = []
+        for req in reqset:
+            if not wheelable(req):
+                # FASTER: Skip packages we don't want to wheel
+                continue
+            if req.constraint:
+                continue
+            if req.is_wheel:
+                if not autobuilding:
+                    logger.info(
+                        'Skipping %s, due to already being wheel.', req.name)
+            elif autobuilding and req.editable:
+                pass
+            elif autobuilding and req.link and not req.link.is_artifact:
+                pass
+            elif autobuilding and not req.source_dir:
+                pass
+            else:
+                if autobuilding:
+                    link = req.link
+                    base, ext = link.splitext()
+                    if pip.index.egg_info_matches(base, None, link) is None:
+                        # Doesn't look like a package - don't autobuild a wheel
+                        # because we'll have no way to lookup the result sanely
+                        continue
+                    if "binary" not in pip.index.fmt_ctl_formats(
+                            self.finder.format_control,
+                            canonicalize_name(req.name)):
+                        logger.info(
+                            "Skipping bdist_wheel for %s, due to binaries "
+                            "being disabled for it.", req.name)
+                        continue
+                self.buildset.append(req)
 
-        if not buildset:
-            return buildset
+        if not self.buildset:
+            return True
 
-        # build the wheels
-        logger.notify(
-            'Building wheels for collected packages: %s' %
-            ','.join([req.name for req in buildset])
+        # Build the wheels.
+        logger.info(
+            'Building wheels for collected packages: %s',
+            ', '.join([req.name for req in self.buildset]),
         )
-        for req in buildset:
-            self._build_one(req)
+        with indent_log():
+            build_success, build_failure = [], []
+            for req in self.buildset:
+                python_tag = None
+                if autobuilding:
+                    python_tag = pep425tags.implementation_tag
+                    output_dir = _cache_for_link(self._cache_root, req.link)
+                    try:
+                        ensure_dir(output_dir)
+                    except OSError as e:
+                        logger.warning("Building wheel for %s failed: %s",
+                                       req.name, e)
+                        build_failure.append(req)
+                        continue
+                else:
+                    output_dir = self._wheel_dir
+                wheel_file = self._build_one(
+                    req, output_dir,
+                    python_tag=python_tag,
+                )
+                if wheel_file:
+                    build_success.append(req)
+                    if autobuilding:
+                        # XXX: This is mildly duplicative with prepare_files,
+                        # but not close enough to pull out to a single common
+                        # method.
+                        # The code below assumes temporary source dirs -
+                        # prevent it doing bad things.
+                        if req.source_dir and not os.path.exists(os.path.join(
+                                req.source_dir, PIP_DELETE_MARKER_FILENAME)):
+                            raise AssertionError(
+                                "bad source dir - missing marker")
+                        # Delete the source we built the wheel from
+                        req.remove_temporary_source()
+                        # set the build directory again - name is known from
+                        # the work prepare_files did.
+                        req.source_dir = req.build_location(
+                            self.requirement_set.build_dir)
+                        # Update the link for this.
+                        req.link = pip.index.Link(
+                            path_to_url(wheel_file))
+                        assert req.link.is_wheel
+                        # extract the wheel into the dir
+                        unpack_url(
+                            req.link, req.source_dir, None, False,
+                            session=self.requirement_set.session)
+                else:
+                    build_failure.append(req)
 
-        return buildset
+        # notify success/failure
+        if build_success:
+            logger.info(
+                'Successfully built %s',
+                ' '.join([req.name for req in build_success]),
+            )
+        if build_failure:
+            logger.info(
+                'Failed to build %s',
+                ' '.join([req.name for req in build_failure]),
+            )
+        # Return True if all builds were successful
+        return len(build_failure) == 0
 
 
 def pipfaster_packagefinder():
@@ -206,8 +296,8 @@ def pipfaster_packagefinder():
     """
     # A poor man's dependency injection: monkeypatch :(
     # we need this exact import -- pip clobbers `commands` in their __init__
-    from pip.commands import install
-    return patched(vars(install), {'PackageFinder': FasterPackageFinder})
+    from pip import basecommand
+    return patched(vars(basecommand), {'PackageFinder': FasterPackageFinder})
 
 
 @contextmanager
@@ -215,29 +305,11 @@ def pipfaster_install():
     # pip<6 needs this exact import -- they clobber `commands` in __init__
     from pip.commands import install
     with patched(vars(install), {'RequirementSet': FasterRequirementSet}):
-        @property
-        def delete_marker_filename(self):
-            """
-            pip.req.InstallRequirement.delete_marker_filename contains an unhelpful assertion of `self.source_dir`
-            Instead, we return a filename that will never exist.
-            """
-            if not self.source_dir:
-                return ''  # The empty string never exists: http://man7.org/linux/man-pages/man2/stat.2.html#ERRORS
-            else:
-                return orig.__get__(self)  # pylint: disable=no-member
-
-        from pip.req import InstallRequirement
-        orig = InstallRequirement.delete_marker_filename
-        InstallRequirement.delete_marker_filename = delete_marker_filename
         yield
-        InstallRequirement.delete_marker_filename = orig
 
 
 def pip(args):
     """Run pip, in-process."""
-    # pip<1.6 needs its logging config reset on each invocation, or else we get duplicate outputs -.-
-    pipmodule.logger.consumers = []
-
     from sys import stdout
     stdout.write(colorize(('pip',) + args))
     stdout.write('\n')
@@ -264,28 +336,13 @@ def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     FIXME: does not list anything installed via -e
     """
-    try:
-        from pip.utils import dist_is_local
-    except ImportError:
-        # pip < 6.0
-        from pip.util import dist_is_local
+    from pip.utils import dist_is_local
 
     return tuple(
         dist_to_req(dist)
         for dist in fresh_working_set()
         if dist_is_local(dist)
     )
-
-
-def pip_parse_requirements(requirement_files):
-    from pip.req import parse_requirements
-
-    # ordering matters =/
-    required = []
-    for reqfile in requirement_files:
-        for req in parse_requirements(reqfile):
-            required.append(req)
-    return required
 
 
 def fresh_working_set():
@@ -331,7 +388,7 @@ def pretty_req(req):
     """
     from copy import copy
     req = copy(req)
-    req.url = None
+    req.link = None
     req.satisfied_by = None
     return req
 
@@ -346,7 +403,7 @@ def trace_requirements(requirements):
     # breadth-first traversal:
     from collections import deque
     queue = deque(requirements)
-    queued = set([req.req for req in queue])
+    queued = set([pkg_resources.Requirement.parse(str(req.req)) for req in queue])
     errors = []
     result = []
     while queue:
@@ -354,7 +411,10 @@ def trace_requirements(requirements):
 
         logger.debug('tracing: %s', req)
         try:
-            dist = working_set.find(req.req)
+            # WorkingSet.find needs a pip._vendor.pkg_resorces.Requirement
+            # while req is a pip._vendor.packaging.requirements.Requirement
+            tmp_req = pkg_resources.Requirement.parse(str(req.req))
+            dist = working_set.find(tmp_req)
         except pkg_resources.VersionConflict as conflict:
             dist = conflict.args[0]
             errors.append('Error: version conflict: %s (%s) <-> %s' % (
@@ -413,22 +473,25 @@ class FasterRequirementSet(RequirementSet):
         wb = FasterWheelBuilder(
             self,
             finder,
-            wheel_dir=wheel_dir,
         )
+        wb.build()
+
         # TODO-TEST: we only incur the build cost once on uncached install
-        for req in wb.build():
-            # create a pinned req, matching the source we have.
-            pinned = pkg_resources.Requirement(req.name, [('==', req.pkg_info()['version'])], ())
+        for req in wb.buildset:
+            # Create a pinned req, matching the source we have.
+            # We can't convert req (pip.req.req_install.Requirement) to pkg_resources.Requirement
+            # directly, we need to regenerate the requirement string instead.
+            pinned = pkg_resources.Requirement.parse(req.name + '==' + req.pkg_info()['version'])
             link = optimistic_wheel_search(pinned, finder.find_links)
             if link is None:
                 logger.error('SLOW!! no wheel found after building (couldn\'t be wheeled?): %s', pinned)
                 continue
 
             # replace the setup.py "sdist" with the wheel "bdist"
-            from pip.util import rmtree, unzip_file
-            rmtree(req.source_dir)
-            unzip_file(link.path, req.source_dir, flatten=False)
-            req.url = link.url
+            # from pip.utils import rmtree, unzip_file
+            # rmtree(req.source_dir)
+            # unzip_file(link.path, req.source_dir, flatten=False)
+            # req.url = link.url
 
 
 # TODO: a pip_faster.patch module
@@ -463,20 +526,12 @@ class FasterInstallCommand(InstallCommand):
     def __init__(self, *args, **kw):
         super(FasterInstallCommand, self).__init__(*args, **kw)
 
-        cmd_opts = self.cmd_opts
-        cmd_opts.add_option(
+        self.cmd_opts.add_option(
             '--prune',
             action='store_true',
             dest='prune',
             default=False,
             help='Uninstall any non-required packages.',
-        )
-
-        cmd_opts.add_option(
-            '--no-prune',
-            action='store_false',
-            dest='prune',
-            help='Do not uninstall any non-required packages.',
         )
 
     def run(self, options, args):
@@ -489,10 +544,7 @@ class FasterInstallCommand(InstallCommand):
         if not os.path.exists(cache_opts.wheelhouse):
             os.makedirs(cache_opts.wheelhouse)
 
-        # from pip.commands.install
-        do_install = (not options.no_install and not self.bundle)
-        do_prune = do_install and options.prune
-        if do_prune:
+        if options.prune:
             previously_installed = pip_get_installed()
 
         requirement_set = super(FasterInstallCommand, self).run(options, args)
@@ -508,7 +560,7 @@ class FasterInstallCommand(InstallCommand):
         # this has a side-effect of finding any missing / conflicting requirements
         required = trace_requirements(required)
 
-        if not do_prune:
+        if not options.prune:
             return requirement_set
 
         extraneous = (
@@ -527,7 +579,7 @@ class FasterInstallCommand(InstallCommand):
 
 
 def pipfaster_install_prune_option():
-    return patched(pipmodule.commands, {FasterInstallCommand.name: FasterInstallCommand})
+    return patched(pipmodule.commands.commands_dict, {FasterInstallCommand.name: FasterInstallCommand})
 
 
 def improved_wheel_support():
