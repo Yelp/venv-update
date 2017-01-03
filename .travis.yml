@@ -23,8 +23,8 @@ matrix:
         - python: '3.4'
           env: JOB=lint
 
-before_install: export PY=$TRAVIS_PYTHON_VERSION
-install: ./CI/install
+before_install: PY=$TRAVIS_PYTHON_VERSION
+install: ./CI/install $PY
 script: ./CI/main $PY $JOB
 
 

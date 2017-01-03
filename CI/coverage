@@ -1,7 +1,5 @@
 #!/bin/sh
 set -eux
-export TOP=$PWD
-
 coverage xml
 
 pip-faster install codecov

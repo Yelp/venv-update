@@ -1,12 +1,13 @@
 #!/bin/bash
 set -euo pipefail
-export PY="$1"
-export JOB="$2"
+PY="$1"
+JOB="$2"
 
 export PATH=~/python/bin:$PATH
 # map "2.7" to "python2.7":
 export PYTHON="$(sed 's/^[0-9]/python&/' <<< "$PY")"
+export REQUIREMENTS=requirements.d/$JOB.txt
 
 set -x
-./CI/install
+./CI/install $PY
 ./CI/make $JOB

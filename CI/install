@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+PY="$1"
 
 set -x
 lsb_release -a

@@ -1,5 +1,7 @@
 #!/bin/bash
 set -eu
+PY="$1"
+
 export PYENV_ROOT="$HOME/.pyenv"
 export PYENV_DEBUG=true
 CACHE="$HOME/.cache/pyenv"
