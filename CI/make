@@ -1,4 +1,4 @@
 #!/bin/bash
 set -euxo pipefail
-time make "$@"
+time make -d "$@"
 : make "$@" finished
