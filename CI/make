@@ -1,4 +1,8 @@
 #!/bin/bash
 set -euxo pipefail
+
+# DEBUG:
+ls -ld venv setup.py requirements.txt requirements.d/* Makefile
+
 time make -d "$@"
 : make "$@" finished
