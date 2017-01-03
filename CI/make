@@ -2,7 +2,7 @@
 set -euxo pipefail
 
 # DEBUG:
-ls -ld venv setup.py requirements.txt requirements.d/* Makefile
+ls -ld venv setup.py requirements.txt requirements.d/* Makefile || true
 
 time make -d "$@"
 : make "$@" finished
