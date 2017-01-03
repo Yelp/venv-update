@@ -5,23 +5,18 @@ PY="$1"
 export PYENV_ROOT="$HOME/.pyenv"
 export PYENV_DEBUG=true
 CACHE="$HOME/.cache/pyenv"
-
-if ! [[ -d "$PYENV_ROOT" ]]; then
-    # make travis look like circleci
-    ln -sfn /opt/pyenv "$PYENV_ROOT"
-fi
 PATH=$PYENV_ROOT/bin:$PATH
+
+# ensure we have latest pyenv
+if ! [[ -d "$PYENV_ROOT" ]]; then
+    git clone https://github.com/yyuu/pyenv.git $PYENV_ROOT
+elif ! [[ -f $PYENV_ROOT/up-to-date ]]; then
+    ( cd $PYENV_ROOT; git pull --ff )
+fi
+touch $PYENV_ROOT/up-to-date
 
 # fd 5 is a copy of the original stdout
 exec 5>&1
-
-# ensure we have latest pyenv
-if ! [[ -d $PYENV_ROOT/plugins/pyenv-update ]]; then
-    git clone --depth 1 \
-        git://github.com/yyuu/pyenv-update.git \
-        $PYENV_ROOT/plugins/pyenv-update
-fi
-pyenv update
 
 # we always use the highest version on offer from pyenv
 LATEST=$(
