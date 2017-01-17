@@ -10,8 +10,10 @@
     -   id: check-yaml
     -   id: debug-statements
     -   id: detect-private-key
+        exclude: '^\.activate\.sh$'
     -   id: double-quote-string-fixer
     -   id: end-of-file-fixer
+        exclude: '^\.activate\.sh$'
     -   id: flake8
         exclude: ^docs/
 -   repo: git://github.com/asottile/reorder_python_imports
