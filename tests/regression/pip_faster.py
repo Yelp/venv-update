@@ -6,11 +6,13 @@ import sys
 
 import pytest
 
+from testing import cached_wheels
 from testing import enable_coverage
 from testing import install_coverage
 from testing import Path
 from testing import pip_freeze
 from testing import run
+from testing import strip_pip_warnings
 from testing import uncolor
 from venv_update import __version__
 
@@ -38,13 +40,16 @@ def test_circular_dependencies():
         '-vv',  # show debug logging
         'circular-dep-a',
     )
-    assert err == ''
+    err = strip_pip_warnings(err)
+    assert err == (
+        'Circular dependency! circular-dep-a==1.0 '
+        '(from circular-dep-b==1.0->circular-dep-a)\n'
+    )
     out = uncolor(out)
     assert out.endswith('''
 tracing: circular-dep-a
 already queued: circular-dep-b==1.0 (from circular-dep-a)
 tracing: circular-dep-b==1.0 (from circular-dep-a)
-Circular dependency! circular-dep-a==1.0 (from circular-dep-b==1.0->circular-dep-a)
 ''')
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
@@ -102,11 +107,8 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')
 
     # it was wheeled
-    from pip.wheel import Wheel
-    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
-    assert 'pure-python-package' in [
-        Wheel(f.basename).name for f in wheelhouse.listdir()
-    ]
+    wheel_names = [wheel.name for wheel in cached_wheels(tmpdir)]
+    assert 'pure-python-package' in wheel_names
 
 
 @pytest.mark.usefixtures('tmpdir')
@@ -115,13 +117,12 @@ def test_install_whl_over_http(pypi_server):
     venv = make_venv()
 
     out, err = run(str(venv.join('bin/pip-faster')), 'install', whl_url)
+    err = strip_pip_warnings(err)
     assert err == ''
     out = uncolor(out)
     assert out == '''\
-Downloading/unpacking %s/packages/wheeled_package-0.2.0-py2.py3-none-any.whl
-  Downloading wheeled_package-0.2.0-py2.py3-none-any.whl
-  Saved ./home/.cache/pip-faster/wheelhouse/wheeled_package-0.2.0-py2.py3-none-any.whl
+Collecting wheeled-package==0.2.0 from {server}/packages/wheeled_package-0.2.0-py2.py3-none-any.whl
+  Downloading {server}/packages/wheeled_package-0.2.0-py2.py3-none-any.whl
 Installing collected packages: wheeled-package
-Successfully installed wheeled-package
-Cleaning up...
-''' % pypi_server
+Successfully installed wheeled-package-0.2.0
+'''.format(server=pypi_server)

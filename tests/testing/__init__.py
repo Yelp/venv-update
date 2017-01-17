@@ -3,9 +3,11 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 from re import compile as Regex
 from re import MULTILINE
 
+from pip.wheel import Wheel
 from py._path.local import LocalPath as Path
 
 TOP = Path(__file__) / '../../..'
@@ -36,11 +38,7 @@ def run(*cmd, **env):
 
 def venv_update(*args, **env):
     # we get coverage for free via the (patched) pytest-cov plugin
-    return run(
-        'venv-update',
-        *args,
-        **env
-    )
+    return run('venv-update', *args, **env)
 
 
 def venv_update_symlink_pwd():
@@ -93,6 +91,7 @@ def uncolor(text):
     # the colored_tty, uncolored_pipe tests cover this pretty well.
     from re import sub
     text = sub('\033\\[[^A-z]*[A-z]', '', text)
+    text = sub('.\b', '', text)
     return sub('[^\n\r]*\r', '', text)
 
 
@@ -136,3 +135,12 @@ class OtherPython(object):
         else:
             self.interpreter = 'python2.7'
             self.version_prefix = '2.7.'
+
+
+def cached_wheels(tmpdir):
+    for _, _, filenames in os.walk(
+            tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse').strpath,
+    ):
+        for filename in filenames:
+            assert filename.endswith('.whl'), filename
+            yield Wheel(filename)

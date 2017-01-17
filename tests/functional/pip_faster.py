@@ -3,12 +3,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
-from pip.wheel import Wheel
 
+from testing import cached_wheels
 from testing import install_coverage
 from testing import pip_freeze
 from testing import requirements
 from testing import run
+from testing import strip_pip_warnings
 from testing import TOP
 from testing import uncolor
 from venv_update import __version__
@@ -17,12 +18,11 @@ from venv_update import __version__
 def it_shows_help_for_prune():
     out, err = run('pip-faster', 'install', '--help')
     assert '''
-  --no-clean                  Don't clean up build directories.
   --prune                     Uninstall any non-required packages.
   --no-prune                  Do not uninstall any non-required packages.
 
-Package Index Options:
-''' in out
+Package Index Options (including deprecated options):
+''' in out  # noqa
     assert err == ''
 
 
@@ -32,7 +32,7 @@ def it_installs_stuff(tmpdir):
     install_coverage(venv)
 
     assert pip_freeze(str(venv)) == '''\
-coverage==4.3.3
+coverage==4.3.4
 coverage-enable-subprocess==1.0
 '''
 
@@ -42,7 +42,7 @@ coverage-enable-subprocess==1.0
     assert [
         req.split('==')[0]
         for req in pip_freeze(str(venv)).split()
-    ] == ['coverage', 'coverage-enable-subprocess', 'venv-update', 'wheel']
+    ] == ['coverage', 'coverage-enable-subprocess', 'venv-update']
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
 
@@ -87,18 +87,15 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
-        '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init-dev',  # noqa
+        '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init',  # noqa
         'coverage-enable-subprocess==1.0',
-        'coverage==4.3.3',
+        'coverage==4.3.4',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         '',
     ])
 
     # we shouldn't wheel things installed editable
-    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
-    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
-    ])
+    assert not tuple(cached_wheels(tmpdir))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -117,23 +114,21 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
-        'coverage==4.3.3',
+        'coverage==4.3.4',
         'coverage-enable-subprocess==1.0',
         'dependant-package==1',
         'implicit-dependency==1',
         'many-versions-package==3',
         'pure-python-package==0.2.1',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         '',
     ])
 
-    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
-    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set([
+    assert set(wheel.name for wheel in cached_wheels(tmpdir)) == set((
         'implicit-dependency',
         'many-versions-package',
         'pure-python-package',
-    ])
+    ))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -153,15 +148,13 @@ def it_doesnt_wheel_git_repos(tmpdir):
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
         'coverage-enable-subprocess==1.0',
-        'coverage==4.3.3',
+        'coverage==4.3.4',
         'dumb-init==0.5.0',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         '',
     ])
 
-    wheelhouse = tmpdir.join('home', '.cache', 'pip-faster', 'wheelhouse')
-    assert set(Wheel(f.basename).name for f in wheelhouse.listdir()) == set()
+    assert not tuple(cached_wheels(tmpdir))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -189,10 +182,9 @@ def it_gives_proper_error_without_requirements(tmpdir):
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'venv-update==' + __version__)
 
-    out, err = run(str(venv.join('bin/pip-faster')), 'install')
-    out = uncolor(out)
-    assert out.startswith('You must give at least one requirement to install')
-    assert err == ''
+    _, err = run(str(venv.join('bin/pip-faster')), 'install')
+    err = strip_pip_warnings(err)
+    assert err.startswith('You must give at least one requirement to install')
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -210,11 +202,24 @@ def it_can_handle_a_bad_findlink(tmpdir):
         'pure-python-package',
     )
     out = uncolor(out)
+    err = strip_pip_warnings(err)
 
-    assert '''
-Candidate wheel: pure_python_package-0.2.1-py2.py3-none-any.whl
+    expected = '''\
+Successfully built pure-python-package
 Installing collected packages: pure-python-package
-Successfully installed pure-python-package
-''' in out
-    assert err == ''
+'''
+    assert expected in out
+    # Between this there's:
+    # 'changing mode of .../venv/bin/pure-python-script to 775'
+    # but that depends on umask
+    _, rest = out.split(expected)
+    expected2 = '''\
+Successfully installed pure-python-package-0.2.1
+Cleaning up...
+'''
+    assert expected2 in rest
+    assert err == (
+        "  Url 'git+wat://not/a/thing' is ignored. "
+        'It is either a non-existing path or lacks a specific scheme.\n'
+    )
     assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')

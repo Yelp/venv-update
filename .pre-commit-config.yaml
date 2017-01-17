@@ -31,7 +31,7 @@
         - .:tests
 -   repo: local
     hooks:
-    -   id: system
+    -   id: pylint
         name: PyLint
         entry: python -m pylint.__main__
         language: system

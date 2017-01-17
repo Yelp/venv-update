@@ -13,7 +13,7 @@ setup(
     author_email='nobody@example.com',
     py_modules=[str('pure_python_package')],
     extras_require={
-        'my_extra': ['implicit_dependency'],
+        'my-extra': ['implicit_dependency'],
     },
     entry_points={
         'console_scripts': [
