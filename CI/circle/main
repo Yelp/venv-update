@@ -16,7 +16,7 @@ test $CIRCLE_NODE_TOTAL -eq 4
 
 timestamp
 sudo apt-get update
-sudo apt-get install -y python2.7-dev python3.4-dev
+sudo apt-get install -y python2.7-dev
 
 ### per-node actions
 timestamp
@@ -31,16 +31,18 @@ case $CIRCLE_NODE_INDEX in
 1)  ## ???
     ./CI/circle/install-python 3.5.0
     PYTHON=python3.5 runtest  # 7.5m
+
+    ./CI/circle/install-python 3.6.0
+    PYTHON=python3.6 runtest  # ???
     ;;
 2)  ## ???
-    # using python3.4.3 from the system
-    PYTHON=python3.4 runlint  # 40s
+    ./CI/circle/install-python 3.5.0
+    PYTHON=python3.5 runlint  # 40s
 
     ./CI/circle/install-python 2.7.10
     PYTHON=python2.7 runlint  # 40s
 
-    # using python3.4.3 from the system
-    PYTHON=python3.4 runtest  # 6m
+    PYTHON=python3.5 runtest  # 7.5m
     ;;
 3)  ## ???
     ./CI/circle/install-python pypy-4.0.1
