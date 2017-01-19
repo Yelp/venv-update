@@ -8,6 +8,7 @@ from sys import version_info
 import pytest
 from py._path.local import LocalPath as Path
 
+from testing import cached_wheels
 from testing import enable_coverage
 from testing import install_coverage
 from testing import OtherPython
@@ -129,6 +130,21 @@ def test_doesnt_use_cache_without_index_server(tmpdir):
         venv_update(*(cmd + ('--no-index',)))
     # But it would succeed if we gave it an index
     venv_update(*cmd)
+
+
+@pytest.mark.usefixtures('pypi_server', 'pypi_packages')
+def test_extra_index_url_doesnt_cache(tmpdir):
+    tmpdir.chdir()
+    enable_coverage()
+    install_coverage()
+
+    requirements('pure-python-package==0.2.1')
+    venv_update(
+        'pip-command=', 'pip-faster', 'install',
+        '--extra-index-url=https://pypi.python.org/simple',
+    )
+
+    assert not tuple(cached_wheels(tmpdir))
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')

@@ -31,7 +31,6 @@ def test_relocatable_cache(tmpdir, pypi_server):
     venv_update()
     path_rest = (
         '.cache', 'pip-faster', 'wheelhouse', pypi_server, 'simple',
-        'pure-python-package',
         'pure_python_package-0.2.1-py2.py3-none-any.whl',
     )
     assert tmpdir.join('home', *path_rest).exists()

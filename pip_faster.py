@@ -61,34 +61,35 @@ else:  # :pragma:nocover:
         raise value
 
 
-class CacheOpts(object):
+class CACHE(object):
+    _cache_dir = user_cache_dir()
+    wheelhouse = os.path.join(_cache_dir, 'pip-faster', 'wheelhouse')
+    pip_wheelhouse = os.path.join(_cache_dir, 'pip', 'wheels')
 
-    def __init__(self):
-        self.pipdir = user_cache_dir() + '/pip-faster'
-        self.wheelhouse = self.pipdir + '/wheelhouse'
+
+def ignorecase_glob(glob):
+    return ''.join([
+        '[{0}{1}]'.format(char.lower(), char.upper())
+        if char.isalpha() else char
+        for char in glob
+    ])
 
 
 def optimistic_wheel_search(req, index_urls):
-    name = req.name.replace('_', '-').lower()
+    name = req.name.replace('-', '_').lower()
 
-    if len(index_urls) != 1:
-        return
-
-    index_url, = index_urls
-    expected_location = os.path.join(
-        CacheOpts().wheelhouse,
-        index_url,
-        name,
-        '*.whl',
-    )
-    for link in glob.glob(expected_location):
-        if not os.path.exists(link):
-            # Ignore broken symlink,
-            continue
-        link = Link('file:' + link)
-        wheel = Wheel(link.filename)
-        if req.specifier.contains(wheel.version) and wheel.supported():
-            return link
+    for index_url in index_urls:
+        expected_location = os.path.join(
+            CACHE.wheelhouse, index_url, ignorecase_glob(name) + '-*.whl',
+        )
+        for link in glob.glob(expected_location):
+            if not os.path.exists(link):
+                # Ignore broken symlink,
+                continue
+            link = Link('file:' + link)
+            wheel = Wheel(link.filename)
+            if req.specifier.contains(wheel.version) and wheel.supported():
+                return link
 
 
 def is_req_pinned(requirement):
@@ -141,7 +142,7 @@ def _can_be_cached(package):
     return (
         package.is_wheel and
         # An assertion that we're looking in the pip wheel dir
-        package.link.path.split(os.sep)[-7:-5] == ['pip', 'wheels']
+        package.link.path.startswith(CACHE.pip_wheelhouse)
     )
 
 
@@ -158,7 +159,7 @@ def cache_installed_wheels(index_url, installed_packages):
 
     We build a structure that looks like
 
-    .cache/pip-faster/wheelhouse/$index_url/$package/$wheel ->
+    .cache/pip-faster/wheelhouse/$index_url/$wheel ->
         (the path pip tells us)
     """
     for installed_package in installed_packages:
@@ -166,13 +167,7 @@ def cache_installed_wheels(index_url, installed_packages):
             continue
         dest = installed_package.link.path
         filename = os.path.basename(dest)
-        wheel = Wheel(filename)
-        cache = os.path.join(
-            CacheOpts().wheelhouse,
-            index_url,
-            wheel.name.lower(),
-            filename,
-        )
+        cache = os.path.join(CACHE.wheelhouse, index_url, filename)
         cache_dir = os.path.dirname(cache)
         mkdirp(cache_dir)
         rel = os.path.relpath(dest, cache_dir)
@@ -361,7 +356,9 @@ class FasterInstallCommand(InstallCommand):
             required = requirement_set.requirements.values()
             successfully_installed = requirement_set.successfully_installed
 
-        cache_installed_wheels(options.index_url, successfully_installed)
+        # With extra_index_urls we don't know where the wheel is from
+        if not options.extra_index_urls:
+            cache_installed_wheels(options.index_url, successfully_installed)
 
         # transitive requirements, previously installed, are also required
         # this has a side-effect of finding any missing / conflicting requirements
