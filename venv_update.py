@@ -307,6 +307,7 @@ def ensure_virtualenv(args, return_values):
     argv[:] = ('virtualenv',) + args
     info(colorize(argv))
     raise_on_failure(virtualenv.main)
+    run(('rm', '-rf', join(return_values.venv_path, 'local')))
 
 
 def wait_for_all_subprocesses():
