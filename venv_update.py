@@ -367,21 +367,6 @@ def user_cache_dir():
     return getenv('XDG_CACHE_HOME', expanduser('~/.cache'))
 
 
-class CacheOpts(object):
-
-    def __init__(self):
-        # We put the cache in the directory that pip already uses.
-        # This has better security characteristics than a machine-wide cache, and is a
-        #   pattern people can use for open-source projects
-        self.pipdir = user_cache_dir() + '/pip-faster'
-        # We could combine these caches to one directory, but pip would search everything twice, going slower.
-        self.wheelhouse = self.pipdir + '/wheelhouse'
-
-        self.pip_options = (
-            '--find-links=file://' + self.wheelhouse,
-        )
-
-
 def venv_update(
         venv=DEFAULT_OPTION_VALUES['venv='],
         install=DEFAULT_OPTION_VALUES['install='],
@@ -429,9 +414,7 @@ def pip_faster(venv_path, pip_command, install, bootstrap_deps):
     # we always have to run the bootstrap, because the presense of an
     # executable doesn't imply the right version. pip is able to validate the
     # version in the fastpath case quickly anyway.
-    bootstrap_command = ('pip', 'install') + CacheOpts().pip_options
-    bootstrap_command += bootstrap_deps
-    run(bootstrap_command)
+    run(('pip', 'install') + bootstrap_deps)
 
     run(pip_command + install)
 

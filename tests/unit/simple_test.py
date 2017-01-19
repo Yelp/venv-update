@@ -13,52 +13,6 @@ def test_importable():
     assert venv_update
 
 
-def test_parse_reqs(tmpdir):
-    tmpdir.chdir()
-
-    with open('setup.py', 'w') as setup:
-        setup.write('\n')
-
-    with open('reqs.txt', 'w') as reqs:
-        reqs.write('''\
-.
-
--r reqs2.txt
-# a comment here
-mccabe
-
-pep8==1.0
-
--e hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=aweirdname
--e git+git://github.com/bukzor/cov-core.git@master#egg=cov-core
-hg+https://bitbucket.org/logilab/pylint@58c66aa083777059a2e6b46f6a0545a2f4977097
-
-file:///my/random/project
--e file:///my/random/project2
-''')
-
-    with open('reqs2.txt', 'w') as reqs:
-        reqs.write('''\
-pep8''')
-
-    # show that ordering is preserved in the parse
-    parsed = pip_faster.pip_parse_requirements(('reqs.txt',))
-    assert [
-        (req.name, req.url)
-        for req in parsed
-    ] == [
-        (None, 'file://' + tmpdir.strpath),
-        ('pep8', None),
-        ('mccabe', None),
-        ('pep8', None),
-        ('aweirdname', 'hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=aweirdname'),
-        ('cov-core', 'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core'),
-        (None, 'hg+https://bitbucket.org/logilab/pylint@58c66aa083777059a2e6b46f6a0545a2f4977097'),
-        (None, 'file:///my/random/project'),
-        (None, 'file:///my/random/project2'),
-    ]
-
-
 def test_pip_get_installed():
     installed = pip_faster.pip_get_installed()
     installed = pip_faster.reqnames(installed)
@@ -143,34 +97,21 @@ def test_shellescape_relpath_longer(tmpdir):
 
 
 @pytest.mark.parametrize('req,expected', [
-    (
-        'foo',
-        False,
-    ), (
-        'foo==1',
-        True,
-    ), (
-        'bar<3,==2,>1',
-        True,
-    ), (
-        'quux<3,!=2,>1',
-        False,
-    ), (
-        'wat==2,!=2',
-        True,
-    ), (
-        'wat-more==2,==3',
-        True,
-    )
+    ('foo', False),
+    ('foo==1', True),
+    ('bar<3,==2,>1', True),
+    ('quux<3,!=2,>1', False),
+    ('wat==2,!=2', True),
+    ('wat-more==2,==3', True),
 ])
-def test_req_is_pinned(req, expected):
+def test_is_req_pinned(req, expected):
     from pkg_resources import Requirement
     req = Requirement.parse(req)
-    assert pip_faster.req_is_pinned(req) is expected
+    assert pip_faster.is_req_pinned(req) is expected
 
 
-def test_req_is_pinned_null():
-    assert pip_faster.req_is_pinned(None) is False
+def test_is_req_pinned_null():
+    assert pip_faster.is_req_pinned(None) is False
 
 
 def test_wait_for_all_subprocesses(monkeypatch):

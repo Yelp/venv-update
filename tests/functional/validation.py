@@ -116,6 +116,7 @@ def test_update_while_active(tmpdir):
     venv_update_symlink_pwd()
     out, err = run('sh', '-c', '. venv/bin/activate && python venv_update.py venv= venv --python=venv/bin/python')
     out = uncolor(out)
+    err = strip_pip_warnings(err)
 
     assert err == ''
     assert out.startswith('''\
@@ -161,7 +162,11 @@ def test_update_invalidated_missing_activate(tmpdir):
 
         out, err = venv_update()
         err = strip_pip_warnings(err)
-        assert err == "sh: 1: .: Can't open venv/bin/activate\n"
+        assert err == (
+            "sh: 1: .: Can't open venv/bin/activate\n"
+            'You must give at least one requirement to install '
+            '(see "pip help install")\n'
+        )
         out = uncolor(out)
         assert out.startswith('''\
 > virtualenv venv
@@ -186,13 +191,16 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         out, err = run('./venv/bin/python', 'venv_update.py')
 
         err = strip_pip_warnings(err)
-        assert err == ''
+        assert err == (
+            'You must give at least one requirement to install '
+            '(see "pip help install")\n'
+        )
         out = uncolor(out)
         assert out.startswith('''\
 > virtualenv venv
 Keeping valid virtualenv from previous run.
-> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse venv-update==%s
-''' % (tmpdir, __version__))
+> pip install venv-update=={0}
+'''.format(__version__))
 
         final_version = assert_python_version(other_python.version_prefix)
         assert final_version == initial_version

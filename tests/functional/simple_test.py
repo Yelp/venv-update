@@ -2,11 +2,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from subprocess import CalledProcessError
 from sys import version_info
 
 import pytest
 from py._path.local import LocalPath as Path
 
+from testing import cached_wheels
 from testing import enable_coverage
 from testing import install_coverage
 from testing import OtherPython
@@ -45,7 +47,6 @@ def test_install_custom_path_and_requirements(tmpdir):
     assert pip_freeze('venv2') == '\n'.join((
         'six==1.8.0',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         ''
     ))
 
@@ -98,7 +99,52 @@ def test_eggless_url(tmpdir):
     requirements('-e file://' + str(TOP / 'tests/testing/packages/pure_python_package'))
 
     venv_update()
-    assert 'pure-python-package' in pip_freeze()
+    assert '#egg=pure_python_package' in pip_freeze()
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_not_installable_thing(tmpdir):
+    tmpdir.chdir()
+    enable_coverage()
+
+    install_coverage()
+
+    requirements('not-a-real-package-plz')
+    with pytest.raises(CalledProcessError):
+        venv_update()
+
+
+@pytest.mark.usefixtures('pypi_server', 'pypi_packages')
+def test_doesnt_use_cache_without_index_server(tmpdir):
+    tmpdir.chdir()
+    enable_coverage()
+
+    requirements('pure-python-package==0.2.1')
+    venv_update()
+
+    tmpdir.join('venv').remove()
+    install_coverage()
+
+    cmd = ('pip-command=', 'pip-faster', 'install')
+    with pytest.raises(CalledProcessError):
+        venv_update(*(cmd + ('--no-index',)))
+    # But it would succeed if we gave it an index
+    venv_update(*cmd)
+
+
+@pytest.mark.usefixtures('pypi_server', 'pypi_packages')
+def test_extra_index_url_doesnt_cache(tmpdir):
+    tmpdir.chdir()
+    enable_coverage()
+    install_coverage()
+
+    requirements('pure-python-package==0.2.1')
+    venv_update(
+        'pip-command=', 'pip-faster', 'install',
+        '--extra-index-url=https://pypi.python.org/simple',
+    )
+
+    assert not tuple(cached_wheels(tmpdir))
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
@@ -131,11 +177,10 @@ def assert_timestamps(*reqs):
     # garbage, to cause a failure
     lastreq.write('-w wat')
 
-    from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update(*args)
 
-    assert excinfo.value.returncode == 2
+    assert excinfo.value.returncode == 1
     assert firstreq.mtime() > Path('venv').mtime()
 
     # blank requirements should succeed
@@ -225,7 +270,6 @@ def test_args_backward(tmpdir):
     enable_coverage()
     requirements('')
 
-    from subprocess import CalledProcessError
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('venv=', 'requirements.txt')
 
@@ -262,7 +306,7 @@ def test_wrong_wheel(tmpdir):
     ret2out, _ = venv_update('venv=', 'venv2', '-p' + other_python.interpreter, 'install=', '-vv', '-r', 'requirements.txt')
 
     assert '''
-  No wheel found locally for pinned requirement pure-python-package==0.1.0 (from -r requirements.txt (line 1))
+  No wheel found locally for pinned requirement pure_python_package==0.1.0 (from -r requirements.txt (line 1))
 ''' in uncolor(ret2out)
 
 
@@ -280,14 +324,13 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.3.3',
+        'coverage==4.3.4',
         'coverage-enable-subprocess==1.0',
         'flake8==2.0',
         'mccabe==0.3',
         'pep8==1.5.7',
         'pyflakes==0.7.3',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         ''
     ))
 
@@ -306,14 +349,13 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.3.3',
+        'coverage==4.3.4',
         'coverage-enable-subprocess==1.0',
         'flake8==2.2.5',
         'mccabe==0.3',
         'pep8==1.5.7',
         'pyflakes==0.8.1',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         ''
     ))
 
@@ -355,20 +397,20 @@ pure_python_package
         'bootstrap-deps=', '-r', 'requirements-bootstrap.txt',
     )
     err = strip_pip_warnings(err)
-    assert err == ''
+    assert err == (
+        'You must give at least one requirement to install '
+        '(see "pip help install")\n'
+    )
 
     out = uncolor(out)
+    assert '\n> pip install -r requirements-bootstrap.txt\n' in out
     assert (
-        '\n> pip install --find-links=file://%s/home/.cache/pip-faster/wheelhouse -r requirements-bootstrap.txt\n' % tmpdir
+        '\nSuccessfully installed pure-python-package-0.2.1 venv-update-%s' % __version__
     ) in out
-    assert (
-        '\nSuccessfully installed pip-1.5.6 pure-python-package-0.2.1 venv-update-%s' % __version__
-    ) in out
-    assert '\n  Successfully uninstalled pure-python-package\n' in out
+    assert '\n  Successfully uninstalled pure-python-package-0.2.1\n' in out
 
     expected = '\n'.join((
         'venv-update==%s' % __version__,
-        'wheel==0.29.0',
         ''
     ))
     assert pip_freeze() == expected
@@ -383,24 +425,14 @@ def test_cant_wheel_package(tmpdir):
 
         out, err = venv_update()
         err = strip_pip_warnings(err)
-        assert err == ''
+        assert err == '  Failed building wheel for cant-wheel-package\n'
 
         out = uncolor(out)
 
-        # for unknown reasons, py27 has an extra line with four spaces in this output, where py26 does not.
-        out = out.replace('\n    \n', '\n')
-        assert '''
-
-----------------------------------------
-Failed building wheel for cant-wheel-package
-Running setup.py bdist_wheel for pure-python-package
-Destination directory: %s/home/.cache/pip-faster/wheelhouse''' % tmpdir + '''
-SLOW!! no wheel found after building (couldn't be wheeled?): cant-wheel-package==0.1.0
+        assert '''\
 Installing collected packages: cant-wheel-package, pure-python-package
-  Running setup.py install for cant-wheel-package
-  Could not find .egg-info directory in install record for cant-wheel-package (from -r requirements.txt (line 1))
-Successfully installed cant-wheel-package pure-python-package
-Cleaning up...
+  Running setup.py install for cant-wheel-package ... done
+Successfully installed cant-wheel-package-0.1.0 pure-python-package-0.2.1
 ''' in out  # noqa
         assert pip_freeze().startswith('cant-wheel-package==0.1.0\n')
 
@@ -419,7 +451,6 @@ def test_has_extras(tmpdir):
                 'implicit-dependency==1',
                 'pure-python-package==0.2.1',
                 'venv-update==%s' % __version__,
-                'wheel==0.29.0',
                 ''
             ))
             assert pip_freeze() == expected
