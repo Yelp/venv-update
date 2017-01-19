@@ -20,6 +20,7 @@ import errno
 import glob
 import os
 import random
+import shutil
 import sys
 from contextlib import contextmanager
 
@@ -29,6 +30,7 @@ from pip.commands.install import InstallCommand
 from pip.exceptions import DistributionNotFound
 from pip.exceptions import InstallationError
 from pip.index import BestVersionAlreadyInstalled
+from pip.index import HTMLPage
 from pip.index import Link
 from pip.index import PackageFinder
 from pip.wheel import Wheel
@@ -83,9 +85,6 @@ def optimistic_wheel_search(req, index_urls):
             CACHE.wheelhouse, index_url, ignorecase_glob(name) + '-*.whl',
         )
         for link in glob.glob(expected_location):
-            if not os.path.exists(link):
-                # Ignore broken symlink,
-                continue
             link = Link('file:' + link)
             wheel = Wheel(link.filename)
             if req.specifier.contains(wheel.version) and wheel.supported():
@@ -154,28 +153,43 @@ def mkdirp(pth):
             raise
 
 
+def _store_wheel_in_cache(file_path, index_url):
+    filename = os.path.basename(file_path)
+    cache = os.path.join(CACHE.wheelhouse, index_url, filename)
+    cache_tmp = '{0}.{1}'.format(cache, random.randint(0, sys.maxsize))
+    cache_dir = os.path.dirname(cache)
+    mkdirp(cache_dir)
+    # Atomicity
+    shutil.copy(file_path, cache_tmp)
+    os.rename(cache_tmp, cache)
+
+
 def cache_installed_wheels(index_url, installed_packages):
     """After installation, pip tells us what it installed and from where.
 
     We build a structure that looks like
 
-    .cache/pip-faster/wheelhouse/$index_url/$wheel ->
-        (the path pip tells us)
+    .cache/pip-faster/wheelhouse/$index_url/$wheel
     """
     for installed_package in installed_packages:
         if not _can_be_cached(installed_package):
             continue
-        dest = installed_package.link.path
-        filename = os.path.basename(dest)
-        cache = os.path.join(CACHE.wheelhouse, index_url, filename)
-        cache_dir = os.path.dirname(cache)
-        mkdirp(cache_dir)
-        rel = os.path.relpath(dest, cache_dir)
+        _store_wheel_in_cache(installed_package.link.path, index_url)
 
-        # non-racey ln -sf
-        cache_tmp = '{0}.{1}'.format(cache, random.randint(0, 2**64))
-        os.symlink(rel, cache_tmp)
-        os.rename(cache_tmp, cache)
+
+def get_patched_download_http_url(orig_download_http_url, index_url):
+    def pipfaster_download_http_url(link, session, temp_dir, hashes):
+        file_path, content_type = orig_download_http_url(
+            link, session, temp_dir, hashes,
+        )
+        if (
+                link.is_wheel and
+                isinstance(link.comes_from, HTMLPage) and
+                link.comes_from.url.startswith(index_url)
+        ):
+            _store_wheel_in_cache(file_path, index_url)
+        return file_path, content_type
+    return pipfaster_download_http_url
 
 
 def pip(args):
@@ -347,7 +361,10 @@ class FasterInstallCommand(InstallCommand):
         if options.prune:
             previously_installed = pip_get_installed()
 
-        requirement_set = super(FasterInstallCommand, self).run(options, args)
+        with pipfaster_download_cacher(options.index_url):
+            requirement_set = super(FasterInstallCommand, self).run(
+                options, args,
+            )
 
         if requirement_set is None:
             required = ()
@@ -416,6 +433,17 @@ def pipfaster_packagefinder():
     # A poor man's dependency injection: monkeypatch :(
     from pip import basecommand
     return patched(vars(basecommand), {'PackageFinder': FasterPackageFinder})
+
+
+def pipfaster_download_cacher(index_url):
+    """vanilla pip stores a cache of the http session in its cache and not the
+    wheel files.  We intercept the download and save those files into our
+    cache
+    """
+    from pip import download
+    orig = download._download_http_url  # pylint:disable=protected-access
+    patched_fn = get_patched_download_http_url(orig, index_url)
+    return patched(vars(download), {'_download_http_url': patched_fn})
 
 
 def main():
