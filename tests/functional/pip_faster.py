@@ -99,6 +99,25 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
+def it_caches_downloaded_wheels_from_pypi(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage()
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'venv-update==' + __version__)
+
+    run(
+        venv.join('bin/pip-faster').strpath, 'install',
+        # One of the few wheeled things on our pypi
+        'wheeled-package',
+    )
+
+    assert set(wheel.name for wheel in cached_wheels(tmpdir)) == set((
+        'wheeled-package',
+    ))
+
+
+@pytest.mark.usefixtures('pypi_server')
 def it_doesnt_wheel_local_dirs(tmpdir):
     venv = tmpdir.join('venv')
     install_coverage(venv)
