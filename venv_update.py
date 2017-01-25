@@ -49,7 +49,7 @@ See https://pip.readthedocs.org/en/stable/user_guide/#environment-variables
 For example:
     PIP_INDEX_URL=https://pypi.example.com/simple venv-update
 
-Please send issues to: https://github.com/yelp/pip-faster
+Please send issues to: https://github.com/yelp/venv-update
 '''
 from __future__ import absolute_import
 from __future__ import print_function
