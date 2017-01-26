@@ -33,6 +33,7 @@ from pip.index import BestVersionAlreadyInstalled
 from pip.index import HTMLPage
 from pip.index import Link
 from pip.index import PackageFinder
+from pip.req import InstallRequirement
 from pip.wheel import Wheel
 
 from venv_update import colorize
@@ -311,7 +312,6 @@ def trace_requirements(requirements):
         # TODO: pip does no validation of extras. should we?
         extras = [extra for extra in req.extras if extra in dist.extras]
         for sub_req in sorted(dist.requires(extras=extras), key=lambda req: req.key):
-            from pip.req import InstallRequirement
             sub_req = InstallRequirement(sub_req, req)
 
             if req_cycle(sub_req):
@@ -388,8 +388,7 @@ class FasterInstallCommand(InstallCommand):
             reqnames(previously_installed) -
             reqnames(required) -
             reqnames(successfully_installed) -
-            # TODO: instead of this, add `venv-update` to the `required`, and let trace-requirements do its work
-            set(['venv-update', 'virtualenv', 'pip', 'setuptools', 'wheel', 'argparse'])  # the stage1 bootstrap packages
+            reqnames(trace_requirements([InstallRequirement.from_line('venv-update')]))  # the stage1 bootstrap packages
         )
 
         if extraneous:

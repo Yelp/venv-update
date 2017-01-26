@@ -2,7 +2,7 @@ venv-update: quick, exact
 =========================
 `Issues <https://github.com/yelp/pip-faster/issues>`_ |
 `Github <https://github.com/yelp/pip-faster>`_ |
-`CI <https://circleci.com/gh/Yelp/pip-faster>`_ |
+`CI <https://travis-ci.org/Yelp/venv-update>`_ |
 `PyPI <https://pypi.python.org/pypi/pip-faster/>`_
 
 Release v\ |release| (:ref:`Installation`)

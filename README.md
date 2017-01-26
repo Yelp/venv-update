@@ -5,8 +5,6 @@ Quickly and exactly synchronize a large python project's virtualenv with its
 
 [![PyPI version](https://badge.fury.io/py/venv-update.svg)]
 (https://pypi.python.org/pypi/venv-update)
-[![Circle CI](https://circleci.com/gh/Yelp/venv-update/tree/master.svg?style=shield)]
-(https://circleci.com/gh/Yelp/venv-update/tree/master)
 [![Travis CI](https://img.shields.io/travis/Yelp/venv-update/master.svg?label=travis-ci)]
 (https://travis-ci.org/Yelp/venv-update/branches)
 [![Coverage](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=master)]
