@@ -1,5 +1,0 @@
-#!/bin/bash
-set -eux
-timestamp
-touch Makefile
-REQUIREMENTS=requirements.d/lint.txt exec make lint
