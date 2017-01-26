@@ -43,13 +43,20 @@ def time_savings(tmpdir, between):
             yield
 
             expected = '\n'.join((
+                'appdirs==1.4.0',
                 'dependant-package==1',
                 'implicit-dependency==1',
                 'many-versions-package==2.1',
+                'packaging==16.8',
+                'pip==9.0.1',
                 'project-with-c==0.1.0',
                 'pure-python-package==0.2.1',
+                'pyparsing==2.1.10',
+                'setuptools==34.0.2',
+                'six==1.10.0',
                 'slow-python-package==0.1.0',
                 'venv-update==%s' % __version__,
+                'wheel==0.29.0',
                 ''
             ))
             assert pip_freeze() == expected

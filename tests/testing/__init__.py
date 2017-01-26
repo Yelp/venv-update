@@ -97,7 +97,7 @@ def uncolor(text):
 
 def pip_freeze(venv='venv'):
     from os.path import join
-    out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local')
+    out, err = run(join(venv, 'bin', 'pip'), 'freeze', '--local', '--all')
 
     # Most python distributions which have argparse in the stdlib fail to
     # expose it to setuptools as an installed package (it seems all but ubuntu

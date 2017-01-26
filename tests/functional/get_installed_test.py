@@ -7,7 +7,10 @@ import pytest
 from testing import run
 from venv_update import __version__
 
-ALWAYS = set(['pip', 'venv-update', 'setuptools', 'wheel'])
+ALWAYS = set((
+    'appdirs', 'packaging', 'pip', 'pyparsing', 'six', 'setuptools',
+    'venv-update', 'wheel',
+))
 
 
 def get_installed():
