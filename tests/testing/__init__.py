@@ -130,8 +130,8 @@ class OtherPython(object):
     def __init__(self):
         import sys
         if sys.version_info[0] <= 2:
-            self.interpreter = 'python3.4'
-            self.version_prefix = '3.4.'
+            self.interpreter = 'python3'
+            self.version_prefix = '3.'
         else:
             self.interpreter = 'python2.7'
             self.version_prefix = '2.7.'

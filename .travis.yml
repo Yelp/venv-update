@@ -1,4 +1,5 @@
 language: python
+dist: trusty
 env:
     # putting this ahead of the `python` directive
     #   means we start all lints before any tests
@@ -6,30 +7,22 @@ env:
     - TOXENV=python
 python:
     # in order of most-valuable tests first
-    - "3.5"
+    - "3.6"
     - "2.6"
-    - pypy
+    - pypy-5.4.1
     - "2.7"
-    - "3.4"
-
-addons:
-    apt:
-        sources:
-            - deadsnakes
-        packages:
-            - python2.7-dev
-            - python3.4-dev
+    - "3.5"
 
 matrix:
     # notify a failed build as soon as anything fails
     fast_finish: true
     # really only need to run lint twice
     exclude:
-        - python: "2.6"
+        - python: '2.6'
           env: TOXENV=lint
-        - python: pypy
+        - python: pypy-5.4.1
           env: TOXENV=lint
-        - python: '3.4'
+        - python: '3.6'
           env: TOXENV=lint
 
 install: ./venv_update.py venv= $VIRTUAL_ENV install= -r CI/requirements.txt

@@ -38,7 +38,7 @@ coverage-enable-subprocess==1.0
 packaging==16.8
 pip==9.0.1
 pyparsing==2.1.10
-setuptools==34.0.2
+setuptools==34.1.1
 six==1.10.0
 wheel==0.29.0
 '''
@@ -112,7 +112,7 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
         'packaging==16.8',
         'pip==9.0.1',
         'pyparsing==2.1.10',
-        'setuptools==34.0.2',
+        'setuptools==34.1.1',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
@@ -168,7 +168,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
         'pip==9.0.1',
         'pure-python-package==0.2.1',
         'pyparsing==2.1.10',
-        'setuptools==34.0.2',
+        'setuptools==34.1.1',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
@@ -205,7 +205,7 @@ def it_doesnt_wheel_git_repos(tmpdir):
         'packaging==16.8',
         'pip==9.0.1',
         'pyparsing==2.1.10',
-        'setuptools==34.0.2',
+        'setuptools==34.1.1',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
