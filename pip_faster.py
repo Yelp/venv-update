@@ -388,7 +388,10 @@ class FasterInstallCommand(InstallCommand):
             reqnames(previously_installed) -
             reqnames(required) -
             reqnames(successfully_installed) -
-            reqnames(trace_requirements([InstallRequirement.from_line('venv-update')]))  # the stage1 bootstrap packages
+            # the stage1 bootstrap packages
+            reqnames(trace_requirements([InstallRequirement.from_line('venv-update')])) -
+            # See #186
+            frozenset(('pkg-resources',))
         )
 
         if extraneous:

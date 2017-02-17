@@ -52,7 +52,7 @@ def time_savings(tmpdir, between):
                 'project-with-c==0.1.0',
                 'pure-python-package==0.2.1',
                 'pyparsing==2.1.10',
-                'setuptools==34.1.1',
+                'setuptools==34.2.0',
                 'six==1.10.0',
                 'slow-python-package==0.1.0',
                 'venv-update==%s' % __version__,
