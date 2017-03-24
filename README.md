@@ -3,14 +3,10 @@ venv-update
 Quickly and exactly synchronize a large python project's virtualenv with its
 [requirements](https://pip.pypa.io/en/stable/user_guide/#requirements-files).
 
-[![PyPI version](https://badge.fury.io/py/venv-update.svg)]
-(https://pypi.python.org/pypi/venv-update)
-[![Travis CI](https://img.shields.io/travis/Yelp/venv-update/master.svg?label=travis-ci)]
-(https://travis-ci.org/Yelp/venv-update/branches)
-[![Coverage](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=master)]
-(https://codecov.io/github/Yelp/venv-update?branch=master)
-[![Documentation](https://readthedocs.org/projects/venv-update/badge/?version=master)]
-(http://venv-update.readthedocs.org/en/stable/)
+[![PyPI version](https://badge.fury.io/py/venv-update.svg)](https://pypi.python.org/pypi/venv-update)
+[![Travis CI](https://img.shields.io/travis/Yelp/venv-update/master.svg?label=travis-ci)](https://travis-ci.org/Yelp/venv-update/branches)
+[![Coverage](https://codecov.io/github/Yelp/venv-update/coverage.svg?branch=master)](https://codecov.io/github/Yelp/venv-update?branch=master)
+[![Documentation](https://readthedocs.org/projects/venv-update/badge/?version=master)](http://venv-update.readthedocs.org/en/stable/)
 
 
 Please see http://venv-update.readthedocs.org/en/stable/ for the complete documentation.
