@@ -31,6 +31,11 @@ def test_trivial(tmpdir):
     requirements('')
     enable_coverage()
     venv_update()
+    # Originally suggested by none other than @bukzor in:
+    # https://github.com/pypa/virtualenv/issues/118
+    # This directory now just causes problems (especially with relocating)
+    # since the debian issue has been fixed.
+    assert not tmpdir.join('venv', 'local').exists()
 
 
 @pytest.mark.usefixtures('pypi_server_with_fallback')
