@@ -12,7 +12,7 @@
 #######################################################################
 set -Eeu
 trap 'echo "[31mFAILED[m (code $?)"' ERR
-version=${1:-master}
+version=${1:-v1.1.2}
 
 colorize() {
     echo "[01;36m>[m [01;33m$@[m" >&2
