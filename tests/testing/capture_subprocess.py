@@ -55,7 +55,7 @@ def pty_normalize_newlines(fd):
 class Pty(Pipe):
     """Represent a pty as a pipe"""
 
-    def __init__(self):  # pylint:disable=super-init-not-called
+    def __init__(self):
         self.read, self.write = os.openpty()
         pty_normalize_newlines(self.read)
 

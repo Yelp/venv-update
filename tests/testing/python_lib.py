@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
-from distutils.sysconfig import get_python_lib  # pylint:disable=import-error
+from distutils.sysconfig import get_python_lib
 
 PYTHON_LIB = os.path.relpath(get_python_lib(), sys.prefix)
 

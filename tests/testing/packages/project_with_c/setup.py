@@ -18,4 +18,4 @@ setup(
             'c-extension-script = project_with_c:hello_world',
         ],
     },
-)  # pylint:disable=duplicate-code
+)
