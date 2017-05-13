@@ -41,7 +41,7 @@ from venv_update import raise_on_failure
 from venv_update import timid_relpath
 from venv_update import user_cache_dir
 
-if True:  # :pragma:nocover
+if True:  # :pragma:nocover:
     # Debian de-vendorizes the version of pip it ships
     try:
         from pip._vendor import pkg_resources
