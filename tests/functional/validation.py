@@ -199,6 +199,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         assert out.startswith('''\
 > virtualenv venv
 Keeping valid virtualenv from previous run.
+> rm -rf venv/local
 > pip install venv-update=={0}
 '''.format(__version__))
 

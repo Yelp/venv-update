@@ -307,6 +307,10 @@ def ensure_virtualenv(args, return_values):
     argv[:] = ('virtualenv',) + args
     info(colorize(argv))
     raise_on_failure(virtualenv.main)
+    # There might not be a venv_path if doing something like "venv= --version"
+    # and not actually asking virtualenv to make a venv.
+    if return_values.venv_path is not None:
+        run(('rm', '-rf', join(return_values.venv_path, 'local')))
 
 
 def wait_for_all_subprocesses():
