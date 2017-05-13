@@ -18,4 +18,4 @@ setup(
         ],
     },
     # NOT a universal wheel
-)  # pylint:disable=duplicate-code
+)

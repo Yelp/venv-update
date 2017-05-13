@@ -67,7 +67,7 @@ DEFAULT_OPTION_VALUES = {
     'pip-command=': ('pip-faster', 'install', '--upgrade', '--prune'),
     'bootstrap-deps=': ('venv-update==' + __version__,),
 }
-__doc__ = __doc__.format(  # pylint:disable=redefined-builtin
+__doc__ = __doc__.format(
     **dict((key, ' '.join(val)) for key, val in DEFAULT_OPTION_VALUES.items())
 )
 
@@ -169,7 +169,7 @@ def exec_(argv):  # never returns
     # in python3, sys.exitfunc has gone away, and atexit._run_exitfuncs seems to be the only pubic-ish interface
     #   https://hg.python.org/cpython/file/3.4/Modules/atexitmodule.c#l289
     import atexit
-    atexit._run_exitfuncs()  # pylint:disable=protected-access
+    atexit._run_exitfuncs()
 
     from os import execv
     execv(argv[0], argv)
@@ -398,7 +398,7 @@ def venv_update(
 def execfile_(filename):
     with open(filename) as code:
         code = compile(code.read(), filename, 'exec')
-        exec(code, {'__file__': filename})  # pylint:disable=exec-used
+        exec(code, {'__file__': filename})
 
 
 def pip_faster(venv_path, pip_command, install, bootstrap_deps):

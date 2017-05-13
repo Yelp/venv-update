@@ -306,7 +306,7 @@ texinfo_documents = [
 #texinfo_no_detailmenu = False
 
 
-def process_docstring(unused_app, what, name, unused_obj, unused_options, lines):  # pylint:disable=too-many-arguments
+def process_docstring(unused_app, what, name, unused_obj, unused_options, lines):
     if (what, name) == ('module', 'venv_update'):
         for i, line in enumerate(lines):
             lines[i] = ' ' + line

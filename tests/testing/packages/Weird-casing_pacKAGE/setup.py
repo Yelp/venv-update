@@ -17,4 +17,4 @@ setup(
             'universal': 1,
         }
     },
-)  # pylint:disable=duplicate-code
+)

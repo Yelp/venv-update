@@ -45,12 +45,12 @@ def test_install_custom_path_and_requirements(tmpdir):
     enable_coverage()
     venv_update('venv=', 'venv2', 'install=', '-r', 'requirements2.txt')
     assert pip_freeze('venv2') == '\n'.join((
-        'appdirs==1.4.0',
+        'appdirs==1.4.3',
         'mccabe==0.6.0',
         'packaging==16.8',
         'pip==9.0.1',
-        'pyparsing==2.1.10',
-        'setuptools==34.2.0',
+        'pyparsing==2.2.0',
+        'setuptools==35.0.2',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
@@ -331,8 +331,8 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'appdirs==1.4.0',
-        'coverage==4.3.4',
+        'appdirs==1.4.3',
+        'coverage==4.4',
         'coverage-enable-subprocess==1.0',
         'flake8==2.0',
         'mccabe==0.3',
@@ -340,8 +340,8 @@ pep8<=1.5.7
         'pep8==1.5.7',
         'pip==9.0.1',
         'pyflakes==0.7.3',
-        'pyparsing==2.1.10',
-        'setuptools==34.2.0',
+        'pyparsing==2.2.0',
+        'setuptools==35.0.2',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
@@ -363,8 +363,8 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'appdirs==1.4.0',
-        'coverage==4.3.4',
+        'appdirs==1.4.3',
+        'coverage==4.4',
         'coverage-enable-subprocess==1.0',
         'flake8==2.2.5',
         'mccabe==0.3',
@@ -372,8 +372,8 @@ pep8<=1.5.7
         'pep8==1.5.7',
         'pip==9.0.1',
         'pyflakes==0.8.1',
-        'pyparsing==2.1.10',
-        'setuptools==34.2.0',
+        'pyparsing==2.2.0',
+        'setuptools==35.0.2',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
@@ -431,11 +431,11 @@ pure_python_package
     assert '\n  Successfully uninstalled pure-python-package-0.2.1\n' in out
 
     expected = '\n'.join((
-        'appdirs==1.4.0',
+        'appdirs==1.4.3',
         'packaging==16.8',
         'pip==9.0.1',
-        'pyparsing==2.1.10',
-        'setuptools==34.2.0',
+        'pyparsing==2.2.0',
+        'setuptools==35.0.2',
         'six==1.10.0',
         'venv-update==' + __version__,
         'wheel==0.29.0',
@@ -463,7 +463,7 @@ Installing collected packages: cant-wheel-package, pure-python-package
 Successfully installed cant-wheel-package-0.1.0 pure-python-package-0.2.1
 ''' in out  # noqa
         assert pip_freeze().startswith(
-            'appdirs==1.4.0\n'
+            'appdirs==1.4.3\n'
             'cant-wheel-package==0.1.0\n'
         )
 
@@ -479,13 +479,13 @@ def test_has_extras(tmpdir):
             venv_update()
 
             expected = '\n'.join((
-                'appdirs==1.4.0',
+                'appdirs==1.4.3',
                 'implicit-dependency==1',
                 'packaging==16.8',
                 'pip==9.0.1',
                 'pure-python-package==0.2.1',
-                'pyparsing==2.1.10',
-                'setuptools==34.2.0',
+                'pyparsing==2.2.0',
+                'setuptools==35.0.2',
                 'six==1.10.0',
                 'venv-update==' + __version__,
                 'wheel==0.29.0',

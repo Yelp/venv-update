@@ -16,4 +16,4 @@ setup(
     author='nobody',
     author_email='nobody@example.com',
     cmdclass={'bdist_wheel': broken_bdist_wheel},
-)  # pylint:disable=duplicate-code
+)

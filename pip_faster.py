@@ -41,10 +41,9 @@ from venv_update import raise_on_failure
 from venv_update import timid_relpath
 from venv_update import user_cache_dir
 
-if True:  # :pragma:nocover:pylint:disable=using-constant-test
+if True:  # :pragma:nocover:
     # Debian de-vendorizes the version of pip it ships
     try:
-        # pylint:disable=ungrouped-imports
         from pip._vendor import pkg_resources
     except ImportError:
         import pkg_resources
@@ -54,9 +53,9 @@ if True:  # :pragma:nocover:pylint:disable=using-constant-test
 PY2 = str is bytes
 if PY2:  # :pragma:nocover:
     _reraise_src = 'def reraise(tp, value, tb=None): raise tp, value, tb'
-    exec(_reraise_src)  # pylint:disable=exec-used
+    exec(_reraise_src)
 else:  # :pragma:nocover:
-    def reraise(tp, value, tb=None):  # pylint:disable=invalid-name
+    def reraise(tp, value, tb=None):
         if value is None:
             value = tp()
         if value.__traceback__ is not tb:
@@ -443,7 +442,7 @@ def pipfaster_download_cacher(index_url):
     cache
     """
     from pip import download
-    orig = download._download_http_url  # pylint:disable=protected-access
+    orig = download._download_http_url
     patched_fn = get_patched_download_http_url(orig, index_url)
     return patched(vars(download), {'_download_http_url': patched_fn})
 

@@ -12,10 +12,10 @@ from errno import ECONNREFUSED
 
 import pytest
 import six
+from ephemeral_port_reserve import reserve
 
 from testing import run
 from testing import TOP
-from testing.ephemeral_port_reserve import reserve
 from venv_update import colorize
 
 

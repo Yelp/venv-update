@@ -25,7 +25,6 @@ def merge_coverage(coverage_data, from_path, to_path):
             {result_filename: coverage_data.arcs(filename)}
         )
 
-        # pylint:disable=protected-access
         del coverage_data._arcs[filename]
         coverage_data._validate_invariants()
 
