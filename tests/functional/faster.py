@@ -43,7 +43,7 @@ def time_savings(tmpdir, between):
             yield
 
             expected = '\n'.join((
-                'appdirs==1.4.0',
+                'appdirs==1.4.3',
                 'dependant-package==1',
                 'implicit-dependency==1',
                 'many-versions-package==2.1',
@@ -51,8 +51,8 @@ def time_savings(tmpdir, between):
                 'pip==9.0.1',
                 'project-with-c==0.1.0',
                 'pure-python-package==0.2.1',
-                'pyparsing==2.1.10',
-                'setuptools==34.2.0',
+                'pyparsing==2.2.0',
+                'setuptools==35.0.2',
                 'six==1.10.0',
                 'slow-python-package==0.1.0',
                 'venv-update==%s' % __version__,
