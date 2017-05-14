@@ -8,7 +8,7 @@
 1. `git tag v{{version}}`
 1. `git push origin master --tags`
 1.  upload to pypi
-    1. if you need to set up pypy auth, `python setup.py register` and follow the prompts
+    1. if you need to set up pypi auth, `python setup.py register` and follow the prompts
     1. `python setup.py sdist bdist_wheel`
     1. `twine upload --skip-existing dist/*`
 1. `fetch-python-package venv-update` -- upload to pypi.yelpcorp
