@@ -125,6 +125,7 @@ html_theme_options = {
     'github_user': 'Yelp',
     'github_repo': 'venv-update',
     'github_banner': True,
+    'github_type': 'star',
     'show_related': True,
     'sidebar_includehidden': True,
 }
