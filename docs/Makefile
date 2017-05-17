@@ -216,7 +216,7 @@ pseudoxml:
 	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
 
 port:
-	../tests/testing/ephemeral_port_reserve.py > port
+	ephemeral-port-reserve > port
 
 .PHONY: serve
 serve: HOST := $(shell hostname -f)
