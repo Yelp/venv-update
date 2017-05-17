@@ -115,7 +115,7 @@ Python library.
 
 .. parsed-literal::
 
- curl -o venv-update `<https://raw.githubusercontent.com/Yelp/venv-update/v2.1.2/venv_update.py>`_
+ curl -o venv-update `<https://raw.githubusercontent.com/Yelp/venv-update/v2.1.3/venv_update.py>`_
  chmod +x venv-update
 
 
