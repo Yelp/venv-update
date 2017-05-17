@@ -281,3 +281,36 @@ Cleaning up...
         'It is either a non-existing path or lacks a specific scheme.\n'
     )
     assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_no_conflicts_when_no_deps_specified(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'venv-update==' + __version__)
+
+    pkgdir = tmpdir.join('pkgdir').ensure_dir()
+    setup_py = pkgdir.join('setup.py')
+
+    def _setup_py(many_versions_package_version):
+        setup_py.write(
+            'from setuptools import setup\n'
+            'setup(\n'
+            '    name="pkg",\n'
+            '    install_requires=["many-versions-package=={0}"],\n'
+            ')\n'.format(many_versions_package_version)
+        )
+
+    cmd = (
+        venv.join('bin/pip-faster').strpath, 'install', '--upgrade',
+        pkgdir.strpath,
+    )
+
+    _setup_py('1')
+    run(*cmd)
+
+    _setup_py('2')
+    # Should not complain about conflicts since we specified `--no-deps`
+    run(*cmd + ('--no-deps',))
