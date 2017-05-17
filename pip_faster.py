@@ -376,26 +376,27 @@ class FasterInstallCommand(InstallCommand):
         if not options.extra_index_urls:
             cache_installed_wheels(options.index_url, successfully_installed)
 
-        # transitive requirements, previously installed, are also required
-        # this has a side-effect of finding any missing / conflicting requirements
-        required = trace_requirements(required)
+        if not options.ignore_dependencies:
+            # transitive requirements, previously installed, are also required
+            # this has a side-effect of finding any missing / conflicting requirements
+            required = trace_requirements(required)
 
-        if not options.prune:
-            return requirement_set
+            if not options.prune:
+                return requirement_set
 
-        extraneous = (
-            reqnames(previously_installed) -
-            reqnames(required) -
-            reqnames(successfully_installed) -
-            # the stage1 bootstrap packages
-            reqnames(trace_requirements([InstallRequirement.from_line('venv-update')])) -
-            # See #186
-            frozenset(('pkg-resources',))
-        )
+            extraneous = (
+                reqnames(previously_installed) -
+                reqnames(required) -
+                reqnames(successfully_installed) -
+                # the stage1 bootstrap packages
+                reqnames(trace_requirements([InstallRequirement.from_line('venv-update')])) -
+                # See #186
+                frozenset(('pkg-resources',))
+            )
 
-        if extraneous:
-            extraneous = sorted(extraneous)
-            pip(('uninstall', '--yes') + tuple(extraneous))
+            if extraneous:
+                extraneous = sorted(extraneous)
+                pip(('uninstall', '--yes') + tuple(extraneous))
 
         # TODO: Cleanup: remove stale values from the cache and wheelhouse that have not been accessed in a week.
 
