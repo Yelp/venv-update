@@ -21,8 +21,7 @@ def it_shows_help_for_prune():
   --prune                     Uninstall any non-required packages.
   --no-prune                  Do not uninstall any non-required packages.
 
-Package Index Options (including deprecated options):
-''' in out  # noqa
+Package Index Options''' in out
     assert err == ''
 
 
