@@ -32,15 +32,8 @@ def it_installs_stuff(tmpdir):
     install_coverage(venv)
 
     assert pip_freeze(str(venv)) == '''\
-appdirs==1.4.3
 coverage==4.4.1
 coverage-enable-subprocess==1.0
-packaging==16.8
-pip==9.0.1
-pyparsing==2.2.0
-setuptools==35.0.2
-six==1.10.0
-wheel==0.29.0
 '''
 
     pip = venv.join('bin/pip').strpath
@@ -50,16 +43,9 @@ wheel==0.29.0
         req.split('==')[0]
         for req in pip_freeze(str(venv)).split()
     ] == [
-        'appdirs',
         'coverage',
         'coverage-enable-subprocess',
-        'packaging',
-        'pip',
-        'pyparsing',
-        'setuptools',
-        'six',
         'venv-update',
-        'wheel',
     ]
 
     run(str(venv.join('bin/pip-faster')), 'install', 'pure_python_package')
@@ -106,16 +92,9 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
         '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init',  # noqa
-        'appdirs==1.4.3',
         'coverage-enable-subprocess==1.0',
         'coverage==4.4.1',
-        'packaging==16.8',
-        'pip==9.0.1',
-        'pyparsing==2.2.0',
-        'setuptools==35.0.2',
-        'six==1.10.0',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         '',
     ])
 
@@ -158,20 +137,13 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
-        'appdirs==1.4.3',
         'coverage==4.4.1',
         'coverage-enable-subprocess==1.0',
         'dependant-package==1',
         'implicit-dependency==1',
         'many-versions-package==3',
-        'packaging==16.8',
-        'pip==9.0.1',
         'pure-python-package==0.2.1',
-        'pyparsing==2.2.0',
-        'setuptools==35.0.2',
-        'six==1.10.0',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         '',
     ])
 
@@ -198,17 +170,10 @@ def it_doesnt_wheel_git_repos(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == set([
-        'appdirs==1.4.3',
         'coverage-enable-subprocess==1.0',
         'coverage==4.4.1',
         'dumb-init==0.5.0',
-        'packaging==16.8',
-        'pip==9.0.1',
-        'pyparsing==2.2.0',
-        'setuptools==35.0.2',
-        'six==1.10.0',
         'venv-update==' + __version__,
-        'wheel==0.29.0',
         '',
     ])
 

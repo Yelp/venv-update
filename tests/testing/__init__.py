@@ -107,6 +107,12 @@ def pip_freeze(venv='venv'):
     import re
     out = re.sub(r'argparse==[\d.]+\n', '', out, count=1)
 
+    # We'll always have `pip`, `setuptools`, and `wheel` -- filter those out
+    for pkg in ('pip', 'setuptools', 'wheel'):
+        reg = re.compile(r'((?<=\n)|^){0}==.*(\n|$)'.format(pkg))
+        assert reg.search(out)
+        out = reg.sub('', out)
+
     err = strip_pip_warnings(err)
     assert err == ''
     return out
