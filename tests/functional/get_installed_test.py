@@ -43,7 +43,6 @@ def test_pip_get_installed(tmpdir):
 
     run(
         'myvenv/bin/pip', 'install',
-        'hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=coverage',
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )
