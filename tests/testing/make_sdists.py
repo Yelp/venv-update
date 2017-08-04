@@ -114,12 +114,12 @@ def download_sdist(source, destination):
     with public_pypi_enabled():
         run((
             python, '-m', 'pip.__main__',
-            'install',
+            'download',
             '--quiet',
             '--no-deps',
-            '--no-use-wheel',
+            '--no-binary', ':all:',
             '--build-dir', str(destination.join('build')),
-            '--download', str(destination),
+            '--dest', str(destination),
             str(source),
         ))
 
@@ -150,12 +150,12 @@ def flock(path, blocking=True):
 
     import fcntl
     flags = fcntl.LOCK_EX  # exclusive
-    if not blocking:
+    if not blocking:  # :pragma:nobranch:
         flags |= fcntl.LOCK_NB  # non-blocking
 
     try:
         fcntl.flock(fd, flags)
-    except IOError as error:
+    except IOError as error:  # :pragma:nocover: not always hit
         if error.errno == 11:  # EAGAIN: lock held
             return None
         else:
@@ -168,7 +168,7 @@ def make_sdists(sources, destination):
     destination.dirpath().ensure(dir=True)
 
     lock = destination.new(ext='lock')
-    if flock(lock.strpath, blocking=False) is None:
+    if flock(lock.strpath, blocking=False) is None:  # :pragma:nocover: not always hit
         print('lock held; waiting for other thread...')
         flock(lock.strpath, blocking=True)
         return

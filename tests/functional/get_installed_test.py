@@ -7,10 +7,7 @@ import pytest
 from testing import run
 from venv_update import __version__
 
-ALWAYS = set((
-    'appdirs', 'packaging', 'pip', 'pyparsing', 'six', 'setuptools',
-    'venv-update', 'wheel',
-))
+ALWAYS = set(('pip', 'setuptools', 'venv-update', 'wheel'))
 
 
 def get_installed():
@@ -46,7 +43,8 @@ def test_pip_get_installed(tmpdir):
 
     run(
         'myvenv/bin/pip', 'install',
-        'hg+https://bitbucket.org/bukzor/coverage.py@__main__-support#egg=coverage',
+        # to avoid installing ordereddict in python2.6
+        'pytest<3',
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )

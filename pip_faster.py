@@ -178,10 +178,8 @@ def cache_installed_wheels(index_url, installed_packages):
 
 
 def get_patched_download_http_url(orig_download_http_url, index_url):
-    def pipfaster_download_http_url(link, session, temp_dir, hashes):
-        file_path, content_type = orig_download_http_url(
-            link, session, temp_dir, hashes,
-        )
+    def pipfaster_download_http_url(link, *args, **kwargs):
+        file_path, content_type = orig_download_http_url(link, *args, **kwargs)
         if (
                 link.is_wheel and
                 isinstance(link.comes_from, HTMLPage) and
@@ -204,7 +202,10 @@ def pip(args):
 
 def dist_to_req(dist):
     """Make a pip.FrozenRequirement from a pkg_resources distribution object"""
-    from pip import FrozenRequirement
+    try:  # :pragma:nocover: (pip>=10)
+        from pip.operations.freeze import FrozenRequirement
+    except ImportError:  # :pragma:nocover: (pip<10)
+        from pip import FrozenRequirement
 
     # normalize the casing, dashes in the req name
     orig_name, dist.project_name = dist.project_name, dist.key

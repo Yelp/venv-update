@@ -4,5 +4,5 @@ export TOP=$PWD
 
 coverage xml
 
-pip-faster install codecov  # pending https://github.com/codecov/codecov-python/pull/57
-codecov -e TRAVIS PYTHON --file coverage.xml
+pip-faster install codecov
+codecov -e TOXENV --file coverage.xml

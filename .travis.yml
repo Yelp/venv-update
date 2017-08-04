@@ -1,39 +1,32 @@
 language: python
 dist: trusty
-env:
-    # putting this ahead of the `python` directive
-    #   means we start all lints before any tests
-    - TOXENV=lint
-    - TOXENV=python
-python:
-    # in order of most-valuable tests first
-    - "3.6"
-    - "2.6"
-    - pypy-5.4.1
-    - "2.7"
-    - "3.5"
 
 matrix:
     # notify a failed build as soon as anything fails
     fast_finish: true
-    # really only need to run lint twice
-    exclude:
-        - python: '2.6'
-          env: TOXENV=lint
-        - python: pypy-5.4.1
-          env: TOXENV=lint
-        - python: '3.6'
-          env: TOXENV=lint
+    # In order of most-valuable tests first
+    include:
+        - env: TOXENV=lint
+          python: 3.6
+        - env: TOXENV=lint
+          python: 2.7
+
+        - env: TOXENV=py36
+          python: 3.6
+        - env: TOXENV=py26
+          python: 2.6
+        - env: TOXENV=pypy
+          python: pypy-5.4.1
+        - env: TOXENV=py27
+          python: 2.7
+        - env: TOXENV=py35
+          python: 3.5
+        - env: TOXENV=latest-pip
+          python: 3.6
 
 install: ./venv_update.py venv= $VIRTUAL_ENV install= -r CI/requirements.txt
-script:
-    - . CI/env
-    - tox
+script: tox
 
-
-# sudo:false gives us the new, faster cluster and enables caches for public repos
-# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
-sudo: false
 cache:
     directories:
         - $HOME/.pip
