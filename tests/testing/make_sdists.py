@@ -150,7 +150,7 @@ def flock(path, blocking=True):
 
     import fcntl
     flags = fcntl.LOCK_EX  # exclusive
-    if not blocking:
+    if not blocking:  # :pragma:nobranch:
         flags |= fcntl.LOCK_NB  # non-blocking
 
     try:
