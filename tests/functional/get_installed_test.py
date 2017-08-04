@@ -43,6 +43,8 @@ def test_pip_get_installed(tmpdir):
 
     run(
         'myvenv/bin/pip', 'install',
+        # to avoid installing ordereddict in python2.6
+        'pytest<3',
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )
