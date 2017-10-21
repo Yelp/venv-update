@@ -24,6 +24,11 @@ matrix:
         - env: TOXENV=latest-pip
           python: 3.6
 
+    allow_failures:
+        # See #203
+        - env: TOXENV=latest-pip
+          python: 3.6
+
 install: ./venv_update.py venv= $VIRTUAL_ENV install= -r CI/requirements.txt
 script: tox
 
