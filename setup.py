@@ -40,7 +40,7 @@ def main():
         license='MIT',
         classifiers=[
             'License :: OSI Approved :: MIT License',
-            'Programming Language :: Python :: 2.6',
+            'Programming Language :: Python :: 2',
             'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: 3.5',
@@ -53,7 +53,7 @@ def main():
             'Environment :: Console',
         ],
         py_modules=['venv_update', 'pip_faster'],
-        packages=find_packages('.', exclude=('tests*',)),
+        packages=find_packages(exclude=('tests*',)),
         install_requires=[
             'pip>=8.1.0',
             'wheel>0.25.0',  # 0.25.0 causes get_tag AssertionError in python3

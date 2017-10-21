@@ -7,7 +7,7 @@ import pytest
 from testing import run
 from venv_update import __version__
 
-ALWAYS = set(('pip', 'setuptools', 'venv-update', 'wheel'))
+ALWAYS = {'pip', 'setuptools', 'venv-update', 'wheel'}
 
 
 def get_installed():
@@ -24,7 +24,7 @@ for p in sorted(p.reqnames(p.pip_get_installed())):
     # do this). This results in argparse sometimes being installed locally,
     # sometimes not, even for a specific version of python.
     # We normalize by never looking at argparse =/
-    out -= set(['argparse'])
+    out -= {'argparse'}
 
     # these will always be present
     assert ALWAYS.issubset(out)
@@ -43,8 +43,7 @@ def test_pip_get_installed(tmpdir):
 
     run(
         'myvenv/bin/pip', 'install',
-        # to avoid installing ordereddict in python2.6
-        'pytest<3',
+        'pytest',
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )

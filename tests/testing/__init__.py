@@ -71,10 +71,6 @@ def strip_coverage_warnings(stderr):
 # pip adds some helpful warnings to stderr, with no way to quiet them.
 pip_warnings_regex = Regex(
     '|'.join((
-        (
-            r'^DEPRECATION: Python 2\.6 is no longer supported by the Python core team, please upgrade your Python\. '
-            r'A future version of pip will drop support for Python 2\.6\n'
-        ),
         r"^  Url '[^']*/\.cache/pip-faster/wheelhouse' is ignored: it is neither a file nor a directory\.\n",
         r'^You are using pip version [0-9.]+, however version [0-9.]+ is available\.\n',
         r"^You should consider upgrading via the 'pip install --upgrade pip' command\.\n",
@@ -109,7 +105,7 @@ def pip_freeze(venv='venv'):
 
     # We'll always have `pip`, `setuptools`, and `wheel` -- filter those out
     for pkg in ('pip', 'setuptools', 'wheel'):
-        reg = re.compile(r'((?<=\n)|^){0}==.*(\n|$)'.format(pkg))
+        reg = re.compile(r'((?<=\n)|^){}==.*(\n|$)'.format(pkg))
         assert reg.search(out)
         out = reg.sub('', out)
 

@@ -200,7 +200,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
 > virtualenv venv
 Keeping valid virtualenv from previous run.
 > rm -rf venv/local
-> pip install venv-update=={0}
+> pip install venv-update=={}
 '''.format(__version__))
 
         final_version = assert_python_version(other_python.version_prefix)

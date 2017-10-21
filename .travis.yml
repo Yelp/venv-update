@@ -13,8 +13,6 @@ matrix:
 
         - env: TOXENV=py36
           python: 3.6
-        - env: TOXENV=py26
-          python: 2.6
         - env: TOXENV=pypy
           python: pypy-5.4.1
         - env: TOXENV=py27
@@ -24,10 +22,15 @@ matrix:
         - env: TOXENV=latest-pip
           python: 3.6
 
+    allow_failures:
+        # See #203
+        - env: TOXENV=latest-pip
+          python: 3.6
+
 install: ./venv_update.py venv= $VIRTUAL_ENV install= -r CI/requirements.txt
 script: tox
 
 cache:
     directories:
         - $HOME/.pip
-        - $HOME/.pre-commit
+        - $HOME/.cache/pre-commit

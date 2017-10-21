@@ -68,7 +68,7 @@ DEFAULT_OPTION_VALUES = {
     'bootstrap-deps=': ('venv-update==' + __version__,),
 }
 __doc__ = __doc__.format(
-    **dict((key, ' '.join(val)) for key, val in DEFAULT_OPTION_VALUES.items())
+    **{key: ' '.join(val) for key, val in DEFAULT_OPTION_VALUES.items()}
 )
 
 # This script must not rely on anything other than
@@ -89,10 +89,10 @@ def parseargs(argv):
         else:
             options[key] += (arg,)
 
-    if set(args) & set(('-h', '--help')):
+    if set(args) & {'-h', '--help'}:
         print(__doc__, end='')
         exit(0)
-    elif set(args) & set(('-V', '--version')):
+    elif set(args) & {'-V', '--version'}:
         print(__version__)
         exit(0)
     elif args:

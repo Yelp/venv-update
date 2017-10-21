@@ -5,18 +5,12 @@ from __future__ import unicode_literals
 import os
 import time
 from subprocess import CalledProcessError
+from sysconfig import get_python_version
 
 import pytest
 
 import testing as T
 from testing.python_lib import PYTHON_LIB
-
-
-if True:  # :pragma:nocover:pylint:disable=using-constant-test
-    try:
-        from sysconfig import get_python_version
-    except ImportError:  # <= python2.6
-        from distutils.sysconfig import get_python_version
 
 
 def assert_venv_marked_invalid(venv):
@@ -48,7 +42,7 @@ conflicting_package
     err = T.strip_coverage_warnings(err)
     err = T.strip_pip_warnings(err)
     assert err == (
-        'Error: version conflict: many-versions-package 3 (venv/{0}) '
+        'Error: version conflict: many-versions-package 3 (venv/{}) '
         '<-> many-versions-package<2 '
         '(from conflicting_package->-r requirements.txt (line 3))\n'.format(
             PYTHON_LIB,
@@ -133,7 +127,7 @@ def test_editable_egg_conflict(tmpdir):
         err = T.strip_pip_warnings(err)
         assert err == (
             'Error: version conflict: many-versions-package 2 '
-            '(tmp/conflicting_package/many_versions_package-2-py{0}.egg) '
+            '(tmp/conflicting_package/many_versions_package-2-py{}.egg) '
             '<-> many_versions_package<2 '
             '(from conflicting-package==1->-r requirements.txt (line 1))\n'.format(
                 get_python_version(),
