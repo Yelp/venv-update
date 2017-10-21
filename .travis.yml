@@ -30,4 +30,4 @@ script: tox
 cache:
     directories:
         - $HOME/.pip
-        - $HOME/.pre-commit
+        - $HOME/.cache/pre-commit
