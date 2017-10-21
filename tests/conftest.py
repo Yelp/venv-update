@@ -42,7 +42,6 @@ def fixed_environment_variables():
 
     # disable casual interaction with python.org
     os.environ['PIP_INDEX_URL'] = '(total garbage)'
-    # we can't ignore the python2.6 warning this way because $PYTHONWARNINGS was invented in python2.7
     os.environ['PYTHONWARNINGS'] = 'ignore:Support for Python 3.0-3.2 has been dropped.:UserWarning'
 
     # normalize $PATH

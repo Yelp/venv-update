@@ -3,7 +3,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from subprocess import CalledProcessError
-from sys import version_info
 
 import pytest
 from py._path.local import LocalPath as Path
@@ -21,8 +20,6 @@ from testing import TOP
 from testing import uncolor
 from testing import venv_update
 from venv_update import __version__
-
-PY33 = (version_info >= (3, 3))
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -278,9 +275,7 @@ def test_args_backward(tmpdir):
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update('venv=', 'requirements.txt')
 
-    # py26 doesn't have a consistent exit code:
-    #   http://bugs.python.org/issue15033
-    assert excinfo.value.returncode != 0
+    assert excinfo.value.returncode == 3
     out, err = excinfo.value.result
     err = strip_coverage_warnings(err)
     err = strip_pip_warnings(err)

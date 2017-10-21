@@ -94,9 +94,6 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
         pip = venv.join('bin/pip').strpath
         for req in reqs:
             run(pip, 'install', '--', req)
-        # wheel needs argparse but it won't get installed
-        if sys.version_info < (2, 7):
-            run(pip, 'install', 'argparse')
         run(pip, 'install', 'venv-update==' + __version__)
     finally:
         del environ['PIP_EXTRA_INDEX_URL']

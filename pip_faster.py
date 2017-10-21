@@ -71,7 +71,7 @@ class CACHE(object):
 
 def ignorecase_glob(glob):
     return ''.join([
-        '[{0}{1}]'.format(char.lower(), char.upper())
+        '[{}{}]'.format(char.lower(), char.upper())
         if char.isalpha() else char
         for char in glob
     ])
@@ -156,7 +156,7 @@ def mkdirp(pth):
 def _store_wheel_in_cache(file_path, index_url):
     filename = os.path.basename(file_path)
     cache = os.path.join(CACHE.wheelhouse, index_url, filename)
-    cache_tmp = '{0}.{1}'.format(cache, random.randint(0, sys.maxsize))
+    cache_tmp = '{}.{}'.format(cache, random.randint(0, sys.maxsize))
     cache_dir = os.path.dirname(cache)
     mkdirp(cache_dir)
     # Atomicity
@@ -255,7 +255,7 @@ def fresh_working_set():
 def req_cycle(req):
     """is this requirement cyclic?"""
     cls = req.__class__
-    seen = set([req.name])
+    seen = {req.name}
     while isinstance(req.comes_from, cls):
         req = req.comes_from
         if req.name in seen:
@@ -291,7 +291,7 @@ def trace_requirements(requirements):
     # breadth-first traversal:
     from collections import deque
     queue = deque(requirements)
-    queued = set([_package_req_to_pkg_resources_req(req.req) for req in queue])
+    queued = {_package_req_to_pkg_resources_req(req.req) for req in queue}
     errors = []
     result = []
     while queue:
@@ -332,7 +332,7 @@ def trace_requirements(requirements):
 
 
 def reqnames(reqs):
-    return set(req.name for req in reqs)
+    return {req.name for req in reqs}
 
 
 class FasterInstallCommand(InstallCommand):

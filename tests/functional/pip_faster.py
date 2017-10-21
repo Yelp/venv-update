@@ -89,13 +89,13 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     run(str(venv.join('bin/pip-faster')), 'install', '-r', 'requirements.txt')
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
-    assert set(frozen_requirements) == set([
+    assert set(frozen_requirements) == {
         '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init',  # noqa
         'coverage-enable-subprocess==1.0',
         'coverage==4.4.1',
         'venv-update==' + __version__,
         '',
-    ])
+    }
 
     # we shouldn't wheel things installed editable
     assert not tuple(cached_wheels(tmpdir))
@@ -115,9 +115,9 @@ def it_caches_downloaded_wheels_from_pypi(tmpdir):
         'wheeled-package',
     )
 
-    assert set(wheel.name for wheel in cached_wheels(tmpdir)) == set((
+    assert {wheel.name for wheel in cached_wheels(tmpdir)} == {
         'wheeled-package',
-    ))
+    }
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -135,7 +135,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
     )
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
-    assert set(frozen_requirements) == set([
+    assert set(frozen_requirements) == {
         'coverage==4.4.1',
         'coverage-enable-subprocess==1.0',
         'dependant-package==1',
@@ -144,13 +144,13 @@ def it_doesnt_wheel_local_dirs(tmpdir):
         'pure-python-package==0.2.1',
         'venv-update==' + __version__,
         '',
-    ])
+    }
 
-    assert set(wheel.name for wheel in cached_wheels(tmpdir)) == set((
+    assert {wheel.name for wheel in cached_wheels(tmpdir)} == {
         'implicit-dependency',
         'many-versions-package',
         'pure-python-package',
-    ))
+    }
 
 
 @pytest.mark.usefixtures('pypi_server')
@@ -168,13 +168,13 @@ def it_doesnt_wheel_git_repos(tmpdir):
     )
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
-    assert set(frozen_requirements) == set([
+    assert set(frozen_requirements) == {
         'coverage-enable-subprocess==1.0',
         'coverage==4.4.1',
         'dumb-init==0.5.0',
         'venv-update==' + __version__,
         '',
-    ])
+    }
 
     assert not tuple(cached_wheels(tmpdir))
 
@@ -263,7 +263,7 @@ def test_no_conflicts_when_no_deps_specified(tmpdir):
             'from setuptools import setup\n'
             'setup(\n'
             '    name="pkg",\n'
-            '    install_requires=["many-versions-package=={0}"],\n'
+            '    install_requires=["many-versions-package=={}"],\n'
             ')\n'.format(many_versions_package_version)
         )
 

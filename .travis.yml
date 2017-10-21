@@ -13,8 +13,6 @@ matrix:
 
         - env: TOXENV=py36
           python: 3.6
-        - env: TOXENV=py26
-          python: 2.6
         - env: TOXENV=pypy
           python: pypy-5.4.1
         - env: TOXENV=py27
