@@ -324,7 +324,7 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.4.1',
+        'coverage==4.4.2',
         'coverage-enable-subprocess==1.0',
         'flake8==2.0',
         'mccabe==0.3',
@@ -349,7 +349,7 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.4.1',
+        'coverage==4.4.2',
         'coverage-enable-subprocess==1.0',
         'flake8==2.2.5',
         'mccabe==0.3',
