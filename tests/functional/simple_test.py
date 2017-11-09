@@ -324,7 +324,7 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.4.1',
+        'coverage==4.4.2',
         'coverage-enable-subprocess==1.0',
         'flake8==2.0',
         'mccabe==0.3',
@@ -349,7 +349,7 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.4.1',
+        'coverage==4.4.2',
         'coverage-enable-subprocess==1.0',
         'flake8==2.2.5',
         'mccabe==0.3',
@@ -382,6 +382,18 @@ def test_package_name_normalization(tmpdir):
 
         venv_update()
         assert '\nweird-CASING-pACKage==' in pip_freeze()
+
+
+@pytest.mark.usefixtures('pypi_server')
+@pytest.mark.parametrize('install_req', ('dotted.package-name', 'dotted-package-name'))
+def test_package_name_normalization_with_dots(tmpdir, install_req):
+    """Packages with dots should be installable with either dots or dashes."""
+    with tmpdir.as_cwd():
+        enable_coverage()
+        requirements(install_req)
+
+        venv_update()
+        assert pip_freeze().startswith('dotted.package-name==')
 
 
 @pytest.mark.usefixtures('pypi_server')

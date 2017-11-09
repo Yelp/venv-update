@@ -95,7 +95,15 @@ def pypi_port():
 @contextmanager
 def start_pypi_server(packages, port, pypi_fallback):
     port = str(port)
-    cmd = ('pypi-server', '-vvvvvv', '-i', '127.0.0.1', '-p', port)
+    cmd = (
+        'pypi-server', '-vvvvvv',
+        '-i', '127.0.0.1',
+        '-p', port,
+        # Default fallback is HTTP, which is no longer supported.
+        # TODO: revert after a new pypiserver is released with this patch:
+        # https://github.com/pypiserver/pypiserver/pull/182
+        '--fallback-url', 'https://pypi.python.org/simple',
+    )
     if not pypi_fallback:
         cmd += ('--disable-fallback',)
     cmd += (str(packages),)
