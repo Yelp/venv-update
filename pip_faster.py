@@ -20,6 +20,7 @@ import errno
 import glob
 import os
 import random
+import re
 import shutil
 import sys
 from contextlib import contextmanager
@@ -229,9 +230,19 @@ def pip_get_installed():
     )
 
 
+def normalize_name(name):
+    """Normalize a python package name a la PEP 503"""
+    # https://www.python.org/dev/peps/pep-0503/#normalized-names
+    return re.sub('[-_.]+', '-', name).lower()
+
+
 def fresh_working_set():
     """return a pkg_resources "working set", representing the *currently* installed packages"""
     class WorkingSetPlusEditableInstalls(pkg_resources.WorkingSet):
+
+        def __init__(self, *args, **kwargs):
+            self._normalized_name_mapping = {}
+            super(WorkingSetPlusEditableInstalls, self).__init__(*args, **kwargs)
 
         def add_entry(self, entry):
             """Same as the original .add_entry, but sets only=False, so that egg-links are honored."""
@@ -247,7 +258,13 @@ def fresh_working_set():
                 # without calling site.main(), an .egg-link file may or may not
                 # be honored, depending on the filesystem
                 replace = (dist.precedence == pkg_resources.EGG_DIST)
+                self._normalized_name_mapping[normalize_name(dist.key)] = dist.key
                 self.add(dist, entry, False, replace=replace)
+
+        def find_normalized(self, req):
+            req = _package_req_to_pkg_resources_req(str(req))
+            req.key = self._normalized_name_mapping.get(normalize_name(req.key), req.key)
+            return self.find(req)
 
     return WorkingSetPlusEditableInstalls()
 
@@ -299,7 +316,7 @@ def trace_requirements(requirements):
 
         logger.debug('tracing: %s', req)
         try:
-            dist = working_set.find(_package_req_to_pkg_resources_req(req.req))
+            dist = working_set.find_normalized(_package_req_to_pkg_resources_req(req.req))
         except pkg_resources.VersionConflict as conflict:
             dist = conflict.args[0]
             errors.append('Error: version conflict: %s (%s) <-> %s' % (

@@ -385,6 +385,18 @@ def test_package_name_normalization(tmpdir):
 
 
 @pytest.mark.usefixtures('pypi_server')
+@pytest.mark.parametrize('install_req', ('dotted.package-name', 'dotted-package-name'))
+def test_package_name_normalization_with_dots(tmpdir, install_req):
+    """Packages with dots should be installable with either dots or dashes."""
+    with tmpdir.as_cwd():
+        enable_coverage()
+        requirements(install_req)
+
+        venv_update()
+        assert pip_freeze().startswith('dotted.package-name==')
+
+
+@pytest.mark.usefixtures('pypi_server')
 def test_override_requirements_file(tmpdir):
     tmpdir.chdir()
     enable_coverage()
