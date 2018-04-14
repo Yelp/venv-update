@@ -4,6 +4,6 @@
 
 pytest
 ephemeral-port-reserve
-pip>8.1
+pip>=8.1,<=9.999
 wheel
 six
