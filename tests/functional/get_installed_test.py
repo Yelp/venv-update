@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 
+from pip_faster import PY2
 from testing import run
 from venv_update import __version__
 
@@ -47,9 +48,15 @@ def test_pip_get_installed(tmpdir):
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )
-    assert get_installed() == ['cov-core', 'coverage', 'py', 'pytest', 'pytest-cov']
+    expected = [
+        'attrs', 'cov-core', 'coverage', 'more-itertools', 'pluggy', 'py',
+        'pytest', 'pytest-cov', 'six',
+    ]
+    if PY2:  # :pragma:nocover:
+        expected.insert(3, 'funcsigs')
+    assert get_installed() == expected
 
-    run('myvenv/bin/pip', 'uninstall', '--yes', 'cov-core', 'coverage', 'py', 'pytest', 'pytest-cov')
+    run('myvenv/bin/pip', 'uninstall', '--yes', *expected)
     assert get_installed() == []
 
     run('myvenv/bin/pip', 'install', 'flake8==2.5.0')
