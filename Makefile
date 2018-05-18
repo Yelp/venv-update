@@ -6,7 +6,8 @@ all: lint test
 
 .PHONY: lint
 lint: venv
-	. venv/bin/activate && pre-commit run --all-files
+	venv/bin/pre-commit install -f --install-hooks
+	venv/bin/pre-commit run --all-files
 
 .PHONY: test tests
 test tests: venv
