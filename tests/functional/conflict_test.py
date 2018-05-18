@@ -81,17 +81,22 @@ pure_python_package==0.1.0
 
     err = T.strip_coverage_warnings(err)
     err = T.strip_pip_warnings(err)
-    assert err == (
-        'dependant-package 1 requires implicit-dependency, which is not installed.\n'
-        "dependant-package 1 has requirement pure-python-package>=0.2.1, but you'll have pure-python-package 0.1.0 which is incompatible.\n"  # noqa
-        "conflicting-package 1 has requirement many-versions-package<2, but you'll have many-versions-package 3 which is incompatible.\n"  # noqa
-        # TODO: do we still need to append our own error?
+
+    err = err.splitlines()
+    # pip outputs conflict lines in a non-consistent order
+    assert set(err[:3]) == {
+        'dependant-package 1 requires implicit-dependency, which is not installed.',
+        "dependant-package 1 has requirement pure-python-package>=0.2.1, but you'll have pure-python-package 0.1.0 which is incompatible.",  # noqa
+        "conflicting-package 1 has requirement many-versions-package<2, but you'll have many-versions-package 3 which is incompatible.",  # noqa
+    }
+    # TODO: do we still need to append our own error?
+    assert '\n'.join(err[3:]) == (
         'Error: version conflict: pure-python-package 0.1.0 '
         '(venv/{lib}) <-> pure-python-package>=0.2.1 '
         '(from dependant_package->-r requirements.txt (line 2))\n'
         'Error: version conflict: many-versions-package 3 '
         '(venv/{lib}) <-> many-versions-package<2 '
-        '(from conflicting_package->-r requirements.txt (line 3))\n'.format(
+        '(from conflicting_package->-r requirements.txt (line 3))'.format(
             lib=PYTHON_LIB,
         )
     )
