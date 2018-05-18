@@ -7,7 +7,7 @@ import os
 from re import compile as Regex
 from re import MULTILINE
 
-from pip.wheel import Wheel
+from pip._internal.wheel import Wheel
 from py._path.local import LocalPath as Path
 
 TOP = Path(__file__) / '../../..'

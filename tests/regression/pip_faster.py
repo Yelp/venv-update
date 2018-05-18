@@ -118,6 +118,7 @@ def test_install_whl_over_http(pypi_server):
     assert err == ''
     out = uncolor(out)
     assert out == '''\
+Looking in indexes: {server}/simple
 Collecting wheeled-package==0.2.0 from {server}/packages/wheeled_package-0.2.0-py2.py3-none-any.whl
   Downloading {server}/packages/wheeled_package-0.2.0-py2.py3-none-any.whl
 Installing collected packages: wheeled-package

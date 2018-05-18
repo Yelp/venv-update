@@ -9,7 +9,7 @@
 /dist
 /tmp*/
 /venv/
-/.cache
+/.pytest_cache
 
 # ignored anywhere
 *.egg-info/

@@ -42,6 +42,9 @@ conflicting_package
     err = T.strip_coverage_warnings(err)
     err = T.strip_pip_warnings(err)
     assert err == (
+        "conflicting-package 1 has requirement many-versions-package<2, but you'll "
+        "have many-versions-package 3 which is incompatible.\n"
+        # TODO: do we still need to append our own error?
         'Error: version conflict: many-versions-package 3 (venv/{}) '
         '<-> many-versions-package<2 '
         '(from conflicting_package->-r requirements.txt (line 3))\n'.format(
@@ -79,6 +82,10 @@ pure_python_package==0.1.0
     err = T.strip_coverage_warnings(err)
     err = T.strip_pip_warnings(err)
     assert err == (
+        'dependant-package 1 requires implicit-dependency, which is not installed.\n'
+        "dependant-package 1 has requirement pure-python-package>=0.2.1, but you'll have pure-python-package 0.1.0 which is incompatible.\n"
+        "conflicting-package 1 has requirement many-versions-package<2, but you'll have many-versions-package 3 which is incompatible.\n"
+        # TODO: do we still need to append our own error?
         'Error: version conflict: pure-python-package 0.1.0 '
         '(venv/{lib}) <-> pure-python-package>=0.2.1 '
         '(from dependant_package->-r requirements.txt (line 2))\n'

@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import pytest
+from subprocess import CalledProcessError
 
 from testing import cached_wheels
 from testing import install_coverage
@@ -204,9 +205,10 @@ def it_gives_proper_error_without_requirements(tmpdir):
     pip = venv.join('bin/pip').strpath
     run(pip, 'install', 'venv-update==' + __version__)
 
-    _, err = run(str(venv.join('bin/pip-faster')), 'install')
-    err = strip_pip_warnings(err)
-    assert err.startswith('You must give at least one requirement to install')
+    with pytest.raises(CalledProcessError) as exc_info:
+        run(str(venv.join('bin/pip-faster')), 'install')
+    _, err = exc_info.value.result
+    assert err.startswith('ERROR: You must give at least one requirement to install')
 
 
 @pytest.mark.usefixtures('pypi_server')

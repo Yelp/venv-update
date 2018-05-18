@@ -1,4 +1,4 @@
-export PYTHON?=python2.7
+export PYTHON?=python3.6
 export REQUIREMENTS?=requirements.txt
 
 .PHONY: all

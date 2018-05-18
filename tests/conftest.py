@@ -44,6 +44,9 @@ def fixed_environment_variables():
     os.environ['PIP_INDEX_URL'] = '(total garbage)'
     os.environ['PYTHONWARNINGS'] = 'ignore:Support for Python 3.0-3.2 has been dropped.:UserWarning'
 
+    # Fixes argparse help tests.
+    os.environ['COLUMNS'] = '1000'
+
     # normalize $PATH
     from sys import executable
     from os import defpath

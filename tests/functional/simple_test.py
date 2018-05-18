@@ -67,7 +67,7 @@ def test_arguments_version(tmpdir):
     out = uncolor(out)
     lines = out.splitlines()
     # 13:py27 14:py35 15:pypy
-    assert len(lines) == 8, repr(lines)
+    assert len(lines) == 9, repr(lines)
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
@@ -409,10 +409,8 @@ pure_python_package
         'bootstrap-deps=', '-r', 'requirements-bootstrap.txt',
     )
     err = strip_pip_warnings(err)
-    assert err == (
-        'You must give at least one requirement to install '
-        '(see "pip help install")\n'
-    )
+    # pip>=10 doesn't complain about installing an empty requirements file.
+    assert err == ''
 
     out = uncolor(out)
     assert '\n> pip install -r requirements-bootstrap.txt\n' in out

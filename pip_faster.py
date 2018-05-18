@@ -26,16 +26,16 @@ import sys
 from contextlib import contextmanager
 
 import pip as pipmodule
-from pip import logger
-from pip.commands.install import InstallCommand
-from pip.exceptions import DistributionNotFound
-from pip.exceptions import InstallationError
-from pip.index import BestVersionAlreadyInstalled
-from pip.index import HTMLPage
-from pip.index import Link
-from pip.index import PackageFinder
-from pip.req import InstallRequirement
-from pip.wheel import Wheel
+from pip._internal import logger
+from pip._internal.commands.install import InstallCommand
+from pip._internal.exceptions import DistributionNotFound
+from pip._internal.exceptions import InstallationError
+from pip._internal.index import BestVersionAlreadyInstalled
+from pip._internal.index import HTMLPage
+from pip._internal.index import Link
+from pip._internal.index import PackageFinder
+from pip._internal.req import InstallRequirement
+from pip._internal.wheel import Wheel
 
 from venv_update import colorize
 from venv_update import raise_on_failure
@@ -198,13 +198,13 @@ def pip(args):
     stdout.write('\n')
     stdout.flush()
 
-    return pipmodule.main(list(args))
+    return pipmodule._internal.main(list(args))
 
 
 def dist_to_req(dist):
     """Make a pip.FrozenRequirement from a pkg_resources distribution object"""
     try:  # :pragma:nocover: (pip>=10)
-        from pip.operations.freeze import FrozenRequirement
+        from pip._internal.operations.freeze import FrozenRequirement
     except ImportError:  # :pragma:nocover: (pip<10)
         from pip import FrozenRequirement
 
@@ -221,7 +221,7 @@ def pip_get_installed():
     """Code extracted from the middle of the pip freeze command.
     FIXME: does not list anything installed via -e
     """
-    from pip.utils import dist_is_local
+    from pip._internal.utils.misc import dist_is_local
 
     return tuple(
         dist_to_req(dist)
@@ -383,12 +383,8 @@ class FasterInstallCommand(InstallCommand):
                 options, args,
             )
 
-        if requirement_set is None:
-            required = ()
-            successfully_installed = ()
-        else:
-            required = requirement_set.requirements.values()
-            successfully_installed = requirement_set.successfully_installed
+        required = requirement_set.requirements.values()
+        successfully_installed = requirement_set.successfully_downloaded
 
         # With extra_index_urls we don't know where the wheel is from
         if not options.extra_index_urls:
@@ -442,7 +438,7 @@ def patched(attrs, updates):
 
 
 def pipfaster_install_prune_option():
-    return patched(pipmodule.commands.commands_dict, {FasterInstallCommand.name: FasterInstallCommand})
+    return patched(pipmodule._internal.commands.commands_dict, {FasterInstallCommand.name: FasterInstallCommand})
 
 
 def pipfaster_packagefinder():
@@ -451,7 +447,7 @@ def pipfaster_packagefinder():
     Suggested upstream at: https://github.com/pypa/pip/pull/2114
     """
     # A poor man's dependency injection: monkeypatch :(
-    from pip import basecommand
+    from pip._internal import basecommand
     return patched(vars(basecommand), {'PackageFinder': FasterPackageFinder})
 
 
@@ -460,7 +456,7 @@ def pipfaster_download_cacher(index_url):
     wheel files.  We intercept the download and save those files into our
     cache
     """
-    from pip import download
+    from pip._internal import download
     orig = download._download_http_url
     patched_fn = get_patched_download_http_url(orig, index_url)
     return patched(vars(download), {'_download_http_url': patched_fn})
@@ -469,7 +465,7 @@ def pipfaster_download_cacher(index_url):
 def main():
     with pipfaster_install_prune_option():
         with pipfaster_packagefinder():
-            raise_on_failure(pipmodule.main)
+            raise_on_failure(pipmodule._internal.main)
 
 
 if __name__ == '__main__':
