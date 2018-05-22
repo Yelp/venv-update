@@ -384,11 +384,10 @@ class FasterInstallCommand(InstallCommand):
             )
 
         required = requirement_set.requirements.values()
-        successfully_installed = requirement_set.successfully_downloaded
 
         # With extra_index_urls we don't know where the wheel is from
         if not options.extra_index_urls:
-            cache_installed_wheels(options.index_url, successfully_installed)
+            cache_installed_wheels(options.index_url, requirement_set.successfully_downloaded)
 
         if not options.ignore_dependencies:
             # transitive requirements, previously installed, are also required
@@ -401,7 +400,6 @@ class FasterInstallCommand(InstallCommand):
             extraneous = (
                 reqnames(previously_installed) -
                 reqnames(required) -
-                reqnames(successfully_installed) -
                 # the stage1 bootstrap packages
                 reqnames(trace_requirements([InstallRequirement.from_line('venv-update')])) -
                 # See #186
