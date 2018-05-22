@@ -162,11 +162,7 @@ def test_update_invalidated_missing_activate(tmpdir):
 
         out, err = venv_update()
         err = strip_pip_warnings(err)
-        assert err == (
-            "sh: 1: .: Can't open venv/bin/activate\n"
-            'You must give at least one requirement to install '
-            '(see "pip help install")\n'
-        )
+        assert err == "sh: 1: .: Can't open venv/bin/activate\n"
         out = uncolor(out)
         assert out.startswith('''\
 > virtualenv venv
@@ -191,10 +187,7 @@ def it_gives_the_same_python_version_as_we_started_with(tmpdir):
         out, err = run('./venv/bin/python', 'venv_update.py')
 
         err = strip_pip_warnings(err)
-        assert err == (
-            'You must give at least one requirement to install '
-            '(see "pip help install")\n'
-        )
+        assert err == ''
         out = uncolor(out)
         assert out.startswith('''\
 > virtualenv venv
