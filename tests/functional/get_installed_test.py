@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import sys
+
 import pytest
 
 from pip_faster import PY2
@@ -48,13 +50,17 @@ def test_pip_get_installed(tmpdir):
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )
+
     expected = [
-        'attrs', 'cov-core', 'coverage', 'more-itertools', 'pluggy', 'py',
-        'pytest', 'pytest-cov', 'six',
+        'atomicwrites', 'attrs', 'cov-core', 'coverage', 'more-itertools',
+        'pluggy', 'py', 'pytest', 'pytest-cov', 'six',
     ]
     if PY2:  # :pragma:nocover:
-        expected.insert(3, 'funcsigs')
-    assert get_installed() == expected
+        expected.extend(['funcsigs', 'scandir'])
+    if sys.version_info < (3, 6):
+        expected.append('pathlib2')
+
+    assert get_installed() == sorted(expected)
 
     run('myvenv/bin/pip', 'uninstall', '--yes', *expected)
     assert get_installed() == []
