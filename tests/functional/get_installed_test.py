@@ -56,9 +56,7 @@ def test_pip_get_installed(tmpdir):
         'pluggy', 'py', 'pytest', 'pytest-cov', 'six',
     ]
     if PY2:  # :pragma:nocover:
-        expected.extend(['funcsigs', 'scandir'])
-    if sys.version_info < (3, 6):
-        expected.append('pathlib2')
+        expected.extend(['funcsigs', 'pathlib2', 'scandir'])
 
     assert get_installed() == sorted(expected)
 
