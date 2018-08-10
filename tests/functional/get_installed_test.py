@@ -48,13 +48,15 @@ def test_pip_get_installed(tmpdir):
         'git+git://github.com/bukzor/cov-core.git@master#egg=cov-core',
         '-e', 'git+git://github.com/bukzor/pytest-cov.git@master#egg=pytest-cov',
     )
+
     expected = [
-        'attrs', 'cov-core', 'coverage', 'more-itertools', 'pluggy', 'py',
-        'pytest', 'pytest-cov', 'six',
+        'atomicwrites', 'attrs', 'cov-core', 'coverage', 'more-itertools',
+        'pluggy', 'py', 'pytest', 'pytest-cov', 'six',
     ]
     if PY2:  # :pragma:nocover:
-        expected.insert(3, 'funcsigs')
-    assert get_installed() == expected
+        expected.extend(['funcsigs', 'pathlib2', 'scandir'])
+
+    assert get_installed() == sorted(expected)
 
     run('myvenv/bin/pip', 'uninstall', '--yes', *expected)
     assert get_installed() == []
