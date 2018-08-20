@@ -66,7 +66,7 @@ For more, see :ref:`venv-update-details`.
 
 pip-faster is a drop-in replacement for pip. ``pip-faster``'s contract is:
 
-   Take the same argumeents and give the same results as ``pip``, just more quickly.
+   Take the same arguments and give the same results as ``pip``, just more quickly.
 
 This is *especially* true in the case of pinned requirements (e.g. ``package-x==1.2.3``).
 If you're also using venv-update (which we heartily recommend!), you can view
