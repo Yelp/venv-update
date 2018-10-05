@@ -66,8 +66,7 @@ def test_arguments_version(tmpdir):
 
     out = uncolor(out)
     lines = out.splitlines()
-    # 13:py27 14:py35 15:pypy
-    assert len(lines) == 9, repr(lines)
+    assert len(lines) == 12, repr(lines)
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
@@ -324,7 +323,7 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.5.1',
+        'coverage==4.5.2',
         'coverage-enable-subprocess==1.0',
         'flake8==2.0',
         'mccabe==0.3',
@@ -349,7 +348,7 @@ pep8<=1.5.7
 ''' % TOP)
     venv_update()
     assert pip_freeze() == '\n'.join((
-        'coverage==4.5.1',
+        'coverage==4.5.2',
         'coverage-enable-subprocess==1.0',
         'flake8==2.2.5',
         'mccabe==0.3',

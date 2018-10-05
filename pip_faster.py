@@ -42,13 +42,16 @@ from venv_update import raise_on_failure
 from venv_update import timid_relpath
 from venv_update import user_cache_dir
 
-if True:  # :pragma:nocover:
-    # Debian de-vendorizes the version of pip it ships
-    try:
-        from pip._vendor import pkg_resources
-    except ImportError:
-        import pkg_resources
+# Debian de-vendorizes the version of pip it ships
+try:  # :pragma:nocover: non-debian
+    from pip._vendor import pkg_resources
+except ImportError:  # :pragma:nocover: debian
+    import pkg_resources
 
+try:  # :pragma:nocover: pip>=18.1
+    from pip._internal.req.constructors import install_req_from_line
+except ImportError:  # :pragma:nocover: pip<18.1
+    install_req_from_line = InstallRequirement.from_line
 
 # Thanks six!
 PY2 = str is bytes
@@ -182,9 +185,17 @@ def get_patched_download_http_url(orig_download_http_url, index_url):
     def pipfaster_download_http_url(link, *args, **kwargs):
         file_path, content_type = orig_download_http_url(link, *args, **kwargs)
         if (
-                link.is_wheel and
-                isinstance(link.comes_from, HTMLPage) and
-                link.comes_from.url.startswith(index_url)
+                link.is_wheel and (
+                    (
+                        # pip <18.1
+                        isinstance(link.comes_from, HTMLPage) and
+                        link.comes_from.url.startswith(index_url)
+                    ) or (
+                        # pip >= 18.1
+                        isinstance(link.comes_from, (str, type(''))) and
+                        link.comes_from.startswith(index_url)
+                    )
+                )
         ):
             _store_wheel_in_cache(file_path, index_url)
         return file_path, content_type
@@ -401,7 +412,7 @@ class FasterInstallCommand(InstallCommand):
                 reqnames(previously_installed) -
                 reqnames(required) -
                 # the stage1 bootstrap packages
-                reqnames(trace_requirements([InstallRequirement.from_line('venv-update')])) -
+                reqnames(trace_requirements([install_req_from_line('venv-update')])) -
                 # See #186
                 frozenset(('pkg-resources',))
             )
@@ -445,8 +456,11 @@ def pipfaster_packagefinder():
     Suggested upstream at: https://github.com/pypa/pip/pull/2114
     """
     # A poor man's dependency injection: monkeypatch :(
-    from pip._internal import basecommand
-    return patched(vars(basecommand), {'PackageFinder': FasterPackageFinder})
+    try:  # :pragma:nocover: pip>=18.1
+        from pip._internal.cli import base_command
+    except ImportError:  # :pragma:nocover: pip<18.1
+        from pip._internal import basecommand as base_command
+    return patched(vars(base_command), {'PackageFinder': FasterPackageFinder})
 
 
 def pipfaster_download_cacher(index_url):
