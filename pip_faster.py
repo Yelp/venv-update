@@ -319,7 +319,7 @@ def trace_requirements(requirements):
             dist = working_set.find_normalized(_package_req_to_pkg_resources_req(req.req))
         except pkg_resources.VersionConflict as conflict:
             dist = conflict.args[0]
-            errors.append('Error: version conflict: %s (%s) <-> %s' % (
+            errors.append('Error: version conflict: {} ({}) <-> {}'.format(
                 dist, timid_relpath(dist.location), req
             ))
 
