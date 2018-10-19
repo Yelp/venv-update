@@ -257,7 +257,7 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, opti
     except CalledProcessError:
         return 'could not inspect metadata'
     if not samefile(orig_path, venv_path):
-        return 'virtualenv moved %s -> %s' % (timid_relpath(orig_path), timid_relpath(venv_path))
+        return 'virtualenv moved {} -> {}'.format(timid_relpath(orig_path), timid_relpath(venv_path))
     elif has_system_site_packages(destination_python) != options.system_site_packages:
         return 'system-site-packages changed, to %s' % options.system_site_packages
 
@@ -266,7 +266,7 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, opti
     destination_version = get_python_version(destination_python)
     source_version = get_python_version(source_python)
     if source_version != destination_version:
-        return 'python version changed %s -> %s' % (destination_version, source_version)
+        return 'python version changed {} -> {}'.format(destination_version, source_version)
 
 
 def ensure_virtualenv(args, return_values):
