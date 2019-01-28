@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
+
 import pytest
 
 from testing import cached_wheels
@@ -115,9 +117,29 @@ def it_caches_downloaded_wheels_from_pypi(tmpdir):
         'wheeled-package',
     )
 
-    assert {wheel.name for wheel in cached_wheels(tmpdir)} == {
+    expected = {'wheeled-package'}
+    assert {wheel.name for wheel in cached_wheels(tmpdir)} == expected
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_caches_downloaded_wheels_extra_index_url(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage()
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'venv-update==' + __version__)
+
+    index = os.environ.pop('PIP_INDEX_URL')
+    run(
+        venv.join('bin/pip-faster').strpath, 'install',
+        # bogus index url just to test `--extra-index-url`
+        '--index-url', 'file://{}'.format(tmpdir),
+        '--extra-index-url', index,
         'wheeled-package',
-    }
+    )
+
+    expected = {'wheeled-package'}
+    assert {wheel.name for wheel in cached_wheels(tmpdir)} == expected
 
 
 @pytest.mark.usefixtures('pypi_server')

@@ -178,15 +178,17 @@ def cache_installed_wheels(index_url, installed_packages):
         _store_wheel_in_cache(installed_package.link.path, index_url)
 
 
-def get_patched_download_http_url(orig_download_http_url, index_url):
+def get_patched_download_http_url(orig_download_http_url, index_urls):
     def pipfaster_download_http_url(link, *args, **kwargs):
         file_path, content_type = orig_download_http_url(link, *args, **kwargs)
-        if (
-                link.is_wheel and
-                isinstance(link.comes_from, HTMLPage) and
-                link.comes_from.url.startswith(index_url)
-        ):
-            _store_wheel_in_cache(file_path, index_url)
+        if link.is_wheel:
+            for index_url in index_urls:
+                if (
+                        isinstance(link.comes_from, HTMLPage) and
+                        link.comes_from.url.startswith(index_url)
+                ):
+                    _store_wheel_in_cache(file_path, index_url)
+                    break
         return file_path, content_type
     return pipfaster_download_http_url
 
@@ -378,7 +380,8 @@ class FasterInstallCommand(InstallCommand):
         if options.prune:
             previously_installed = pip_get_installed()
 
-        with pipfaster_download_cacher(options.index_url):
+        index_urls = [options.index_url] + options.extra_index_urls
+        with pipfaster_download_cacher(index_urls):
             requirement_set = super(FasterInstallCommand, self).run(
                 options, args,
             )
@@ -455,14 +458,14 @@ def pipfaster_packagefinder():
     return patched(vars(basecommand), {'PackageFinder': FasterPackageFinder})
 
 
-def pipfaster_download_cacher(index_url):
+def pipfaster_download_cacher(index_urls):
     """vanilla pip stores a cache of the http session in its cache and not the
     wheel files.  We intercept the download and save those files into our
     cache
     """
     from pip import download
     orig = download._download_http_url
-    patched_fn = get_patched_download_http_url(orig, index_url)
+    patched_fn = get_patched_download_http_url(orig, index_urls)
     return patched(vars(download), {'_download_http_url': patched_fn})
 
 

@@ -74,6 +74,8 @@ pip_warnings_regex = Regex(
         r"^  Url '[^']*/\.cache/pip-faster/wheelhouse' is ignored: it is neither a file nor a directory\.\n",
         r'^You are using pip version [0-9.]+, however version [0-9.]+ is available\.\n',
         r"^You should consider upgrading via the 'pip install --upgrade pip' command\.\n",
+        r"^DEPRECATION: Python 2\.7 will reach the end of its life on January 1st, 2020\. Please upgrade your Python as Python 2\.7 won't be maintained after that date\. A future version of pip will drop support for Python 2\.7\.\n",  # noqa: E501
+        r"^DEPRECATION: Python 3\.4 support has been deprecated. pip 19\.1 will be the last one supporting it\. Please upgrade your Python as Python 3\.4 won't be maintained after March 2019 \(cf PEP 429\)\.\n",   # noqa: E501
     )),
     flags=MULTILINE,
 )
