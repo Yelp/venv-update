@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import re
 from subprocess import CalledProcessError
 
 import pytest
@@ -412,6 +413,8 @@ pure_python_package
     assert err == ''
 
     out = uncolor(out)
+    # installing venv-update may downgrade / upgrade pip
+    out = re.sub(' pip-[0-9.]+ ', ' ', out)
     assert '\n> pip install -r requirements-bootstrap.txt\n' in out
     assert (
         '\nSuccessfully installed pure-python-package-0.2.1 venv-update-%s' % __version__
