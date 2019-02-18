@@ -237,6 +237,7 @@ def pip_get_installed():
         dist_to_req(dist)
         for dist in fresh_working_set()
         if dist_is_local(dist)
+        if dist.key != 'python'  # See #220
     )
 
 

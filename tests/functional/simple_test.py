@@ -67,7 +67,6 @@ def test_arguments_version(tmpdir):
 
     out = uncolor(out)
     lines = out.splitlines()
-    assert len(lines) == 12, repr(lines)
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
