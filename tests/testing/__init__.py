@@ -111,6 +111,8 @@ def pip_freeze(venv='venv'):
         reg = re.compile(r'((?<=\n)|^){}==.*(\n|$)'.format(pkg))
         assert reg.search(out)
         out = reg.sub('', out)
+    # The `coverage` version is floating
+    out = re.sub('^coverage==.*', 'coverage==ANY', out, count=1)
 
     err = strip_pip_warnings(err)
     assert err == ''

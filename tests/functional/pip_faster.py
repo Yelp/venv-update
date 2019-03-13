@@ -34,7 +34,7 @@ def it_installs_stuff(tmpdir):
     install_coverage(venv)
 
     assert pip_freeze(str(venv)) == '''\
-coverage==4.5.2
+coverage==ANY
 coverage-enable-subprocess==1.0
 '''
 
@@ -95,7 +95,7 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     assert set(frozen_requirements) == {
         '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init',  # noqa
         'coverage-enable-subprocess==1.0',
-        'coverage==4.5.2',
+        'coverage==ANY',
         'venv-update==' + __version__,
         '',
     }
@@ -159,7 +159,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == {
-        'coverage==4.5.2',
+        'coverage==ANY',
         'coverage-enable-subprocess==1.0',
         'dependant-package==1',
         'implicit-dependency==1',
@@ -193,7 +193,7 @@ def it_doesnt_wheel_git_repos(tmpdir):
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == {
         'coverage-enable-subprocess==1.0',
-        'coverage==4.5.2',
+        'coverage==ANY',
         'dumb-init==0.5.0',
         'venv-update==' + __version__,
         '',
