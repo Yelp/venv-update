@@ -34,7 +34,7 @@ def it_installs_stuff(tmpdir):
     install_coverage(venv)
 
     assert pip_freeze(str(venv)) == '''\
-coverage==4.5.2
+coverage==ANY
 coverage-enable-subprocess==1.0
 '''
 
@@ -95,7 +95,7 @@ def it_installs_stuff_with_dash_e_without_wheeling(tmpdir):
     assert set(frozen_requirements) == {
         '-e git://github.com/Yelp/dumb-init.git@87545be699a13d0fd31f67199b7782ebd446437e#egg=dumb_init',  # noqa
         'coverage-enable-subprocess==1.0',
-        'coverage==4.5.2',
+        'coverage==ANY',
         'venv-update==' + __version__,
         '',
     }
@@ -159,7 +159,7 @@ def it_doesnt_wheel_local_dirs(tmpdir):
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == {
-        'coverage==4.5.2',
+        'coverage==ANY',
         'coverage-enable-subprocess==1.0',
         'dependant-package==1',
         'implicit-dependency==1',
@@ -193,7 +193,7 @@ def it_doesnt_wheel_git_repos(tmpdir):
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert set(frozen_requirements) == {
         'coverage-enable-subprocess==1.0',
-        'coverage==4.5.2',
+        'coverage==ANY',
         'dumb-init==0.5.0',
         'venv-update==' + __version__,
         '',
@@ -269,6 +269,25 @@ Cleaning up...
         'It is either a non-existing path or lacks a specific scheme.\n'
     )
     assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')
+
+
+@pytest.mark.usefixtures('pypi_server')
+def it_considers_equals_star_not_pinned(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'venv-update==' + __version__)
+
+    run(
+        str(venv.join('bin/pip-faster')),
+        'install', 'many-versions-package==2',
+    )
+    run(
+        str(venv.join('bin/pip-faster')),
+        'install', '--upgrade', 'many-versions-package==2.*',
+    )
+    assert 'many-versions-package==2.1' in pip_freeze(str(venv)).split('\n')
 
 
 @pytest.mark.usefixtures('pypi_server')
