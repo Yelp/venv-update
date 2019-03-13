@@ -59,7 +59,7 @@ from os.path import exists
 from os.path import join
 from subprocess import CalledProcessError
 
-__version__ = '3.2.1'
+__version__ = '3.2.2'
 DEFAULT_VIRTUALENV_PATH = 'venv'
 DEFAULT_OPTION_VALUES = {
     'venv=': (DEFAULT_VIRTUALENV_PATH,),
