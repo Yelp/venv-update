@@ -101,7 +101,7 @@ def is_req_pinned(requirement):
         return False
 
     for spec in requirement.specifier:
-        if spec.operator == '==' and not spec.version.endswith(".*"):
+        if spec.operator == '==' and not spec.version.endswith('.*'):
             return True
     return False
 
