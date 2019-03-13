@@ -272,6 +272,25 @@ Cleaning up...
 
 
 @pytest.mark.usefixtures('pypi_server')
+def it_considers_equals_star_not_pinned(tmpdir):
+    venv = tmpdir.join('venv')
+    install_coverage(venv)
+
+    pip = venv.join('bin/pip').strpath
+    run(pip, 'install', 'venv-update==' + __version__)
+
+    run(
+        str(venv.join('bin/pip-faster')),
+        'install', 'many-versions-package==2',
+    )
+    run(
+        str(venv.join('bin/pip-faster')),
+        'install', '--upgrade', 'many-versions-package==2.*',
+    )
+    assert 'many-versions-package==2.1' in pip_freeze(str(venv)).split('\n')
+
+
+@pytest.mark.usefixtures('pypi_server')
 def test_no_conflicts_when_no_deps_specified(tmpdir):
     venv = tmpdir.join('venv')
     install_coverage(venv)
