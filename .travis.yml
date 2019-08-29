@@ -13,7 +13,7 @@ matrix:
         - env: TOXENV=py36
           python: 3.6
         - env: TOXENV=pypy
-          python: pypy-5.4.1
+          python: pypy
         - env: TOXENV=py27
           python: 2.7
         - env: TOXENV=latest-pip

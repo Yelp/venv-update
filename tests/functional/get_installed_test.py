@@ -50,11 +50,14 @@ def test_pip_get_installed(tmpdir):
     )
 
     expected = [
-        'atomicwrites', 'attrs', 'cov-core', 'coverage', 'more-itertools',
-        'pluggy', 'py', 'pytest', 'pytest-cov', 'six',
+        'atomicwrites', 'attrs', 'cov-core', 'coverage', 'importlib-metadata',
+        'more-itertools', 'packaging', 'pluggy', 'py', 'pyparsing', 'pytest',
+        'pytest-cov', 'six', 'wcwidth', 'zipp',
     ]
     if PY2:  # :pragma:nocover:
-        expected.extend(['funcsigs', 'pathlib2', 'scandir'])
+        expected.extend([
+            'configparser', 'contextlib2', 'funcsigs', 'pathlib2', 'scandir',
+        ])
 
     assert get_installed() == sorted(expected)
 
