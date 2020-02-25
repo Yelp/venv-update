@@ -162,7 +162,7 @@ def test_update_invalidated_missing_activate(tmpdir):
 
         out, err = venv_update()
         err = strip_pip_warnings(err)
-        assert err == "sh: 1: .: Can't open venv/bin/activate\n"
+        assert err.strip() == "sh: 1: .: Can't open venv/bin/activate"
         out = uncolor(out)
         assert out.startswith('''\
 > virtualenv venv

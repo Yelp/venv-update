@@ -264,10 +264,7 @@ Successfully installed pure-python-package-0.2.1
 Cleaning up...
 '''
     assert expected2 in rest
-    assert err == (
-        "  Url 'git+wat://not/a/thing' is ignored. "
-        'It is either a non-existing path or lacks a specific scheme.\n'
-    )
+    assert "Url 'git+wat://not/a/thing' is ignored." in err
     assert 'pure-python-package==0.2.1' in pip_freeze(str(venv)).split('\n')
 
 

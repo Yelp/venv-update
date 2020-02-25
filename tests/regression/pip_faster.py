@@ -41,16 +41,16 @@ def test_circular_dependencies():
         'circular-dep-a',
     )
     err = strip_pip_warnings(err)
-    assert err == (
+    assert err.strip() == (
         'Circular dependency! circular-dep-a==1.0 '
-        '(from circular-dep-b==1.0->circular-dep-a)\n'
+        '(from circular-dep-b==1.0->circular-dep-a)'
     )
     out = uncolor(out)
-    assert out.endswith('''
+    assert '''
 tracing: circular-dep-a
 already queued: circular-dep-b==1.0 (from circular-dep-a)
 tracing: circular-dep-b==1.0 (from circular-dep-a)
-''')
+''' in out
 
     frozen_requirements = pip_freeze(str(venv)).split('\n')
     assert 'circular-dep-a==1.0' in frozen_requirements

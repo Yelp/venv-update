@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import os
 from re import compile as Regex
+from re import DOTALL
 from re import MULTILINE
 
 from pip._internal.wheel import Wheel
@@ -79,13 +80,15 @@ pip_warnings_regex = Regex(
         r"^DEPRECATION: Python 3\.4 support has been deprecated. pip 19\.1 will be the last one supporting it\. Please upgrade your Python as Python 3\.4 won't be maintained after March 2019 \(cf PEP 429\)\.\n",   # noqa: E501
         r'^DEPRECATION: A future version of pip will drop support for Python 2\.7\.\n',  # noqa: E501
         r'^DEPRECATION: A future version of pip will drop support for Python 2\.7\. More details about Python 2 support in pip, can be found at https://pip\.pypa\.io/en/latest/development/release-process/#python-2-support\n',  # noqa: E501
+        r'\S+ UserWarning: Setuptools will stop working on Python 2.*warnings.warn.*$',  # noqa: E501
     )),
-    flags=MULTILINE,
+    flags=MULTILINE | DOTALL,
 )
 
 
 def strip_pip_warnings(stderr):
-    return pip_warnings_regex.sub('', stderr)
+    stderr = pip_warnings_regex.sub('', stderr)
+    return stderr.strip()
 
 
 def uncolor(text):

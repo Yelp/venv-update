@@ -99,7 +99,7 @@ def pypi_port():
 def start_pypi_server(packages, port, pypi_fallback):
     port = str(port)
     cmd = (
-        'pypi-server', '-vvvvvv',
+        'pypi-server', '-v',
         '-i', '127.0.0.1',
         '-p', port,
         # Default fallback is HTTP, which is no longer supported.
