@@ -5,5 +5,5 @@
 pytest>=3.6.0
 ephemeral-port-reserve
 pip>=10.0.0,<=18.1
-wheel
+wheel<0.34.0
 six
