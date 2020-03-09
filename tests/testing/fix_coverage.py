@@ -11,30 +11,30 @@ coverage.env.TESTING = 'true'
 
 
 def merge_coverage(coverage_data, from_path, to_path):
+    new_coverage_data = CoverageData()
+    assert coverage_data._filename != new_coverage_data._filename
+
     for filename in coverage_data.measured_files():
         result_filename = filename.split(from_path)[-1]
-        if filename == result_filename:
-            continue
+        if filename != result_filename:
+            result_filename = result_filename.lstrip('/')
+            result_filename = os.path.join(to_path, result_filename)
+            result_filename = os.path.abspath(result_filename)
+            assert os.path.exists(result_filename), result_filename
 
-        result_filename = result_filename.lstrip('/')
-        result_filename = os.path.join(to_path, result_filename)
-        result_filename = os.path.abspath(result_filename)
-        assert os.path.exists(result_filename), result_filename
-
-        coverage_data.add_arcs(
+        new_coverage_data.add_arcs(
             {result_filename: coverage_data.arcs(filename)}
         )
 
-        del coverage_data._arcs[filename]
-        coverage_data._validate_invariants()
+    return new_coverage_data
 
 
 def fix_coverage(from_path, to_path):
-    coverage_data = CoverageData()
     os.rename('.coverage', '.coverage.orig')
-    coverage_data.read_file('.coverage.orig')
-    merge_coverage(coverage_data, from_path, to_path)
-    coverage_data.write_file('.coverage')
+    coverage_data = CoverageData(basename='.coverage.orig')
+    coverage_data.read()
+    new_coverage_data = merge_coverage(coverage_data, from_path, to_path)
+    new_coverage_data.write()
 
 
 def main():

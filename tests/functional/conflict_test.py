@@ -41,13 +41,13 @@ conflicting_package
 
     err = T.strip_coverage_warnings(err)
     err = T.strip_pip_warnings(err)
-    assert err == (
+    assert err.strip() == (
         "conflicting-package 1 has requirement many-versions-package<2, but you'll "
         'have many-versions-package 3 which is incompatible.\n'
         # TODO: do we still need to append our own error?
         'Error: version conflict: many-versions-package 3 (venv/{}) '
         '<-> many-versions-package<2 '
-        '(from conflicting_package->-r requirements.txt (line 3))\n'.format(
+        '(from conflicting_package->-r requirements.txt (line 3))'.format(
             PYTHON_LIB,
         )
     )
@@ -136,11 +136,11 @@ def test_editable_egg_conflict(tmpdir):
 
         err = T.strip_coverage_warnings(err)
         err = T.strip_pip_warnings(err)
-        assert err == (
+        assert err.strip() == (
             'Error: version conflict: many-versions-package 2 '
             '(tmp/conflicting_package/many_versions_package-2-py{}.egg) '
             '<-> many_versions_package<2 '
-            '(from conflicting-package==1->-r requirements.txt (line 1))\n'.format(
+            '(from conflicting-package==1->-r requirements.txt (line 1))'.format(
                 get_python_version(),
             )
         )

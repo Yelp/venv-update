@@ -15,7 +15,7 @@ def test_fix_coverage(tmpdir):
     unrelated_file = tmpdir.join('bar.py')
     unrelated_file.ensure()
 
-    coverage_data = CoverageData()
+    coverage_data = CoverageData(basename='.coverage.orig')
     coverage_data.add_arcs({
         str(base_file): {(1, 2): None},
         str(sub_file): {(3, 4): None},
@@ -26,13 +26,13 @@ def test_fix_coverage(tmpdir):
     assert coverage_data.lines(sub_file) == [3, 4]
     assert coverage_data.lines(unrelated_file) == [5, 6]
 
-    merge_coverage(coverage_data, '/site-packages/', str(tmpdir))
+    new_coverage_data = merge_coverage(coverage_data, '/site-packages/', str(tmpdir))
 
-    # The base file should contain all the lines and arcs
-    assert coverage_data.lines(base_file) == [1, 2, 3, 4]
-    assert coverage_data.arcs(base_file) == [(1, 2), (3, 4)]
-    assert coverage_data.lines(unrelated_file) == [5, 6]
-    assert coverage_data.arcs(unrelated_file) == [(5, 6)]
+    # The new file should contain all the lines and arcs
+    assert new_coverage_data.lines(base_file) == [1, 2, 3, 4]
+    assert new_coverage_data.arcs(base_file) == [(1, 2), (3, 4)]
+    assert new_coverage_data.lines(unrelated_file) == [5, 6]
+    assert new_coverage_data.arcs(unrelated_file) == [(5, 6)]
 
-    # And the sub file should no longer exist
-    assert sub_file not in coverage_data.measured_files()
+    # And it should not contain the original, un-merged names.
+    assert sub_file not in new_coverage_data.measured_files()

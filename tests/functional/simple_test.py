@@ -436,7 +436,7 @@ def test_cant_wheel_package(tmpdir):
 
         out, err = venv_update()
         err = strip_pip_warnings(err)
-        assert err == '  Failed building wheel for cant-wheel-package\n'
+        assert err.strip() == 'Failed building wheel for cant-wheel-package'
 
         out = uncolor(out)
 
