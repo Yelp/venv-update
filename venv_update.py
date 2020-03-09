@@ -71,7 +71,7 @@ from subprocess import CalledProcessError
 # To fix this we just delete the environment variable.
 os.environ.pop('__PYVENV_LAUNCHER__', None)
 
-__version__ = '3.2.3'
+__version__ = '3.2.4'
 DEFAULT_VIRTUALENV_PATH = 'venv'
 DEFAULT_OPTION_VALUES = {
     'venv=': (DEFAULT_VIRTUALENV_PATH,),
