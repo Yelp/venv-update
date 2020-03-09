@@ -55,9 +55,21 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 from os.path import exists
 from os.path import join
 from subprocess import CalledProcessError
+
+# https://github.com/Yelp/venv-update/issues/227
+# https://stackoverflow.com/a/53193892
+# On OS X, Python "framework" builds set a `__PYVENV_LAUNCHER__` environment
+# variable when executed, which gets inherited by child processes and cause
+# certain Python builds to put incorrect packages onto their path. This causes
+# weird bugs with venv-update like import errors calling pip and infinite
+# exec() loops trying to activate a virtualenv.
+#
+# To fix this we just delete the environment variable.
+os.environ.pop('__PYVENV_LAUNCHER__', None)
 
 __version__ = '3.2.3'
 DEFAULT_VIRTUALENV_PATH = 'venv'
