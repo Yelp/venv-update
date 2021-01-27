@@ -54,15 +54,15 @@ def test_pip_get_installed(tmpdir):
         'cov-core',
         'coverage',
         'importlib-metadata',
-        'more-itertools',
+        'iniconfig',
         'packaging',
         'pluggy',
         'py',
         'pyparsing',
         'pytest',
         'pytest-cov',
-        'six',
-        'wcwidth',
+        'toml',
+        'typing-extensions',
         'zipp',
     ]
     if PY2:  # :pragma:nocover:
@@ -75,6 +75,7 @@ def test_pip_get_installed(tmpdir):
             'scandir',
         ])
 
+    # This seems prone to failure when deps can/will change.
     assert get_installed() == sorted(expected)
 
     run('myvenv/bin/pip', 'uninstall', '--yes', *expected)
