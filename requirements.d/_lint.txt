@@ -1,3 +1,5 @@
 # packages needed for linting, but not for prod
 flake8
-pre-commit
+# Workaround for:
+#   Error: version conflict: virtualenv 16.7.10 (venv/lib/python3.6/site-packages) <-> virtualenv>=20.0.8 (from pre-commit->-r requirements.d/_lint.txt (line 3))
+pre-commit<=1.21.0
