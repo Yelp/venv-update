@@ -32,7 +32,7 @@ ENV_WHITELIST = (
 )
 
 
-@pytest.yield_fixture(autouse=True)
+@pytest.fixture(autouse=True)
 def fixed_environment_variables():
     orig_environ = os.environ.copy()
 
@@ -58,7 +58,7 @@ def fixed_environment_variables():
     os.environ.update(orig_environ)
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def tmpdir(tmpdir):
     """override tmpdir to provide a $HOME and $TMPDIR"""
     home = tmpdir.ensure('home', dir=True)
@@ -75,7 +75,7 @@ def tmpdir(tmpdir):
     os.environ.update(orig_environ)
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def pypi_packages():
     package_temp = TOP.join('build/test-packages')
     with TOP.as_cwd():
@@ -90,7 +90,7 @@ def pypi_packages():
     yield package_temp
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.fixture(scope='session')
 def pypi_port():
     yield reserve()
 
@@ -135,13 +135,13 @@ def start_pypi_server(packages, port, pypi_fallback):
         server.wait()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def pypi_server(pypi_packages, pypi_port):
     with start_pypi_server(pypi_packages, pypi_port, False) as pypi_url:
         yield pypi_url
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def pypi_server_with_fallback(pypi_packages, pypi_port):
     with start_pypi_server(pypi_packages, pypi_port, True) as pypi_url:
         yield pypi_url

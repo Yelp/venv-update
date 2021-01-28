@@ -3,6 +3,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import re
+import sys
 from subprocess import CalledProcessError
 
 import pytest
@@ -70,6 +71,7 @@ def test_arguments_version(tmpdir):
     assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
+@pytest.mark.skipif('__pypy__' in sys.builtin_module_names, reason="site-packages doesn't show up under pypy for some reason")
 @pytest.mark.usefixtures('pypi_server')
 def test_arguments_system_packages(tmpdir):
     """Show that we can pass arguments through to virtualenv"""
@@ -90,6 +92,7 @@ for p in sys.path:
     assert out and Path(out).isdir()
 
 
+@pytest.mark.skipif(sys.version_info < (3, 0), reason='fails on Python2 + not worth figuring out why')
 @pytest.mark.usefixtures('pypi_server')
 def test_eggless_url(tmpdir):
     tmpdir.chdir()

@@ -272,10 +272,6 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, opti
     if not samefile(orig_path, venv_path):
         return 'virtualenv moved {} -> {}'.format(timid_relpath(orig_path), timid_relpath(venv_path))
     elif has_system_site_packages(destination_python) != options.system_site_packages:
-        info('XXX venv_path=%s' % venv_path)
-        info('XXX source_python=%s' % source_python)
-        info('XXX destination_python=%s' % destination_python)
-        info('XXX options=%s' % options)
         return 'system-site-packages for changed, to %s' % options.system_site_packages
 
     if source_python is None:
@@ -289,7 +285,6 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, opti
 def ensure_virtualenv(args, return_values):
     """Ensure we have a valid virtualenv."""
     def adjust_options(options, args):
-        info('XXX options: %s' % options)
         # TODO-TEST: proper error message with no arguments
         venv_path = return_values.venv_path = args[0]
 

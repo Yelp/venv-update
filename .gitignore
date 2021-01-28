@@ -1,6 +1,6 @@
 # only ignored in this directory, specifically
 /build/
-/.coverage
+/.coverage*
 /.idea
 /.project
 /.pydevproject
