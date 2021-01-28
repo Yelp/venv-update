@@ -63,10 +63,6 @@ tracing: circular-dep-b==1.0 (from circular-dep-a)
     reason='ancient versions are not py3 compatible, even for install',
 )
 @pytest.mark.parametrize('reqs', [
-    # old setuptools and old pip
-    ['setuptools==0.6c11', 'pip==1.4.1'],
-    # old setuptools and new pip
-    ['setuptools==0.6c11', 'pip==1.5.6'],
     # new setuptools and old pip
     ['setuptools==18.2', 'pip==1.4.1'],
 ])

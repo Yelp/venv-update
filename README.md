@@ -48,3 +48,19 @@ See all output from a test:
 Check coverage of a single test:
 
     ./test tests/functional/simple_test.py::test_downgrade
+
+
+Yelpers
+=======
+To develop and run tests suites on a devbox, make sure to:
+
+1. Python 3.6.0 on a xenial devbox breaks coverage. Use a bionic devbox instead.
+
+2. Override pip.conf to use public pypi. Don't forget to delete it after you're done!
+```
+$ cat ~/.pip/pip.conf
+[global]
+index-url = https://pypi.org/simple/
+```
+
+3. `sudo apt-get install pypy-dev` so TOXENV=pypy doesn't fail spectacularly
