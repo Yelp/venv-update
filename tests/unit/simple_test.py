@@ -166,6 +166,9 @@ def test_user_cache_dir():
     environ['XDG_CACHE_HOME'] = '/quux/bar'
     assert venv_update.user_cache_dir() == '/quux/bar'
 
+    environ['VENV_UPDATE_CACHE_DIR'] = '/bar/foo/venv-update-specific-cache'
+    assert venv_update.user_cache_dir() == '/bar/foo/venv-update-specific-cache'
+
 
 def test_get_python_version():
     import sys

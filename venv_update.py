@@ -381,7 +381,7 @@ def user_cache_dir():
     # stolen from pip.utils.appdirs.user_cache_dir
     from os import getenv
     from os.path import expanduser
-    return getenv('XDG_CACHE_HOME', expanduser('~/.cache'))
+    return getenv('VENV_UPDATE_CACHE_DIR', getenv('XDG_CACHE_HOME', expanduser('~/.cache')))
 
 
 def venv_update(
