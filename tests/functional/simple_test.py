@@ -238,7 +238,7 @@ def pipe_output(read, write):
     import virtualenv
     split_uncolored = uncolored.strip().split('\n')
     version_cmd_index = split_uncolored.index('> virtualenv --version')
-    assert 'virtualenv {}'.format(virtualenv.__version__) in split_uncolored[version_cmd_index+1]
+    assert 'virtualenv {}'.format(virtualenv.__version__) in split_uncolored[version_cmd_index + 1]
 
     return result, uncolored
 
