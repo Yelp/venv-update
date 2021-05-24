@@ -26,19 +26,16 @@ import sys
 from contextlib import contextmanager
 
 import pip as pipmodule
-from pip._internal.cli.main import logger
+from pip._internal import logger
 from pip._internal.commands.install import InstallCommand
 from pip._internal.exceptions import DistributionNotFound
 from pip._internal.exceptions import InstallationError
-from pip._internal.exceptions import BestVersionAlreadyInstalled
-from pip._internal.index.collector import HTMLPage
-from pip._internal.index.package_finder import PackageFinder
-from pip._internal.models.link import Link
-from pip._internal.models.wheel import Wheel
-from pip._internal.network.download import BatchDownloader
-from pip._internal.network.download import Downloader
+from pip._internal.index import BestVersionAlreadyInstalled
+from pip._internal.index import HTMLPage
+from pip._internal.index import Link
+from pip._internal.index import PackageFinder
 from pip._internal.req import InstallRequirement
-
+from pip._internal.wheel import Wheel
 
 from venv_update import colorize
 from venv_update import raise_on_failure
@@ -110,10 +107,6 @@ def is_req_pinned(requirement):
 
 
 class FasterPackageFinder(PackageFinder):
-
-    def __init__(self, *args, **kwargs):
-        print('\n\n\t\tFasterPacakgeFinder instantiated\n\n')
-        super(FasterPackageFinder, self).__init__(*args, **kwargs)
 
     def find_requirement(self, req, upgrade):
         if is_req_pinned(req.req):
@@ -220,14 +213,14 @@ def pip(args):
 
 def dist_to_req(dist):
     """Make a pip.FrozenRequirement from a pkg_resources distribution object"""
-    # try:  # :pragma:nocover: (pip>=10)
-    from pip._internal.operations.freeze import FrozenRequirement
-    # except ImportError:  # :pragma:nocover: (pip<10)
-    #     from pip import FrozenRequirement
+    try:  # :pragma:nocover: (pip>=10)
+        from pip._internal.operations.freeze import FrozenRequirement
+    except ImportError:  # :pragma:nocover: (pip<10)
+        from pip import FrozenRequirement
 
     # normalize the casing, dashes in the req name
     orig_name, dist.project_name = dist.project_name, dist.key
-    result = FrozenRequirement.from_dist(dist)
+    result = FrozenRequirement.from_dist(dist, [])
     # put things back the way we found it.
     dist.project_name = orig_name
 
@@ -373,7 +366,6 @@ def reqnames(reqs):
 class FasterInstallCommand(InstallCommand):
 
     def __init__(self, *args, **kw):
-        print('\n\n\t\tFasterInstallCommand instantiated\n\n')
         super(FasterInstallCommand, self).__init__(*args, **kw)
 
         cmd_opts = self.cmd_opts
@@ -398,18 +390,11 @@ class FasterInstallCommand(InstallCommand):
             previously_installed = pip_get_installed()
 
         index_urls = [options.index_url] + options.extra_index_urls
-        #with pipfaster_download_cacher(index_urls):
+        with pipfaster_download_cacher(index_urls):
+            requirement_set = super(FasterInstallCommand, self).run(
+                options, args,
+            )
 
-        # TODO: this is happening too late. The requirement_preparer has already created the 
-        #       the non-override version
-        # with pipfaster_download_cacher_v2(index_urls):
-            # requirement_set = super(FasterInstallCommand, self).run(
-            #     options, args,
-            # )
-
-        status_code = super(FasterInstallCommand, self).run(options, args)
-
-        # TODO: find a replacement for reqirement_set
         required = requirement_set.requirements.values()
 
         # With extra_index_urls we don't know where the wheel is from
@@ -442,68 +427,41 @@ class FasterInstallCommand(InstallCommand):
 # TODO: a pip_faster.patch module
 
 
-def patch(d, updates):
-    """Perform a set of updates to a dictionary, return the original values."""
+def patch(attrs, updates):
+    """Perform a set of updates to a attribute dictionary, return the original values."""
     orig = {}
-    for key, value in updates:
-        orig[key] = d[key]
-        d[key] = value
+    for attr, value in updates:
+        orig[attr] = attrs[attr]
+        attrs[attr] = value
     return orig
 
 
 @contextmanager
-def patched(d, updates):
-    """A context in which some keys temporarily have a modified value."""
-    #import pdb; pdb.set_trace()
-    orig = patch(d, updates.items())
+def patched(attrs, updates):
+    """A context in which some attributes temporarily have a modified value."""
+    orig = patch(attrs, updates.items())
     try:
         yield orig
     finally:
-        patch(d, orig.items())
+        patch(attrs, orig.items())
 # END: pip_faster.patch module
 
 
 def pipfaster_install_prune_option():
-    #return patched(pipmodule._internal.commands.commands_dict, {FasterInstallCommand.name: FasterInstallCommand})
-    from pip._internal.commands import CommandInfo
-    return patched(
-        pipmodule._internal.commands.commands_dict, 
-        {
-            'install': CommandInfo('pip_faster', 'FasterInstallCommand', 'Install packages',)
-        }
-    )
+    return patched(pipmodule._internal.commands.commands_dict, {FasterInstallCommand.name: FasterInstallCommand})
 
 
-# def pipfaster_packagefinder():
-#     """Provide a short-circuited search when the requirement is pinned and appears on disk.
-
-#     Suggested upstream at: https://github.com/pypa/pip/pull/2114
-#     """
-#     # A poor man's dependency injection: monkeypatch :(
-#     from pip._internal.index import package_finder
-#     # try:  # :pragma:nocover: pip>=18.1
-#     #     from pip._internal.cli import base_command
-#     # except ImportError:  # :pragma:nocover: pip<18.1
-#     #     from pip._internal import basecommand as base_command
-#     #return patched(vars(base_command), {'PackageFinder': FasterPackageFinder})
-#     #import pdb; pdb.set_trace()
-#     return patched(vars(package_finder), {'PackageFinder': FasterPackageFinder})
-
-
-def pipfaster_packagefinder2():
+def pipfaster_packagefinder():
     """Provide a short-circuited search when the requirement is pinned and appears on disk.
 
     Suggested upstream at: https://github.com/pypa/pip/pull/2114
     """
     # A poor man's dependency injection: monkeypatch :(
-    from pip._internal.cli import req_command
-    # try:  # :pragma:nocover: pip>=18.1
-    #     from pip._internal.cli import base_command
-    # except ImportError:  # :pragma:nocover: pip<18.1
-    #     from pip._internal import basecommand as base_command
-    #return patched(vars(base_command), {'PackageFinder': FasterPackageFinder})
-    #import pdb; pdb.set_trace()
-    return patched(vars(req_command), {'PackageFinder': FasterPackageFinder})
+    try:  # :pragma:nocover: pip>=18.1
+        from pip._internal.cli import base_command
+    except ImportError:  # :pragma:nocover: pip<18.1
+        from pip._internal import basecommand as base_command
+    return patched(vars(base_command), {'PackageFinder': FasterPackageFinder})
 
 
 def pipfaster_download_cacher(index_urls):
@@ -517,124 +475,10 @@ def pipfaster_download_cacher(index_urls):
     return patched(vars(download), {'_download_http_url': patched_fn})
 
 
-class CachingDownloader(Downloader):
-
-    def __init__(
-        self,
-        session,  # type: PipSession
-        progress_bar,  # type: str
-    ):
-        # type: (...) -> None
-        print('\n\n\t\tCachingDownloader instantiated! \n\n')
-        super(CachingDownloader, self).__init__(session, progress_bar)
-
-    def __call__(self, link, location):
-        # type: (Link, str) -> Tuple[str, str]
-        """Download the file given by link into location."""
-        print('\n\n\t\tOverride download call!\n\n')
-        filepath, content_type = super().__call__(self, link, location)
-
-        # try:
-        #     resp = _http_get_download(self._session, link)
-        # except NetworkConnectionError as e:
-        #     assert e.response is not None
-        #     logger.critical(
-        #         "HTTP error %s while getting %s", e.response.status_code, link
-        #     )
-        #     raise
-
-        # filename = _get_http_response_filename(resp, link)
-        # filepath = os.path.join(location, filename)
-
-        # chunks = _prepare_download(resp, link, self._progress_bar)
-        # with open(filepath, 'wb') as content_file:
-        #     for chunk in chunks:
-        #         content_file.write(chunk)
-        # content_type = resp.headers.get('Content-Type', '')
-        # return filepath, content_type
-
-
-class CachingBatchDownloader(BatchDownloader):
-
-    def __init__(
-        self,
-        session,  # type: PipSession
-        progress_bar,  # type: str
-    ):
-        # type: (...) -> None
-        print('\n\n\t\tCachingBatchDownloader instantiated! \n\n')
-        super(CachingBatchDownloader, self).__init__(session, progress_bar)
-
-    def __call__(self, links, location):
-        # type: (Iterable[Link], str) -> Iterable[Tuple[Link, Tuple[str, str]]]
-        """Download the files given by links into location."""
-
-        print('\n\n\t\tCachingBatchDownloader::__call__ running\n\n')
-        for link, (filepath, content_type) in super().__call__(links, location):
-            yield link, (filepath, content_type)
-
-        # for link in links:
-        #     try:
-        #         resp = _http_get_download(self._session, link)
-        #     except NetworkConnectionError as e:
-        #         assert e.response is not None
-        #         logger.critical(
-        #             "HTTP error %s while getting %s",
-        #             e.response.status_code, link,
-        #         )
-        #         raise
-
-        #     filename = _get_http_response_filename(resp, link)
-        #     filepath = os.path.join(location, filename)
-
-        #     chunks = _prepare_download(resp, link, self._progress_bar)
-        #     with open(filepath, 'wb') as content_file:
-        #         for chunk in chunks:
-        #             content_file.write(chunk)
-        #     content_type = resp.headers.get('Content-Type', '')
-        #     yield link, (filepath, content_type)
-
-
-# def pipfaster_download_cacher_v2():
-#     """vanilla pip stores a cache of the http session in its cache and not the
-#     wheel files.  We intercept the download and save those files into our
-#     cache
-#     """
-#     print('\n\n\t\tInstalled custom download cachers! \n\n')
-#     from pip._internal.network import download
-#     return patched(
-#         vars(download), 
-#         {
-#             'Downloader': CachingDownloader,
-#             'BatchDownloader': CachingBatchDownloader,
-#         },
-
-#     )
-
-
-def pipfaster_download_cacher_v3():
-    """vanilla pip stores a cache of the http session in its cache and not the
-    wheel files.  We intercept the download and save those files into our
-    cache
-    """
-    print('\n\n\t\tInstalled custom download cachers! \n\n')
-    from pip._internal.operations import prepare
-    return patched(
-        vars(prepare), 
-        {
-            'Downloader': CachingDownloader,
-            'BatchDownloader': CachingBatchDownloader,
-        },
-
-    )
-
-
 def main():
-    # with pipfaster_download_cacher_v2():
-    with pipfaster_download_cacher_v3():            
-        with pipfaster_install_prune_option():
-            with pipfaster_packagefinder2():
-                raise_on_failure(pipmodule._internal.main)
+    with pipfaster_install_prune_option():
+        with pipfaster_packagefinder():
+            raise_on_failure(pipmodule._internal.main)
 
 
 if __name__ == '__main__':

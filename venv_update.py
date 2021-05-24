@@ -213,7 +213,7 @@ def exec_scratch_virtualenv(args):
         # TODO: do we allow user-defined override of which version of virtualenv to install?
         # https://github.com/Yelp/venv-update/issues/231 virtualenv 20+ is not supported.
         tmp = scratch.src + '.tmp'
-        run((scratch_python, '-m', 'pip.__main__', 'install', 'virtualenv>=20.3.4', '--target', tmp))
+        run((scratch_python, '-m', 'pip.__main__', 'install', 'virtualenv>=20', '--target', tmp))
         from os import rename
         rename(tmp, scratch.src)
 
@@ -235,19 +235,12 @@ def get_original_path(venv_path):  # TODO-TEST: a unit test
 
 
 def has_system_site_packages(venv_path):
-    from configparser import ConfigParser
-    pyvenv_cfg_path = os.path.join(venv_path, 'pyvenv.cfg')
-
-    if not os.path.exists(pyvenv_cfg_path):
-        return False
-
-    # Avoid using pathlib.Path which doesn't exist in python2 and
-    # hack around configparser's inability to handle sectionless config
-    # files: https://bugs.python.org/issue22253
-    pyvenv_cfg = ConfigParser()
-    with open(pyvenv_cfg_path, 'r') as f:
-        pyvenv_cfg.read_string('[root]\n' + f.read())
-    return pyvenv_cfg.getboolean('root', 'include-system-site-packages', fallback=False)
+    from pathlib import Path
+    from virtualenv.create.pyenv_cfg import PyEnvCfg
+    pyenv_cfg = PyEnvCfg.from_folder(Path(venv_path))
+    include_system_site_packages = pyenv_cfg['include-system-site-packages']
+    assert include_system_site_packages in ('true', 'false')
+    return True if include_system_site_packages == 'true' else False
 
 
 def get_python_version(interpreter):
