@@ -55,7 +55,7 @@ def main():
         py_modules=['venv_update', 'pip_faster'],
         packages=find_packages(exclude=('tests*',)),
         install_requires=[
-            'pip>=10.0.0,<=18.1',
+            'pip>=20.3',
             # >0.25.0 because 0.25.0 causes get_tag AssertionError in python3
             # <0.34.0 because 0.34.0 changes pypy tag generation in a way that
             # our old pip version can't handle
