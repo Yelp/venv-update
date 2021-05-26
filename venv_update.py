@@ -235,12 +235,19 @@ def get_original_path(venv_path):  # TODO-TEST: a unit test
 
 
 def has_system_site_packages(venv_path):
-    from pathlib import Path
-    from virtualenv.create.pyenv_cfg import PyEnvCfg
-    pyenv_cfg = PyEnvCfg.from_folder(Path(venv_path))
-    include_system_site_packages = pyenv_cfg['include-system-site-packages']
-    assert include_system_site_packages in ('true', 'false')
-    return True if include_system_site_packages == 'true' else False
+    from configparser import ConfigParser
+    pyvenv_cfg_path = os.path.join(venv_path, 'pyvenv.cfg')
+
+    if not os.path.exists(pyvenv_cfg_path):
+        return False
+
+    # Avoid using pathlib.Path which doesn't exist in python2 and
+    # hack around configparser's inability to handle sectionless config
+    # files: https://bugs.python.org/issue22253
+    pyvenv_cfg = ConfigParser()
+    with open(pyvenv_cfg_path, 'r') as f:
+        pyvenv_cfg.read_string('[root]\n' + f.read())
+    return pyvenv_cfg.getboolean('root', 'include-system-site-packages', fallback=False)
 
 
 def get_python_version(interpreter):

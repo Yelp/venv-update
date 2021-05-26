@@ -181,3 +181,7 @@ def test_get_python_version():
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update.get_python_version('/bin/false')
     assert excinfo.value.returncode == 1
+
+
+def test_missing_pyvenv_cfg(tmpdir):
+    assert venv_update.has_system_site_packages(tmpdir) is False
