@@ -170,10 +170,9 @@ def test_user_cache_dir():
 def test_get_python_version():
     import sys
 
-    expected = '.'.join(str(part) for part in sys.version_info[:3])
+    expected = '.'.join(str(part) for part in sys.version_info)
     actual = venv_update.get_python_version(sys.executable)
-    assert actual.startswith(expected)
-    assert actual[len(expected)] in ' +'
+    assert expected == actual
 
     assert venv_update.get_python_version('total garbage') is None
 
@@ -181,7 +180,3 @@ def test_get_python_version():
     with pytest.raises(CalledProcessError) as excinfo:
         venv_update.get_python_version('/bin/false')
     assert excinfo.value.returncode == 1
-
-
-def test_missing_pyvenv_cfg(tmpdir):
-    assert venv_update.has_system_site_packages(tmpdir) is False

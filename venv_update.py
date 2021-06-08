@@ -234,28 +234,12 @@ def get_original_path(venv_path):  # TODO-TEST: a unit test
     return check_output(('sh', '-c', '. %s; printf "$VIRTUAL_ENV"' % venv_executable(venv_path, 'activate')))
 
 
-def has_system_site_packages(venv_path):
-    from configparser import ConfigParser
-    pyvenv_cfg_path = os.path.join(venv_path, 'pyvenv.cfg')
-
-    if not os.path.exists(pyvenv_cfg_path):
-        return False
-
-    # Avoid using pathlib.Path which doesn't exist in python2 and
-    # hack around configparser's inability to handle sectionless config
-    # files: https://bugs.python.org/issue22253
-    pyvenv_cfg = ConfigParser()
-    with open(pyvenv_cfg_path, 'r') as f:
-        pyvenv_cfg.read_string('[root]\n' + f.read())
-    return pyvenv_cfg.getboolean('root', 'include-system-site-packages', fallback=False)
-
-
 def get_python_version(interpreter):
     if not exists(interpreter):
         return None
 
-    cmd = (interpreter, '-c', 'import sys; print(sys.version)')
-    return check_output(cmd)
+    cmd = (interpreter, '-c', 'import sys; print(".".join(str(p) for p in sys.version_info))')
+    return check_output(cmd).strip()
 
 
 def invalid_virtualenv_reason(venv_path, source_python, destination_python, virtualenv_system_site_packages):
@@ -265,15 +249,34 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, virt
         return 'could not inspect metadata'
     if not samefile(orig_path, venv_path):
         return 'virtualenv moved {} -> {}'.format(timid_relpath(orig_path), timid_relpath(venv_path))
-    elif has_system_site_packages(venv_path) != virtualenv_system_site_packages:
-        return 'system-site-packages changed, to %s' % virtualenv_system_site_packages
 
+    pyvenv_cfg_path = join(venv_path, 'pyvenv.cfg')
+
+    if not exists(pyvenv_cfg_path):
+        return 'virtualenv created with virtualenv<20'
+
+    # Avoid using pathlib.Path which doesn't exist in python2 and
+    # hack around configparser's inability to handle sectionless config
+    # files: https://bugs.python.org/issue22253
+    from configparser import ConfigParser
+    pyvenv_cfg = ConfigParser()
+    with open(pyvenv_cfg_path, 'r') as f:
+        pyvenv_cfg.read_string('[root]\n' + f.read())
+    if pyvenv_cfg.getboolean('root', 'include-system-site-packages', fallback=False) != virtualenv_system_site_packages:
+        return 'system-site-packages changed, to %s' % virtualenv_system_site_packages
     if source_python is None:
         return
-    destination_version = get_python_version(destination_python)
+
+    destination_version = pyvenv_cfg.get('root', 'version_info', fallback=None)
     source_version = get_python_version(source_python)
     if source_version != destination_version:
         return 'python version changed {} -> {}'.format(destination_version, source_version)
+
+    base_executable = pyvenv_cfg.get('root', 'base-executable', fallback=None)
+    if base_executable:
+        base_executable_version = get_python_version(base_executable)
+        if base_executable_version != destination_version:
+            return 'base executable python version changed {} -> {}'.format(destination_version, base_executable_version)
 
 
 def ensure_virtualenv(args, return_values):
