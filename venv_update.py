@@ -273,10 +273,9 @@ def invalid_virtualenv_reason(venv_path, source_python, destination_python, virt
         return 'python version changed {} -> {}'.format(destination_version, source_version)
 
     base_executable = pyvenv_cfg.get('root', 'base-executable', fallback=None)
-    if base_executable:
-        base_executable_version = get_python_version(base_executable)
-        if base_executable_version != destination_version:
-            return 'base executable python version changed {} -> {}'.format(destination_version, base_executable_version)
+    base_executable_version = get_python_version(base_executable)
+    if base_executable_version != destination_version:
+        return 'base executable python version changed {} -> {}'.format(destination_version, base_executable_version)
 
 
 def ensure_virtualenv(args, return_values):

@@ -64,11 +64,18 @@ def test_arguments_version(tmpdir):
     # should show virtualenv version, successfully
     out, err = venv_update('venv=', '--version')
     err = strip_pip_warnings(err)
-    assert err == ''
+    if sys.version_info < (3, 0):
+        import virtualenv
+        assert 'virtualenv {}'.format(virtualenv.__version__) in err
+    else:
+        assert err == ''
 
     out = uncolor(out)
     lines = out.splitlines()
-    assert lines[-2] == '> virtualenv --version', repr(lines)
+    if sys.version_info < (3, 0):
+        assert lines[-1] == '> virtualenv --version', repr(lines)
+    else:
+        assert lines[-2] == '> virtualenv --version', repr(lines)
 
 
 @pytest.mark.skipif('__pypy__' in sys.builtin_module_names, reason="site-packages doesn't show up under pypy for some reason")
@@ -220,6 +227,7 @@ def pipe_output(read, write):
     vupdate = Popen(
         ('venv-update', 'venv=', '--version'),
         env=environ,
+        stderr=write,
         stdout=write,
         close_fds=True,
     )
