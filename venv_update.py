@@ -211,7 +211,6 @@ def exec_scratch_virtualenv(args):
     if not exists(join(scratch.src, 'virtualenv')):
         scratch_python = venv_python(scratch.venv)
         # TODO: do we allow user-defined override of which version of virtualenv to install?
-        # https://github.com/Yelp/venv-update/issues/231 virtualenv 20+ is not supported.
         tmp = scratch.src + '.tmp'
         run((scratch_python, '-m', 'pip.__main__', 'install', 'virtualenv>=20.0.8', '--target', tmp))
         from os import rename

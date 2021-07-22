@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import contextlib
+import sys
 
 import pytest
 from py._path.local import LocalPath as Path
@@ -103,6 +104,7 @@ def test_noop_install_faster(tmpdir):
     assert time_savings(tmpdir, between=do_nothing) > 6
 
 
+@pytest.mark.skipif('__pypy__' in sys.builtin_module_names, reason='slower under pypy for some reason')
 @pytest.mark.usefixtures('pypi_server_with_fallback', 'pypi_packages')
 def test_cached_clean_install_faster(tmpdir):
     def clean():
