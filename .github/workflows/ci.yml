@@ -2,16 +2,8 @@
 name: venv-update-ci
 on: push
 jobs:
-  tox:
+  lint:
     runs-on: ubuntu-18.04
-    strategy:
-      fail-fast: false
-      matrix:
-        toxenv:
-          - lint
-          - py36
-          - py27
-          - pypy
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -19,5 +11,34 @@ jobs:
           python-version: 3.6
       - run: pip install tox==3.21.2
       - run: pip install -r CI/requirements.txt
-      - run: sudo apt-get install -y pypy pypy-dev
-      - run: tox -e ${{ matrix.toxenv }}
+      - run: tox -e lint
+  py36:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - run: pip install tox==3.21.2
+      - run: pip install -r CI/requirements.txt
+      - run: tox -e py36
+  py27:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - run: pip install tox==3.21.2
+      - run: pip install -r CI/requirements.txt
+      - run: tox -e py27
+  pypy3:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: pypy-3.6
+      - run: pip install tox==3.21.2
+      - run: pip install -r CI/requirements.txt
+      - run: tox -e pypy3

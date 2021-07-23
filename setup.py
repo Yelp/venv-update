@@ -56,10 +56,7 @@ def main():
         packages=find_packages(exclude=('tests*',)),
         install_requires=[
             'pip>=10.0.0,<=18.1',
-            # >0.25.0 because 0.25.0 causes get_tag AssertionError in python3
-            # <0.34.0 because 0.34.0 changes pypy tag generation in a way that
-            # our old pip version can't handle
-            'wheel>0.25.0,<0.34.0',
+            'wheel>0.25.0',  # 0.25.0 causes get_tag AssertionError in python3
             'setuptools>=0.8.0',  # 0.7 causes "'sys_platform' not defined" when installing wheel >0.25
         ],
         entry_points={

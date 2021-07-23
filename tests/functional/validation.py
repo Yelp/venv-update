@@ -2,6 +2,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import fileinput
+
 import pytest
 
 from testing import enable_coverage
@@ -168,6 +170,44 @@ def test_update_invalidated_missing_activate(tmpdir):
 > virtualenv venv
 Removing invalidated virtualenv. (could not inspect metadata)
 ''')
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_update_invalidated_missing_pyvenv_cfg(tmpdir):
+    with tmpdir.as_cwd():
+        enable_coverage()
+        requirements('')
+
+        venv_update()
+        tmpdir.join('venv/pyvenv.cfg').remove()
+
+        out, _ = venv_update()
+        out = uncolor(out)
+        assert out.startswith('''\
+> virtualenv venv
+Removing invalidated virtualenv. (virtualenv created with virtualenv<20)
+''')
+
+
+@pytest.mark.usefixtures('pypi_server')
+def test_update_invalidated_changed_base_executable(tmpdir):
+    with tmpdir.as_cwd():
+        enable_coverage()
+        requirements('')
+
+        from sys import executable as python
+        venv_update('venv=', '--python=' + python, 'venv')
+
+        for line in fileinput.input(str(tmpdir.join('venv/pyvenv.cfg')), inplace=True):
+            if line.startswith('base-executable = '):
+                print('base-executable = /some/other/python')
+            else:
+                print(line, end='')
+        out, _ = venv_update('venv=', '--python=' + python, 'venv')
+        out = uncolor(out)
+        assert out.startswith('''\
+> virtualenv --python={} venv
+Removing invalidated virtualenv. (base executable python version changed'''.format(python))
 
 
 @pytest.mark.usefixtures('pypi_server')

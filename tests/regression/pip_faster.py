@@ -64,7 +64,12 @@ tracing: circular-dep-b==1.0 (from circular-dep-a)
 )
 @pytest.mark.parametrize('reqs', [
     # new setuptools and old pip
-    ['setuptools==18.2', 'pip==1.4.1'],
+    [
+        'setuptools==18.2',
+        # Non-SNI compatible clients (i.e. pip<2.7.9) cannot access public pypi anymore.
+        # pip==6.0 is the earliest supported version. See https://github.com/pypa/pypi-support/issues/978
+        'pip==6.0',
+    ],
 ])
 def test_old_pip_and_setuptools(tmpdir, reqs):
     """We should be able to use pip-faster's wheel building even if we have
@@ -85,7 +90,7 @@ def test_old_pip_and_setuptools(tmpdir, reqs):
     # We need to add public PyPI as an extra URL since we're installing
     # packages (setuptools and pip) which aren't available from our PyPI fixture.
     from os import environ
-    environ['PIP_EXTRA_INDEX_URL'] = 'https://pypi.python.org/simple/'
+    environ['PIP_EXTRA_INDEX_URL'] = 'https://pypi.org/simple/'
     try:
         pip = venv.join('bin/pip').strpath
         for req in reqs:
